@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { InitPlayers } from "../../Initalizer/InitPlayers";
-import type { NationalTeam, Player, Team } from "../../Models/WorldStage";
+import React from 'react';
+import logo from '../../assets/Images/logo.png';
+import styles from "./StartingPage.module.css";
 
 interface StartingPageProps {
     setCurrentPage: (page: string) => void;
@@ -9,11 +9,15 @@ interface StartingPageProps {
 export function StartingPage({ setCurrentPage }: StartingPageProps) {
 
     return (
-        <div>
-            <h1>Footy Manager: World Stage</h1>
-            <h3>Welcome to Footy Manager: World Stage!</h3>
-            <h3>Click the button below to begin your journey.</h3>
-            <button onClick={() => setCurrentPage("CreateManager")}>Start</button>
+        <div className={styles.startingPageContainer}>
+            <div>
+                <img src={logo} className={styles.logo} alt="logo" />
+            </div>
+            <div className={styles.welcomeContainer}>
+                <h3>Welcome to Footy Manager: World Stage!</h3>
+                <h3>Click the button below to begin your football journey.</h3>
+                <button onClick={() => setCurrentPage("CreateManager")}>Start</button>
+            </div>
         </div>
     );
 }

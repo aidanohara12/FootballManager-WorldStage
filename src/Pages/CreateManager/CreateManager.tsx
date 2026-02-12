@@ -25,7 +25,7 @@ export function CreateManager() {
 
     return (
         <div className={styles.createManagerContainer}>
-            <h1>Create Manager!</h1>
+            <h1>Create Your Manager!</h1>
             <form>
                 <div className={styles.formRow}>
                     <div>

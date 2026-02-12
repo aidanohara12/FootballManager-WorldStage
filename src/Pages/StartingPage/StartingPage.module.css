@@ -1,0 +1,58 @@
+@import "../../Globals/globalVariables.css";
+
+.startingPageContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--tertiary-color);
+}
+
+.logo {
+    width: 50rem;
+    height: auto;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 0.75rem black);
+}
+
+.welcomeContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.welcomeContainer h3 {
+    color: var(--secondary-color);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.welcomeContainer button {
+    width: 100%;
+    max-width: 400px;
+    padding: 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.welcomeContainer button:hover {
+    background-color: #008f5d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 168, 107, 0.3);
+}
+
+.welcomeContainer button:active {
+    transform: translateY(0);
+}

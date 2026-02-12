@@ -127,7 +127,7 @@
     width: 100%;
     max-width: 400px;
     padding: 1rem;
-    background-color: #314d2f;
+    background-color: #008f5d;
     color: white;
     border: none;
     border-radius: 8px;
@@ -141,7 +141,7 @@
 }
 
 .createManagerContainer button:hover {
-    background-color: #008f5d;
+    background-color: #314d2f;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 168, 107, 0.3);
 }
