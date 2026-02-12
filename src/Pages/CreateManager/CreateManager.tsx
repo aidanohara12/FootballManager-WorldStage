@@ -25,21 +25,44 @@ export function CreateManager() {
 
     return (
         <div className={styles.createManagerContainer}>
-            <h1>Create Manager</h1>
+            <h1>Create Manager!</h1>
             <form>
-                <div className="form-group">
-                    <label htmlFor="name">Name</label>
-                    <input
-                        type="text"
-                        className="form-control"
-                        id="name"
-                        value={name}
-                        required={true}
-                        onChange={(e) => setName(e.target.value)}
-                    />
+                <div className={styles.formRow}>
+                    <div>
+                        <label htmlFor="name">Name</label>
+                        <h4>Enter the name of your manager</h4>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="name"
+                            value={name}
+                            required={true}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="age">Age</label>
+                        <h4>Enter the age of your manager (20-70)</h4>
+                        <input
+                            type="number"
+                            className="form-control"
+                            id="age"
+                            value={age}
+                            min={20}
+                            max={70}
+                            required={true}
+                            onChange={(e) => setAge(parseInt(e.target.value) || 0)}
+                            onBlur={(e) => {
+                                const newAge = parseInt(e.target.value);
+                                if (newAge < 20) setAge(20);
+                                if (newAge > 70) setAge(70);
+                            }}
+                        />
+                    </div>
                 </div>
                 <div className="form-group">
                     <label htmlFor="country">National Team</label>
+                    <h4>Select the national team you want to manage (Top 50 countries)</h4>
                     <select
                         className="form-control"
                         id="country"
@@ -53,6 +76,7 @@ export function CreateManager() {
                 </div>
                 <div className="form-group">
                     <label htmlFor="league">League</label>
+                    <h4>Select the league you want to manage</h4>
                     <select
                         className="form-control"
                         id="league"
@@ -70,6 +94,7 @@ export function CreateManager() {
                 </div>
                 <div className="form-group">
                     <label htmlFor="club">Club</label>
+                    <h4>Select the club you want to manage</h4>
                     <select
                         className="form-control"
                         id="club"
@@ -82,18 +107,8 @@ export function CreateManager() {
                     </select>
                 </div>
                 <div className="form-group">
-                    <label htmlFor="age">Age</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        id="age"
-                        value={age}
-                        required={true}
-                        onChange={(e) => setAge(parseInt(e.target.value))}
-                    />
-                </div>
-                <div className="form-group">
                     <label htmlFor="type">Type</label>
+                    <h4>Select the type of manager you want to be</h4>
                     <select
                         className="form-control"
                         id="type"
@@ -110,7 +125,7 @@ export function CreateManager() {
                     className="btn btn-primary"
                     onClick={() => createManager()}
                 >
-                    Create
+                    Create Manager
                 </button>
             </form>
         </div>

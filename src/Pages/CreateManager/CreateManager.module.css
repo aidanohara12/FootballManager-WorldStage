@@ -5,4 +5,147 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 2rem;
+}
+
+.createManagerContainer h1 {
+    color: var(--secondary-color);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.createManagerContainer .form-group {
+    margin-bottom: 1.5rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.formRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    width: 100%;
+}
+
+.formRow .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.formRow .form-group:first-child {
+    flex: 2;
+    /* Name takes more space */
+}
+
+.formRow .form-group:last-child {
+    flex: 1;
+    /* Age takes less space */
+}
+
+.createManagerContainer h4 {
+    color: var(--secondary-color);
+    font-size: .7rem;
+    font-weight: 400;
+    margin: 0rem;
+    padding-bottom: 0.4rem;
+    text-align: center;
+}
+
+.createManagerContainer form {
+    background: var(--primary-color);
+    opacity: 0.8;
+    padding: 2.5rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.createManagerContainer .form-group {
+    margin-bottom: 1.5rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.createManagerContainer label {
+    display: flex;
+    color: var(--secondary-color);
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    margin-top: .5rem;
+    font-size: 0.95rem;
+    text-align: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.createManagerContainer .form-control {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: var(--tertiary-color);
+    text-align: center;
+}
+
+.createManagerContainer .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.1);
+}
+
+.createManagerContainer .form-control:hover {
+    border-color: var(--primary-color);
+}
+
+.createManagerContainer input {
+    width: 12rem;
+    height: 2rem;
+    text-align: center;
+    font-size: medium;
+}
+
+.createManagerContainer select {
+    width: 30rem;
+    height: 2rem;
+    text-align: center;
+}
+
+.createManagerContainer button {
+    width: 100%;
+    max-width: 400px;
+    padding: 1rem;
+    background-color: #314d2f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.createManagerContainer button:hover {
+    background-color: #008f5d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 168, 107, 0.3);
+}
+
+.createManagerContainer button:active {
+    transform: translateY(0);
 }
