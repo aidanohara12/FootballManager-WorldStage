@@ -1,0 +1,120 @@
+import { useState, useEffect } from "react";
+import { Top50Countries } from "../../Models/Countries.ts";
+import { AllTeams } from "../../Models/Teams.ts";
+import styles from "./CreateManager.module.css";
+
+export function CreateManager() {
+    const [name, setName] = useState<string>("");
+    const [country, setCountry] = useState<string>("Spain");
+    const [league, setLeague] = useState<string>("Premier League");
+    const [team, setTeam] = useState<string>(AllTeams.find((team: any) => team.league === league)?.name || "");
+    const [age, setAge] = useState<number>(0);
+    const [type, setType] = useState<string>("scout");
+
+    function createManager() {
+        const manager: any = {
+            name: name,
+            country: country,
+            team: team,
+            age: age,
+            type: type
+        };
+        console.log(manager);
+    }
+
+
+    return (
+        <div className={styles.createManagerContainer}>
+            <h1>Create Manager</h1>
+            <form>
+                <div className="form-group">
+                    <label htmlFor="name">Name</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="name"
+                        value={name}
+                        required={true}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="country">National Team</label>
+                    <select
+                        className="form-control"
+                        id="country"
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                    >
+                        {Top50Countries.map((country: any, index: number) => (
+                            <option key={index} value={country}>{index + 1}. {country}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="league">League</label>
+                    <select
+                        className="form-control"
+                        id="league"
+                        value={league}
+                        onChange={(e) => setLeague(e.target.value)}
+                    >
+                        <option value="Premier League">Premier League</option>
+                        <option value="La Liga">La Liga</option>
+                        <option value="Serie A">Serie A</option>
+                        <option value="Bundesliga">Bundesliga</option>
+                        <option value="Ligue 1">Ligue 1</option>
+                        <option value="Eredivisie">Eredivisie</option>
+                        <option value="Primeira Liga">Primeira Liga</option>
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="club">Club</label>
+                    <select
+                        className="form-control"
+                        id="club"
+                        value={team}
+                        onChange={(e) => setTeam(e.target.value)}
+                    >
+                        {AllTeams.filter((team: any) => team.league === league).map((team: any, index: number) => (
+                            <option key={index} value={team.name}>{team.name}</option>
+                        ))}
+                    </select>
+                </div>
+                <div className="form-group">
+                    <label htmlFor="age">Age</label>
+                    <input
+                        type="number"
+                        className="form-control"
+                        id="age"
+                        value={age}
+                        required={true}
+                        onChange={(e) => setAge(parseInt(e.target.value))}
+                    />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="type">Type</label>
+                    <select
+                        className="form-control"
+                        id="type"
+                        value={type}
+                        onChange={(e) => setType(e.target.value)}
+                    >
+                        <option value="scout">Scout- Recruits better players</option>
+                        <option value="tactitian">Tactitian- Improves team strategy for matches</option>
+                        <option value="Developer">Developer- Improves player development and training</option>
+                    </select>
+                </div>
+                <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => createManager()}
+                >
+                    Create
+                </button>
+            </form>
+        </div>
+    );
+}
+
+export default CreateManager;
