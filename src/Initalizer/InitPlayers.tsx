@@ -16,71 +16,111 @@ function createRandomPlayer(position: string, team: string, countryName?: string
 
     // Select country first to determine overall rating bias
     const countryIndex = Math.floor(Math.random() * Top50Countries.length);
-    const country = countryName || Top50Countries[countryIndex];
+    const country = countryName || Top50Countries[countryIndex].country;
 
-    // Players from top 25 countries get a bonus to their overall rating
+    // Players from different country tiers get different rating distributions
     const chanceOfBetterPlayer = Math.floor(Math.random() * 10) + 1;
     let overall: number;
 
-    // Base overall calculation considering both country and age
-    if (countryIndex < 25) {
-        // Top 25 countries
+    // Determine country tier
+    let countryTier: 'top10' | 'decent' | 'alright';
+    if (countryIndex < 10) {
+        countryTier = 'top10';
+    } else if (countryIndex < 30) {
+        countryTier = 'decent';
+    } else {
+        countryTier = 'alright';
+    }
+
+    // Base overall calculation considering country tier and age
+    if (countryTier === 'top10') {
+        // TOP 10 COUNTRIES - Best players
         if (age >= 15 && age <= 20) {
             // Young players: higher chance of low overall
             if (chanceOfBetterPlayer >= 9) {
-                overall = Math.floor(Math.random() * (90 - 70 + 1)) + 70; // 10% chance: decent young talent
+                overall = Math.floor(Math.random() * (93 - 75 + 1)) + 75; // 10% chance: exceptional young talent
             } else if (chanceOfBetterPlayer >= 5) {
-                overall = Math.floor(Math.random() * (75 - 60 + 1)) + 60; // 40% chance: developing
+                overall = Math.floor(Math.random() * (80 - 65 + 1)) + 65; // 40% chance: promising
             } else {
-                overall = Math.floor(Math.random() * (59 - 55 + 1)) + 55; // 50% chance: raw talent
+                overall = Math.floor(Math.random() * (70 - 58 + 1)) + 58; // 50% chance: developing
+            }
+        } else if (age >= 21 && age <= 27) {
+            // Prime development years: higher chance at high overall
+            if (chanceOfBetterPlayer >= 7) {
+                overall = Math.floor(Math.random() * (99 - 88 + 1)) + 88; // 30% chance: world class
+            } else if (chanceOfBetterPlayer >= 3) {
+                overall = Math.floor(Math.random() * (90 - 78 + 1)) + 78; // 40% chance: elite
+            } else {
+                overall = Math.floor(Math.random() * (80 - 68 + 1)) + 68; // 30% chance: very good
+            }
+        } else {
+            // 28-35: higher chance at solid/declining overall
+            if (chanceOfBetterPlayer >= 8) {
+                overall = Math.floor(Math.random() * (92 - 80 + 1)) + 80; // 20% chance: still elite
+            } else if (chanceOfBetterPlayer >= 4) {
+                overall = Math.floor(Math.random() * (85 - 70 + 1)) + 70; // 40% chance: solid veteran
+            } else {
+                overall = Math.floor(Math.random() * (75 - 60 + 1)) + 60; // 40% chance: declining
+            }
+        }
+    } else if (countryTier === 'decent') {
+        // COUNTRIES 11-30 - Decent players
+        if (age >= 15 && age <= 20) {
+            // Young players: higher chance of low overall
+            if (chanceOfBetterPlayer >= 9) {
+                overall = Math.floor(Math.random() * (85 - 70 + 1)) + 70; // 10% chance: promising
+            } else if (chanceOfBetterPlayer >= 6) {
+                overall = Math.floor(Math.random() * (74 - 60 + 1)) + 60; // 30% chance: developing
+            } else {
+                overall = Math.floor(Math.random() * (59 - 55 + 1)) + 55; // 60% chance: raw
             }
         } else if (age >= 21 && age <= 27) {
             // Prime development years: higher chance at high overall
             if (chanceOfBetterPlayer >= 8) {
-                overall = Math.floor(Math.random() * (99 - 85 + 1)) + 85; // 20% chance: elite
-            } else if (chanceOfBetterPlayer >= 3) {
-                overall = Math.floor(Math.random() * (84 - 75 + 1)) + 75; // 30% chance: very good
+                overall = Math.floor(Math.random() * (97 - 80 + 1)) + 80; // 20% chance: excellent
+            } else if (chanceOfBetterPlayer >= 5) {
+                overall = Math.floor(Math.random() * (84 - 70 + 1)) + 70; // 30% chance: good
             } else {
-                overall = Math.floor(Math.random() * (74 - 65 + 1)) + 65; // 20% chance: good
+                overall = Math.floor(Math.random() * (73 - 60 + 1)) + 60; // 50% chance: average
             }
         } else {
             // 28-35: higher chance at basic/declining overall
-            if (chanceOfBetterPlayer >= 8) {
-                overall = Math.floor(Math.random() * (90 - 75 + 1)) + 75; // 20% chance: still strong
-            } else if (chanceOfBetterPlayer >= 4) {
-                overall = Math.floor(Math.random() * (80 - 65 + 1)) + 65; // 40% chance: solid veteran
+            if (chanceOfBetterPlayer >= 9) {
+                overall = Math.floor(Math.random() * (85 - 72 + 1)) + 72; // 10% chance: decent veteran
+            } else if (chanceOfBetterPlayer >= 5) {
+                overall = Math.floor(Math.random() * (76 - 62 + 1)) + 62; // 40% chance: average veteran
             } else {
-                overall = Math.floor(Math.random() * (70 - 55 + 1)) + 55; // 40% chance: declining
+                overall = Math.floor(Math.random() * (61 - 55 + 1)) + 55; // 50% chance: declining
             }
         }
     } else {
-        // Bottom 25 countries
+        // COUNTRIES 31-50 - Alright players
         if (age >= 15 && age <= 20) {
             // Young players: higher chance of low overall
             if (chanceOfBetterPlayer >= 9) {
-                overall = Math.floor(Math.random() * (90 - 65 + 1)) + 65; // 10% chance: promising
+                overall = Math.floor(Math.random() * (84 - 65 + 1)) + 65; // 10% chance: decent prospect
             } else if (chanceOfBetterPlayer >= 6) {
-                overall = Math.floor(Math.random() * (75 - 58 + 1)) + 58; // 30% chance: developing
+                overall = Math.floor(Math.random() * (70 - 58 + 1)) + 58; // 30% chance: developing
             } else {
-                overall = Math.floor(Math.random() * (70 - 55 + 1)) + 55; // 60% chance: raw
+                overall = Math.floor(Math.random() * (57 - 55 + 1)) + 55; // 60% chance: raw
             }
         } else if (age >= 21 && age <= 27) {
-            // Prime development years: higher chance at high overall
+            // Prime development years: higher chance at decent overall
             if (chanceOfBetterPlayer >= 8) {
-                overall = Math.floor(Math.random() * (99 - 80 + 1)) + 80; // 20% chance: excellent
+                overall = Math.floor(Math.random() * (92 - 75 + 1)) + 75; // 20% chance: good
             } else if (chanceOfBetterPlayer >= 5) {
-                overall = Math.floor(Math.random() * (85 - 70 + 1)) + 70; // 30% chance: good
+                overall = Math.floor(Math.random() * (81 - 65 + 1)) + 65; // 30% chance: decent
             } else {
-                overall = Math.floor(Math.random() * (75 - 60 + 1)) + 60; // 50% chance: average
+                overall = Math.floor(Math.random() * (70 - 58 + 1)) + 58; // 50% chance: average
             }
         } else {
             // 28-35: higher chance at basic/declining overall
             if (chanceOfBetterPlayer >= 9) {
-                overall = Math.floor(Math.random() * (90 - 68 + 1)) + 68; // 10% chance: decent veteran
+                overall = Math.floor(Math.random() * (80 - 68 + 1)) + 68; // 10% chance: decent veteran
             } else if (chanceOfBetterPlayer >= 5) {
-                overall = Math.floor(Math.random() * (75 - 60 + 1)) + 60; // 40% chance: average veteran
+                overall = Math.floor(Math.random() * (73 - 60 + 1)) + 60; // 40% chance: average veteran
             } else {
-                overall = Math.floor(Math.random() * (70 - 55 + 1)) + 55; // 50% chance: declining
+                overall = Math.floor(Math.random() * (59 - 55 + 1)) + 55; // 50% chance: declining
             }
         }
     }
@@ -95,10 +135,10 @@ function createRandomPlayer(position: string, team: string, countryName?: string
         potential = overall + Math.floor(Math.random() * (15 - 5 + 1)) + 5;
     } else if (age <= 28) {
         // Players approaching their prime, smaller growth
-        potential = overall + Math.floor(Math.random() * (8 - 2 + 1)) + 2;
+        potential = overall + Math.floor(Math.random() * (6 - 2 + 1)) + 2;
     } else if (age <= 30) {
         // Prime age players, potential close to current overall
-        potential = overall + Math.floor(Math.random() * (5 - 0 + 1)) + 0;
+        potential = overall + Math.floor(Math.random() * (2 - 0 + 1)) + 0;
     } else {
         // Older players, potential equals or slightly lower than current
         potential = Math.max(overall, overall - Math.floor(Math.random() * 3));
@@ -212,7 +252,7 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
             league: teamData.league,
             manager: {
                 name: getRandomPlayerName(),
-                country: Top50Countries[Math.floor(Math.random() * Top50Countries.length)],
+                country: Top50Countries[Math.floor(Math.random() * Top50Countries.length)].country,
                 team: teamData.name,
                 age: Math.floor(Math.random() * (60 - 25 + 1)) + 25,
                 type: "Club"
@@ -233,24 +273,24 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
     Top50Countries.forEach((countryData: any) => {
         const nationalTeam: NationalTeam = {
             team: {
-                name: countryData,
+                name: countryData.country,
                 league: "National",
                 manager: {
                     name: getRandomPlayerName(),
-                    country: countryData,
-                    team: countryData,
+                    country: countryData.country,
+                    team: countryData.country,
                     age: Math.floor(Math.random() * (60 - 25 + 1)) + 25,
                     type: "National"
                 },
-                color: countryData.color,
+                color: '',
                 players: [],
                 moneyToSpend: 0
             },
-            country: countryData
+            country: countryData.country
         };
 
         // Get players for this national team
-        const players = getNationalTeamPlayers(countryData, AllPlayers);
+        const players = getNationalTeamPlayers(countryData.country, AllPlayers);
         nationalTeam.team.players = players;
 
         // Add to NationalTeams array

@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import type { NationalTeam, Player } from "../../Models/WorldStage.ts";
-import Top50Countries from "../../Models/Countries.ts";
+import type { Team, Player, NationalTeam } from "../../Models/WorldStage.ts";
 import type { Manager } from "../../Models/WorldStage.ts";
-import styles from "./SelectNational.module.css";
+import styles from "./SelectClub.module.css";
+import { Top50Countries } from "../../Models/Countries.ts";
 
-interface SelectNationalProps {
-    nationalTeams: NationalTeam[];
-    setNationalTeams: (teams: NationalTeam[]) => void;
+interface SelectClubProps {
+    teams: Team[];
+    setTeams: (teams: Team[]) => void;
     manager: Manager;
     setCurrentPage: (page: string) => void;
 }
 
-export function SelectNational({ nationalTeams, setNationalTeams, manager, setCurrentPage }: SelectNationalProps) {
+export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectClubProps) {
     const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
     const [currentPositionIndex, setCurrentPositionIndex] = useState<number>(0);
 
@@ -24,11 +24,11 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
 
     const currentPosition = positions[currentPositionIndex];
 
-    function setNationalTeamStartingPlayers() {
-        const updatedTeams = nationalTeams.map((nt) => {
-            const updatedPlayers = nt.team.players?.map((p) => ({
+    function setTeamStartingPlayers() {
+        const updatedTeams = teams.map((team) => {
+            const updatedPlayers = team.players?.map((p) => ({
                 ...p,
-                startingNational: false
+                startingTeam: false
             }));
 
             updatedPlayers
@@ -56,14 +56,11 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                 .forEach((p) => p.startingNational = true);
 
             return {
-                ...nt,
-                team: {
-                    ...nt.team,
-                    players: updatedPlayers
-                }
+                ...team,
+                players: updatedPlayers
             };
         });
-        setNationalTeams(updatedTeams);
+        setTeams(updatedTeams);
     }
 
     function handlePlayerCheck(e: React.ChangeEvent<HTMLInputElement>) {
@@ -92,7 +89,8 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
             setCurrentPositionIndex(currentPositionIndex + 1);
             setSelectedPlayers([]);
         } else {
-            setCurrentPage("SelectClub");
+            // All positions selected, finalize
+            setCurrentPage("MainPage");
         }
     }
 
@@ -104,12 +102,12 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
     }
 
     useEffect(() => {
-        setNationalTeamStartingPlayers();
+        setTeamStartingPlayers();
     }, []);
 
     return (
         <div className={styles.selectNationalContainer}>
-            <h3>Select Your National Team Starters!</h3>
+            <h3>Select Your Club Team Starters!</h3>
             <h4>Select {currentPosition.name}s ({selectedPlayers.length}/{currentPosition.max})</h4>
 
             {/* Progress indicator */}
@@ -124,14 +122,14 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                 ))}
             </div>
 
-            {nationalTeams.filter((nt) => nt.country === manager.country).map((nt) => (
-                <div key={nt.country} className={styles.teamCard}>
-                    <h4>{Top50Countries.find((c) => c.country === nt.country)?.flag} {nt.country} {Top50Countries.find((c) => c.country === nt.country)?.flag}</h4>
+            {teams.filter((team) => team.name === manager.team).map((team) => (
+                <div key={team.name} className={styles.teamCard}>
+                    <h4 style={{ color: team.color }}>{team.name}</h4>
 
                     <div className={styles.positionSection}>
                         <h5>{currentPosition.name}s</h5>
                         <div className={styles.playerList}>
-                            {nt.team.players
+                            {team.players
                                 ?.filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
                                 .map((p) => (
@@ -156,7 +154,7 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                                                     <span className={styles.statLabel}>POT:</span> {p.potential}
                                                 </span>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>Team:</span> {p.team}
+                                                    <span className={styles.statLabel}>Country:</span> {p.country} {Top50Countries.find((c) => c.country === p.country)?.flag}
                                                 </span>
                                             </div>
                                         </div>
@@ -181,4 +179,4 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
     );
 }
 
-export default SelectNational;
+export default SelectClub;

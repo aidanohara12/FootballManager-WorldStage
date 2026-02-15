@@ -106,8 +106,8 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
                     >
-                        {Top50Countries.map((country: any, index: number) => (
-                            <option key={index} value={country}>{index + 1}. {country}</option>
+                        {Top50Countries.map((country: any) => (
+                            <option key={country.country} value={country.country}>{country.country} {country.flag}</option>
                         ))}
                     </select>
                 </div>
