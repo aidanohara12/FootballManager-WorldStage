@@ -3,6 +3,8 @@ export interface Player {
     position: string;
     overall: number;
     country: string;
+    startingNational?: boolean;
+    startingTeam?: boolean;
     team: string;
     age: number;
     potential: number;
@@ -16,6 +18,7 @@ export interface Manager {
     team: string;
     age: number;
     type: string;
+    trophies?: number;
 }
 
 export interface Team {

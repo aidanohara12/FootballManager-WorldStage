@@ -2,24 +2,61 @@ import { useState, useEffect } from "react";
 import { Top50Countries } from "../../Models/Countries.ts";
 import { AllTeams } from "../../Models/Teams.ts";
 import styles from "./CreateManager.module.css";
+import type { Manager, NationalTeam, Team } from "../../Models/WorldStage.ts";
 
-export function CreateManager() {
+interface CreateManagerProps {
+    setCurrentPage: (page: string) => void;
+    allTeams: Team[];
+    nationalTeams: NationalTeam[];
+    setAllTeams: (teams: Team[]) => void;
+    setNationalTeams: (teams: NationalTeam[]) => void;
+    setUserManager: (manager: Manager) => void;
+}
+
+export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllTeams, setNationalTeams, setUserManager }: CreateManagerProps) {
     const [name, setName] = useState<string>("");
     const [country, setCountry] = useState<string>("Spain");
     const [league, setLeague] = useState<string>("Premier League");
-    const [team, setTeam] = useState<string>(AllTeams.find((team: any) => team.league === league)?.name || "");
+    const [team, setTeam] = useState<string>(allTeams.find((team: any) => team.league === league)?.name || "");
     const [age, setAge] = useState<number>(0);
     const [type, setType] = useState<string>("scout");
 
     function createManager() {
-        const manager: any = {
+        if (!name || age < 20 || age > 70) {
+            alert("Please fill in all fields correctly");
+            return;
+        }
+
+        const manager = {
             name: name,
             country: country,
             team: team,
             age: age,
             type: type
         };
-        console.log(manager);
+
+        const updatedClubTeams = allTeams.map((t) =>
+            t.name === team
+                ? { ...t, manager: { ...manager, type: "Club" } }
+                : t
+        );
+        setAllTeams(updatedClubTeams);
+
+        const updatedNationalTeams = nationalTeams.map((nt) =>
+            nt.country === country
+                ? {
+                    ...nt,
+                    team: {
+                        ...nt.team,
+                        manager: { ...manager, type: "National" }
+                    }
+                }
+                : nt
+        );
+        setNationalTeams(updatedNationalTeams);
+
+        setUserManager(manager);
+        setCurrentPage("MainPage");
     }
 
 
