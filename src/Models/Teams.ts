@@ -4,7 +4,7 @@ export const PremierLeague = [
     { name: "Aston Villa", league: "Premier League", color: "#95BFE5" },
     { name: "Bournemouth", league: "Premier League", color: "#DA291C" },
     { name: "Brentford", league: "Premier League", color: "#FB0E04" },
-    { name: "Brighton & Hove Albion", league: "Premier League", color: "#0057B8" },
+    { name: "Brighton", league: "Premier League", color: "#0057B8" },
     { name: "Burnley", league: "Premier League", color: "#6C1D45" },
     { name: "Chelsea", league: "Premier League", color: "#034694" },
     { name: "Crystal Palace", league: "Premier League", color: "#1B458F" },
@@ -17,9 +17,9 @@ export const PremierLeague = [
     { name: "Newcastle United", league: "Premier League", color: "#241F20" },
     { name: "Nottingham Forest", league: "Premier League", color: "#DD0000" },
     { name: "Sunderland", league: "Premier League", color: "#EB172B" },
-    { name: "Tottenham Hotspur", league: "Premier League", color: "#132257" },
+    { name: "Tottenham", league: "Premier League", color: "#132257" },
     { name: "West Ham United", league: "Premier League", color: "#7A263A" },
-    { name: "Wolverhampton Wanderers", league: "Premier League", color: "#FDB913" }
+    { name: "Wolverhampton", league: "Premier League", color: "#FDB913" }
 ];
 
 // La Liga (Spain) - 2025/26 Season

@@ -1,0 +1,160 @@
+.playerAttributesView {
+    background: var(--primary-color);
+    opacity: 0.8;
+    backdrop-filter: blur(15px);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 320px;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+/* Custom scrollbar */
+.playerAttributesView::-webkit-scrollbar {
+    width: 8px;
+}
+
+.playerAttributesView::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.playerAttributesView::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color, #00A86B);
+}
+
+.playerName {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-bottom: 0.75rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.playerStats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.statBadge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.statBadge:hover {
+    background: white;
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 168, 107, 0.2);
+}
+
+.statLabel {
+    font-weight: 700;
+    color: var(--primary-color, #00A86B);
+    margin-right: 0.5rem;
+    font-size: 0.85rem;
+}
+
+/* Different colors for key stats */
+.statBadge:nth-child(1) .statLabel {
+    color: #9b59b6;
+}
+
+.statBadge:nth-child(2) .statLabel {
+    color: #e67e22;
+}
+
+.statBadge:nth-child(3) .statLabel {
+    color: #f39c12;
+}
+
+.statBadge:nth-child(4) .statLabel {
+    color: #3498db;
+}
+
+.statBadge:nth-child(5) .statLabel {
+    color: #e74c3c;
+}
+
+.statBadge:nth-child(6) .statLabel {
+    color: #16a085;
+}
+
+.statBadge:nth-child(7) .statLabel {
+    color: #27ae60;
+}
+
+.overallValue {
+    font-weight: 800;
+    font-size: 1rem;
+    color: #f39c12;
+    background: rgba(243, 156, 18, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.potentialValue {
+    font-weight: 800;
+    font-size: 1rem;
+    color: #3498db;
+    background: rgba(52, 152, 219, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+}
+
+.closeButton {
+    width: 100%;
+    padding: 0.75rem;
+    background: #008f5d;
+    border: black;
+    border-radius: 6px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0, 168, 107, 0.3);
+}
+
+.closeButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 168, 107, 0.5);
+    background: linear-gradient(135deg, #008f5d 0%, #00A86B 100%);
+}
+
+.closeButton:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .playerAttributesView {
+        width: 280px;
+        padding: 1rem;
+    }
+
+    .playerName {
+        font-size: 1.2rem;
+    }
+
+    .statBadge {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.8rem;
+    }
+}

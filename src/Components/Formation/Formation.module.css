@@ -89,7 +89,7 @@
     flex-direction: column;
     gap: 1rem;
     overflow-y: auto;
-    max-height: 72vh;
+    max-height: 65vh;
     /* Changed from 100% to match formation height */
     width: 250px;
     border-radius: 10px;
@@ -117,38 +117,6 @@
 /* Player cards in bench should be centered */
 .bench .playerCard {
     margin: 0 auto;
-}
-
-/* Responsive adjustments - ONLY for very small screens */
-@media (max-width: 768px) {
-    .formation {
-        flex-direction: column;
-    }
-
-    .bench {
-        width: 100%;
-        max-height: 200px;
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        border-left: none;
-        border-top: 3px solid var(--primary-color, #00A86B);
-    }
-
-    .bench::-webkit-scrollbar {
-        height: 8px;
-        width: auto;
-    }
-
-    .forwards,
-    .midfielders,
-    .defenders {
-        gap: 1rem;
-    }
-
-    .starters {
-        gap: 1rem;
-    }
 }
 
 /* Rest of the CSS stays the same */
@@ -199,6 +167,7 @@
     flex-direction: column;
     gap: 0.25rem;
     margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
 }
 
 .statBadge {

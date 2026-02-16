@@ -27,7 +27,7 @@ export function PlayerCard({ player, setSelectedPlayer }: PlayerCardProps) {
                     <span>{countryFlag}</span>
                 </span>
 
-                {player.startingTeam && (
+                {(player.startingTeam || player.startingNational) && (
                     <>
                         <span className={styles.statBadge}>
                             <span className={styles.statLabel}>OVR:</span>

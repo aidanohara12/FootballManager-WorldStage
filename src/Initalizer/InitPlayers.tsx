@@ -155,9 +155,9 @@ function createRandomPlayer(position: string, team: string, countryName?: string
         country: country,
         team: team,
         age: age,
-        value: overall * 0.25,
+        value: overall * 0.20,
         contract: {
-            4: overall * 0.25,
+            4: overall * 0.20,
         }
     };
     return player;

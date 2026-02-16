@@ -13,6 +13,7 @@ interface SelectNationalProps {
 
 export function SelectNational({ nationalTeams, setNationalTeams, manager, setCurrentPage }: SelectNationalProps) {
     const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
+    const [allSelectedPlayers, setAllSelectedPlayers] = useState<string[]>([]); // Track all selections
     const [currentPositionIndex, setCurrentPositionIndex] = useState<number>(0);
 
     const positions = [
@@ -88,10 +89,34 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
             return;
         }
 
+        // Add current selections to the full list
+        const updatedAllSelected = [...allSelectedPlayers, ...selectedPlayers];
+        setAllSelectedPlayers(updatedAllSelected);
+
         if (currentPositionIndex < positions.length - 1) {
+            // Move to next position
             setCurrentPositionIndex(currentPositionIndex + 1);
             setSelectedPlayers([]);
         } else {
+            // All positions selected, update the national team
+            const updatedTeams = nationalTeams.map((nt) => {
+                if (nt.country !== manager.country) return nt;
+
+                const updatedPlayers = nt.team.players?.map((p) => ({
+                    ...p,
+                    startingNational: updatedAllSelected.includes(p.name)
+                }));
+
+                return {
+                    ...nt,
+                    team: {
+                        ...nt.team,
+                        players: updatedPlayers
+                    }
+                };
+            });
+
+            setNationalTeams(updatedTeams);
             setCurrentPage("SelectClub");
         }
     }

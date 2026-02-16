@@ -5,14 +5,15 @@ import styles from "./Formation.module.css";
 interface FormationProps {
     currentTeam: Team;
     setSelectedPlayer: (player: Player | null) => void;
+    clubTeam: boolean;
 }
 
-export function Formation({ currentTeam, setSelectedPlayer }: FormationProps) {
-    const currentTeamForwards = currentTeam.players?.filter((p) => p.position === "Forward").filter((p) => p.startingTeam);
-    const currentTeamMidfielders = currentTeam.players?.filter((p) => p.position === "Midfielder").filter((p) => p.startingTeam);
-    const currentTeamDefenders = currentTeam.players?.filter((p) => p.position === "Defender").filter((p) => p.startingTeam);
-    const currentTeamGoalkeepers = currentTeam.players?.filter((p) => p.position === "Goalkeeper").filter((p) => p.startingTeam);
-    const currentTeamBench = currentTeam.players?.filter((p) => !p.startingTeam).sort((a, b) => b.overall - a.overall);
+export function Formation({ currentTeam, setSelectedPlayer, clubTeam }: FormationProps) {
+    const currentTeamForwards = currentTeam.players?.filter((p) => p.position === "Forward").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamMidfielders = currentTeam.players?.filter((p) => p.position === "Midfielder").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamDefenders = currentTeam.players?.filter((p) => p.position === "Defender").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamGoalkeepers = currentTeam.players?.filter((p) => p.position === "Goalkeeper").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamBench = currentTeam.players?.filter((p) => clubTeam ? !p.startingTeam : !p.startingNational).sort((a, b) => b.overall - a.overall);
     return (
         <div className={styles.formation}>
             <div className={styles.starters}>

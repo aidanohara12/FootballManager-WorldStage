@@ -23,6 +23,7 @@
     margin-bottom: .5rem;
     margin-top: 0rem;
     text-align: center;
+    align-self: center;
 }
 
 .selectedPlayer {
@@ -34,20 +35,26 @@
     color: black;
     padding: 2rem;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     z-index: 1000;
-    max-width: 500px;
+    max-width: 375px;
     width: 90%;
+    height: 500px;
 }
 
-/* Optional: Add a backdrop/overlay behind the selected player */
-.selectedPlayer::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: -1;
+.teamInfo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    position: relative;
+}
+
+.teamInfo .teamName {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.teamInfo button {
+    right: 1rem;
 }
