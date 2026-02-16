@@ -147,16 +147,16 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                                             <div className={styles.playerName}>{p.name}</div>
                                             <div className={styles.playerStats}>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>Age:</span> {p.age}
+                                                    <h5 className={styles.statLabel}>Age: {p.age}</h5>
                                                 </span>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>OVR:</span> {p.overall}
+                                                    <h5 className={styles.statLabel}>OVR: {p.overall}</h5>
                                                 </span>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>POT:</span> {p.potential}
+                                                    <h5 className={styles.statLabel}>POT: {p.potential}</h5>
                                                 </span>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>Team:</span> {p.team}
+                                                    <h5 className={styles.statLabel}>Team: {p.team}</h5>
                                                 </span>
                                             </div>
                                         </div>

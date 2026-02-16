@@ -40,18 +40,24 @@ export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeam
                 />
             )}
             {currentPage === "MainPage" && (
-                <div>
+                <div className={styles.tabs}>
                     {activeTab === "Schedule" && <Schedule />}
                     {activeTab === "Stats" && <Stats />}
-                    {activeTab === "Team" && <TeamView />}
+                    {activeTab === "Team" && <TeamView
+                        allTeams={allTeams}
+                        setAllTeams={setAllTeams}
+                        nationalTeams={nationalTeams}
+                        setNationalTeams={setNationalTeams}
+                        userManager={userManager}
+                    />}
                     {activeTab === "History" && <History />}
                     {activeTab === "Table" && <Table />}
-                    <div>
-                        <button onClick={() => setActiveTab("Schedule")}>Schedule</button>
-                        <button onClick={() => setActiveTab("Team")}>Team</button>
-                        <button onClick={() => setActiveTab("Table")}>Table</button>
-                        <button onClick={() => setActiveTab("Stats")}>Stats</button>
-                        <button onClick={() => setActiveTab("History")}>History</button>
+                    <div className={styles.tabButtons}>
+                        <button className={activeTab === "Schedule" ? styles.activeTab : ""} onClick={() => setActiveTab("Schedule")}>Schedule</button>
+                        <button className={activeTab === "Team" ? styles.activeTab : ""} onClick={() => setActiveTab("Team")}>Team</button>
+                        <button className={activeTab === "Table" ? styles.activeTab : ""} onClick={() => setActiveTab("Table")}>Table</button>
+                        <button className={activeTab === "Stats" ? styles.activeTab : ""} onClick={() => setActiveTab("Stats")}>Stats</button>
+                        <button className={activeTab === "History" ? styles.activeTab : ""} onClick={() => setActiveTab("History")}>History</button>
                     </div>
                 </div>
             )}

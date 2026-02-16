@@ -1,0 +1,253 @@
+.formation {
+    display: flex;
+    flex-direction: row;
+    min-height: 72vh;
+    background:
+        linear-gradient(180deg, #2d5016 0%, #1a3d0a 100%);
+    padding: 2rem;
+    position: relative;
+    gap: 2rem;
+}
+
+/* Center circle */
+.formation::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 40%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Vertical line */
+.formation::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 40%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.starters {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 1rem;
+    /* Reduced from 2rem */
+}
+
+/* Forwards - 3 players at the top */
+.forwards {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    /* Reduced from 2rem */
+    width: 100%;
+}
+
+/* Midfielders - 3 players in the middle */
+.midfielders {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    /* Reduced from 2.5rem */
+    width: 100%;
+}
+
+/* Defenders - 4 players at the back */
+.defenders {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    /* Reduced from 1.5rem */
+    width: 100%;
+}
+
+/* Goalkeeper - 1 player at the very back */
+.goalkeepers {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Bench - vertical scroll on the right */
+.bench {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    padding: 1rem;
+    border-left: 3px solid var(--primary-color, #00A86B);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    max-height: 72vh;
+    /* Changed from 100% to match formation height */
+    width: 250px;
+    border-radius: 10px;
+}
+
+/* Custom scrollbar for bench */
+.bench::-webkit-scrollbar {
+    width: 8px;
+}
+
+.bench::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.bench::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #00A86B);
+    border-radius: 10px;
+}
+
+.bench::-webkit-scrollbar-thumb:hover {
+    background: #008f5d;
+}
+
+/* Player cards in bench should be centered */
+.bench .playerCard {
+    margin: 0 auto;
+}
+
+/* Responsive adjustments - ONLY for very small screens */
+@media (max-width: 768px) {
+    .formation {
+        flex-direction: column;
+    }
+
+    .bench {
+        width: 100%;
+        max-height: 200px;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-left: none;
+        border-top: 3px solid var(--primary-color, #00A86B);
+    }
+
+    .bench::-webkit-scrollbar {
+        height: 8px;
+        width: auto;
+    }
+
+    .forwards,
+    .midfielders,
+    .defenders {
+        gap: 1rem;
+    }
+
+    .starters {
+        gap: 1rem;
+    }
+}
+
+/* Rest of the CSS stays the same */
+.playerCard {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+    border-radius: 8px;
+    padding: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--primary-color, #00A86B);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.playerCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color, #00A86B), #43e97b);
+}
+
+.playerCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 12px rgba(0, 168, 107, 0.3);
+}
+
+.playerName {
+    font-size: 0.45rem;
+    font-weight: 800;
+    color: var(--secondary-color, #1A1A1A);
+    text-align: center;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+}
+
+.playerStats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.3rem;
+}
+
+.statBadge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.15rem 0.3rem;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.2s ease;
+    font-size: 0.6rem;
+}
+
+.statBadge:hover {
+    border-color: var(--primary-color, #00A86B);
+}
+
+.statLabel {
+    font-weight: 700;
+    color: var(--primary-color, #00A86B);
+    font-size: 0.55rem;
+}
+
+/* Specific styling for each stat */
+.statBadge:nth-child(1) .statLabel {
+    color: #9b59b6;
+}
+
+.statBadge:nth-child(2) .statLabel {
+    color: #f39c12;
+}
+
+.statBadge:nth-child(3) .statLabel {
+    color: #3498db;
+}
+
+.statBadge:nth-child(4) .statLabel {
+    color: #e74c3c;
+}
+
+.overallValue {
+    font-weight: 800;
+    font-size: 0.65rem;
+    color: #f39c12;
+}
+
+.potentialValue {
+    font-weight: 800;
+    font-size: 0.65rem;
+    color: #3498db;
+}

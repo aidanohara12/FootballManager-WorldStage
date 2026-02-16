@@ -243,7 +243,8 @@
 }
 
 .statLabel {
-    font-weight: 600;
+    font-size: 0.8rem !important;
+    font-weight: 700;
     color: var(--primary-color, #00A86B);
 }
 

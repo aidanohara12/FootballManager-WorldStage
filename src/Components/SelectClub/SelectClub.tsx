@@ -35,25 +35,25 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
                 ?.filter((p) => p.position === "Forward")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 3)
-                .forEach((p) => p.startingNational = true);
+                .forEach((p) => p.startingTeam = true);
 
             updatedPlayers
                 ?.filter((p) => p.position === "Midfielder")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 3)
-                .forEach((p) => p.startingNational = true);
+                .forEach((p) => p.startingTeam = true);
 
             updatedPlayers
                 ?.filter((p) => p.position === "Defender")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 4)
-                .forEach((p) => p.startingNational = true);
+                .forEach((p) => p.startingTeam = true);
 
             updatedPlayers
                 ?.filter((p) => p.position === "Goalkeeper")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 1)
-                .forEach((p) => p.startingNational = true);
+                .forEach((p) => p.startingTeam = true);
 
             return {
                 ...team,
@@ -84,6 +84,24 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
             alert(`Please select exactly ${currentPosition.max} ${currentPosition.name}(s)`);
             return;
         }
+
+        const updatedTeams = teams.map((team) => {
+            if (team.name !== manager.team) return team;
+
+            const updatedPlayers = team.players?.map((p) => {
+                if (selectedPlayers.includes(p.name)) {
+                    return { ...p, startingTeam: true };
+                }
+                return p;
+            });
+
+            return {
+                ...team,
+                players: updatedPlayers
+            };
+        });
+
+        setTeams(updatedTeams);
 
         if (currentPositionIndex < positions.length - 1) {
             setCurrentPositionIndex(currentPositionIndex + 1);
@@ -145,16 +163,16 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
                                             <div className={styles.playerName}>{p.name}</div>
                                             <div className={styles.playerStats}>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>Age:</span> {p.age}
+                                                    <h5 className={styles.statLabel}>Age: {p.age}</h5>
                                                 </span>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>OVR:</span> {p.overall}
+                                                    <h5 className={styles.statLabel}>OVR: {p.overall}</h5>
                                                 </span>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>POT:</span> {p.potential}
+                                                    <h5 className={styles.statLabel}>POT: {p.potential}</h5>
                                                 </span>
                                                 <span className={styles.statBadge}>
-                                                    <span className={styles.statLabel}>Country:</span> {p.country} {Top50Countries.find((c) => c.country === p.country)?.flag}
+                                                    <h5 className={styles.statLabel}>Country: {p.country} {Top50Countries.find((c) => c.country === p.country)?.flag}</h5>
                                                 </span>
                                             </div>
                                         </div>

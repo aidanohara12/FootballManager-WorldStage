@@ -242,10 +242,13 @@
     border: 1px solid #e0e0e0;
 }
 
+
 .statLabel {
-    font-weight: 600;
+    font-size: 0.8rem !important;
+    font-weight: 700;
     color: var(--primary-color, #00A86B);
 }
+
 
 .statBadge:nth-child(2) .statLabel {
     color: #f39c12;

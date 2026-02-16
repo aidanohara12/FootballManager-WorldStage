@@ -1,0 +1,53 @@
+.teamViewContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--tertiary-color);
+    color: black;
+    width: 100%;
+    position: relative;
+}
+
+.formation {
+    width: 100%;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    color: var(--secondary-color, #1A1A1A);
+}
+
+.teamName {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: .5rem;
+    margin-top: 0rem;
+    text-align: center;
+}
+
+.selectedPlayer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    color: black;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    max-width: 500px;
+    width: 90%;
+}
+
+/* Optional: Add a backdrop/overlay behind the selected player */
+.selectedPlayer::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
