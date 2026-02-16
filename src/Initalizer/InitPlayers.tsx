@@ -1,8 +1,8 @@
-import Top50Countries from "../Models/Countries";
+import { Top50Countries } from "../Models/Countries";
 import AllTeams from "../Models/Teams";
 import firstNames from "../Models/Names/FirstNames.ts";
 import lastNames from "../Models/Names/LastNames.ts";
-import { type Player, type Team, type NationalTeam } from "../Models/WorldStage";
+import { type Player, type Team, type NationalTeam, type League, type Tournament, type LeagueTeam, type InternationalFriendly, type InternationalTournament, type TournamentTeam } from "../Models/WorldStage";
 
 function getRandomPlayerName() {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
@@ -147,6 +147,10 @@ function createRandomPlayer(position: string, team: string, countryName?: string
     // Ensure potential never exceeds 99
     potential = Math.min(99, potential);
 
+    // Calculate value using exponential growth: best players ~25M, <80 overall very cheap
+    const calculatedValue = Math.pow((overall - 50) / 10, 3) * 0.22;
+    const playerValue = Math.max(0.1, calculatedValue);
+
     const player: Player = {
         name: getRandomPlayerName(),
         position: position,
@@ -155,9 +159,9 @@ function createRandomPlayer(position: string, team: string, countryName?: string
         country: country,
         team: team,
         age: age,
-        value: overall * 0.20,
+        value: playerValue,
         contract: {
-            4: overall * 0.20,
+            4: playerValue,
         }
     };
     return player;
@@ -243,7 +247,42 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[]) {
     return nationalTeamPlayers;
 }
 
-export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTeams: NationalTeam[]) {
+export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[]) {
+    // Initialize leagues - get unique league names and create league objects
+    const uniqueLeagues = [...new Set(AllTeams.map((t) => t.league))];
+
+    uniqueLeagues.forEach((leagueName: string) => {
+        const league: League = {
+            name: leagueName,
+            matches: []
+        };
+
+        Leagues.push(league);
+    });
+
+    const uniqueClubTournaments = [...new Set(AllTeams.map((t) => t.tournament))];
+
+    uniqueClubTournaments.forEach((tournamentName: string) => {
+        const tournament: Tournament = {
+            name: tournamentName,
+            matches: []
+        };
+
+        Tournaments.push(tournament);
+    });
+
+    // Initialize International Tournaments - flatten the tournament arrays and get unique values
+    const uniqueInternationalTournaments = [...new Set(Top50Countries.flatMap((t) => t.tournaments))];
+
+    uniqueInternationalTournaments.forEach((tournamentName: string) => {
+        const tournament: Tournament = {
+            name: tournamentName,
+            matches: []
+        };
+
+        Tournaments.push(tournament);
+    });
+
     // Initialize Club Teams
     AllTeams.forEach((teamData: any) => {
         // Create the new team object
@@ -264,6 +303,26 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
 
         // Add to ClubTeams array
         ClubTeams.push(newTeam);
+
+        // Add to Leagues array as LeagueTeam
+        Leagues.forEach((league: League) => {
+            if (league.name === teamData.league) {
+                league?.teams?.push({
+                    Team: newTeam,
+                    League: league,
+                });
+            }
+        });
+
+        // Add to Tournaments array as TournamentTeam
+        Tournaments.forEach((tournament: Tournament) => {
+            if (tournament.name === teamData.tournament) {
+                tournament?.teams?.push({
+                    Team: newTeam,
+                    Tournament: tournament,
+                });
+            }
+        });
 
         // Create players for this team (will update newTeam.players)
         createPlayersForTeam(newTeam, AllPlayers);
@@ -292,6 +351,16 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
         // Get players for this national team
         const players = getNationalTeamPlayers(countryData.country, AllPlayers);
         nationalTeam.team.players = players;
+
+        // Add to International Tournaments array
+        InternationalTournaments.forEach((tournament: InternationalTournament) => {
+            if (tournament.name === countryData.tournament) {
+                tournament?.teams?.push({
+                    Team: nationalTeam.team,
+                    Tournament: tournament,
+                });
+            }
+        });
 
         // Add to NationalTeams array
         NationalTeams.push(nationalTeam);

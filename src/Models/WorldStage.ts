@@ -10,6 +10,14 @@ export interface Player {
     potential: number;
     value: number;
     contract: Record<number, number>;
+    leagueGoals?: number;
+    leagueAssists?: number;
+    countryGoals?: number;
+    countryAssists?: number;
+    totalGoals?: number;
+    totalAssists?: number;
+    awards?: number;
+    trophies?: number;
 }
 
 export interface Manager {
@@ -18,7 +26,9 @@ export interface Manager {
     team: string;
     age: number;
     type: string;
-    trophies?: number;
+    leagueTrophies?: number;
+    tournamentTrophies?: number;
+    internationalTrophies?: number;
 }
 
 export interface Team {
@@ -33,4 +43,66 @@ export interface Team {
 export interface NationalTeam {
     team: Team;
     country: string;
+}
+
+export interface LeagueTeam {
+    Team: Team;
+    League: League;
+    points?: number;
+    wins?: number;
+    losses?: number;
+    draws?: number;
+    goalsFor?: number;
+    goalsAgainst?: number;
+}
+
+export interface Match {
+    homeTeam: Team;
+    awayTeam: Team;
+    date: string;
+    homeScore: number;
+    awayScore: number;
+    homeScorers?: Player[];
+    awayScorers?: Player[];
+    homeAssists?: Player[];
+    awayAssists?: Player[];
+    league?: League;
+    tournament?: Tournament;
+}
+
+export interface League {
+    name: string;
+    teams?: LeagueTeam[];
+    matches?: Match[];
+    pastChampions?: LeagueTeam[];
+}
+
+export interface InternationalFriendly {
+    name: string;
+    match: Match;
+}
+
+export interface TournamentTeam {
+    Team: Team;
+    Tournament: Tournament;
+    points?: number;
+    wins?: number;
+    losses?: number;
+    draws?: number;
+    goalsFor?: number;
+    goalsAgainst?: number;
+}
+
+export interface InternationalTournament {
+    name: string;
+    teams?: TournamentTeam[];
+    matches?: Match[];
+    pastChampions?: TournamentTeam[];
+}
+
+export interface Tournament {
+    name: string;
+    teams?: TournamentTeam[];
+    matches?: Match[];
+    pastChampions?: TournamentTeam[];
 }

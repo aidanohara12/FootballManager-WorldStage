@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Manager, NationalTeam, Team } from "../../Models/WorldStage.ts";
-import SelectNational from "../../Components/SelectNational/SelectNational.tsx";
+import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
-import { SelectClub } from "../../Components/SelectClub/SelectClub.tsx";
+import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
 import { Schedule } from "../../Tabs/Schedule/Schedule.tsx";
 import { Stats } from "../../Tabs/Stats/Stats.tsx";
 import { TeamView } from "../../Tabs/Team/TeamView.tsx";
@@ -21,6 +21,8 @@ interface MainPageProps {
 export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager }: MainPageProps) {
     const [currentPage, setCurrentPage] = useState<string>("SelectNational");
     const [activeTab, setActiveTab] = useState<string>("Schedule");
+
+    //Leagues and Tournaments
     return (
         <div className={styles.mainPageContainer}>
             {currentPage === "SelectNational" && (

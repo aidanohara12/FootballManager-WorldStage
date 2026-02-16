@@ -28,8 +28,11 @@ export function LayoutPage() {
         const players: Player[] = [];
         const clubs: Team[] = [];
         const nations: NationalTeam[] = [];
+        const leagues: League[] = [];
+        const tournaments: Tournament[] = [];
 
-        InitPlayers(players, clubs, nations);
+
+        InitPlayers(players, clubs, nations, leagues, tournaments);
 
         setAllPlayers(players);
         setClubTeams(clubs);
