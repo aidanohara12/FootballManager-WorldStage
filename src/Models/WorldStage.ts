@@ -48,12 +48,12 @@ export interface NationalTeam {
 export interface LeagueTeam {
     Team: Team;
     League: League;
-    points?: number;
-    wins?: number;
-    losses?: number;
-    draws?: number;
-    goalsFor?: number;
-    goalsAgainst?: number;
+    points: number;
+    wins: number;
+    losses: number;
+    draws: number;
+    goalsFor: number;
+    goalsAgainst: number;
 }
 
 export interface Match {
@@ -62,19 +62,19 @@ export interface Match {
     date: string;
     homeScore: number;
     awayScore: number;
-    homeScorers?: Player[];
-    awayScorers?: Player[];
-    homeAssists?: Player[];
-    awayAssists?: Player[];
-    league?: League;
-    tournament?: Tournament;
+    homeScorers: Player[];
+    awayScorers: Player[];
+    homeAssists: Player[];
+    awayAssists: Player[];
+    league: League;
+    tournament: Tournament;
 }
 
 export interface League {
     name: string;
-    teams?: LeagueTeam[];
-    matches?: Match[];
-    pastChampions?: LeagueTeam[];
+    teams: LeagueTeam[];
+    matches: Match[];
+    pastChampions: LeagueTeam[];
 }
 
 export interface InternationalFriendly {
@@ -85,24 +85,24 @@ export interface InternationalFriendly {
 export interface TournamentTeam {
     Team: Team;
     Tournament: Tournament;
-    points?: number;
-    wins?: number;
-    losses?: number;
-    draws?: number;
-    goalsFor?: number;
-    goalsAgainst?: number;
+    points: number;
+    wins: number;
+    losses: number;
+    draws: number;
+    goalsFor: number;
+    goalsAgainst: number;
 }
 
 export interface InternationalTournament {
     name: string;
-    teams?: TournamentTeam[];
-    matches?: Match[];
-    pastChampions?: TournamentTeam[];
+    teams: TournamentTeam[];
+    matches: Match[];
+    pastChampions: TournamentTeam[];
 }
 
 export interface Tournament {
     name: string;
-    teams?: TournamentTeam[];
-    matches?: Match[];
-    pastChampions?: TournamentTeam[];
+    teams: TournamentTeam[];
+    matches: Match[];
+    pastChampions: TournamentTeam[];
 }

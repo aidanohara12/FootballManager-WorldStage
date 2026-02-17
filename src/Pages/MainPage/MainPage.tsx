@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Manager, NationalTeam, Team } from "../../Models/WorldStage.ts";
+import type { InternationalTournament, League, Manager, NationalTeam, Team, Tournament } from "../../Models/WorldStage.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
 import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
@@ -16,9 +16,12 @@ interface MainPageProps {
     setNationalTeams: (teams: NationalTeam[]) => void;
     userManager: Manager;
     setUserManager: (manager: Manager) => void;
+    leagues: League[];
+    tournaments: Tournament[];
+    internationalTournaments: InternationalTournament[];
 }
 
-export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager }: MainPageProps) {
+export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager, leagues, tournaments, internationalTournaments }: MainPageProps) {
     const [currentPage, setCurrentPage] = useState<string>("SelectNational");
     const [activeTab, setActiveTab] = useState<string>("Schedule");
 
@@ -53,7 +56,13 @@ export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeam
                         userManager={userManager}
                     />}
                     {activeTab === "History" && <History />}
-                    {activeTab === "Table" && <Table />}
+                    {activeTab === "Table" && <Table 
+                        allTeams={allTeams}
+                        manager={userManager}
+                        leagues={leagues}
+                        tournaments={tournaments}
+                        internationalTournaments={internationalTournaments}
+                    />}
                     <div className={styles.tabButtons}>
                         <button className={activeTab === "Schedule" ? styles.activeTab : ""} onClick={() => setActiveTab("Schedule")}>Schedule</button>
                         <button className={activeTab === "Team" ? styles.activeTab : ""} onClick={() => setActiveTab("Team")}>Team</button>

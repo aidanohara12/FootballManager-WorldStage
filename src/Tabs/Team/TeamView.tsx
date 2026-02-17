@@ -23,7 +23,7 @@ export function TeamView({ allTeams, setAllTeams, nationalTeams, setNationalTeam
     }
 
     return (
-        <div className={styles.teamViewContainer}>
+        <div className={styles.teamViewContainer} onClick={() => setSelectedPlayer(null)}>
             <div className={styles.teamInfo}>
                 <h4 className={styles.teamName} style={{ color: currentTeam === "Club" ? clubTeam?.color : nationalTeam?.color }}>
                     {currentTeam === "Club" ? clubTeam?.name : nationalTeam?.name}
@@ -39,7 +39,7 @@ export function TeamView({ allTeams, setAllTeams, nationalTeams, setNationalTeam
             </div>
 
             {selectedPlayer && (
-                <div className={styles.selectedPlayer}>
+                <div className={styles.selectedPlayer} onClick={() => setSelectedPlayer(null)}>
                     <PlayerAttributesView player={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />
                 </div>
             )}

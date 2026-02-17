@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { InitPlayers } from "../../Initalizer/InitPlayers";
-import type { Manager, NationalTeam, Player, Team } from "../../Models/WorldStage";
+import type { InternationalTournament, League, Manager, NationalTeam, Player, Team, Tournament } from "../../Models/WorldStage";
 import { StartingPage } from "../StartingPage/StartingPage";
 import { MainPage } from "../MainPage/MainPage";
 import { CreateManager } from "../CreateManager/CreateManager";
@@ -16,9 +16,11 @@ export function LayoutPage() {
         country: "",
         team: "",
         age: 0,
-        type: "",
-        trophies: 0
+        type: ""
     });
+    const [leagues, setLeagues] = useState<League[]>([]);
+    const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [internationalTournaments, setInternationalTournaments] = useState<InternationalTournament[]>([]);
 
     useEffect(() => {
         handleInit();
@@ -30,13 +32,17 @@ export function LayoutPage() {
         const nations: NationalTeam[] = [];
         const leagues: League[] = [];
         const tournaments: Tournament[] = [];
+        const internationalTournaments: InternationalTournament[] = [];
 
 
-        InitPlayers(players, clubs, nations, leagues, tournaments);
+        InitPlayers(players, clubs, nations, leagues, tournaments, internationalTournaments);
 
         setAllPlayers(players);
         setClubTeams(clubs);
         setNationalTeams(nations);
+        setLeagues(leagues);
+        setTournaments(tournaments);
+        setInternationalTournaments(internationalTournaments);
     };
 
     const handlePageChange = (page: string) => {
@@ -74,6 +80,9 @@ export function LayoutPage() {
                     setNationalTeams={setNationalTeams}
                     userManager={userManager}
                     setUserManager={setUserManager}
+                    leagues={leagues}
+                    tournaments={tournaments}
+                    internationalTournaments={internationalTournaments}
                 />
             </div>
         );
