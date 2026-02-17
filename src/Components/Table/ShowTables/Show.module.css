@@ -100,6 +100,80 @@
     color: #666;
 }
 
+/* Knockout Bracket */
+.bracketContainer {
+    width: 100%;
+    height: 63vh;
+    overflow-x: auto;
+    padding: 1rem;
+}
+
+.bracket {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    min-width: fit-content;
+}
+
+.roundColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.roundTitle {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.matchup {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    min-width: 180px;
+}
+
+.matchupTeam {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.matchupTeam:last-child {
+    border-bottom: none;
+}
+
+.matchupTeamName {
+    font-weight: 500;
+}
+
+.matchupScore {
+    font-weight: 700;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.winner {
+    background-color: #e8f5e9;
+    font-weight: 600;
+}
+
+.tbd {
+    color: #bbb;
+    font-style: italic;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
 

@@ -16,7 +16,7 @@ interface TableProps {
 export function Table({ allTeams, manager, leagues, tournaments, internationalTournaments }: TableProps) {
     const managerLeague = leagues.find((league) => league.teams?.find((team) => team.Team.name === manager.team));
     const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.Team.name === manager.team));
-    const managerInternationalTournaments = internationalTournaments.find((tournament) => tournament.teams?.find((team) => team.Team.name === manager.country));
+    const managerInternationalTournaments = internationalTournaments.find((tournament) => tournament.teams?.find((team) => team.Team.team.name === manager.country));
 
     // Sorted arrays with user's league/tournament first
     const sortedLeagues = managerLeague
@@ -72,8 +72,10 @@ export function Table({ allTeams, manager, leagues, tournaments, internationalTo
     const leagueTeams = leagues.find((league) => league.name === selectedLeague?.name)?.teams;
     //get the teams for the selected tournament
     const tournamentTeams = tournaments.find((tournament) => tournament.name === selectedTournament?.name)?.teams;
+    const tournamentMatches = tournaments.find((tournament) => tournament.name === selectedTournament?.name)?.matches;
     //get the teams for the selected international tournament
     const internationalTournamentTeams = internationalTournaments.find((tournament) => tournament.name === selectedInternationalTournament?.name)?.teams;
+    const internationalTournamentMatches = internationalTournaments.find((tournament) => tournament.name === selectedInternationalTournament?.name)?.matches;
     return (
         <div>
             <div className={styles.topContainer}>
@@ -114,7 +116,7 @@ export function Table({ allTeams, manager, leagues, tournaments, internationalTo
                                 ))}
                             </select>
                         </div>
-                        <ShowTournamentTable tournamentTitle={getLeague()} tournamentTeams={tournamentTeams} />
+                        <ShowTournamentTable tournamentTitle={getLeague()} tournamentTeams={tournamentTeams} tournamentMatches={tournamentMatches} />
                     </div>
                 )}
 
@@ -132,7 +134,7 @@ export function Table({ allTeams, manager, leagues, tournaments, internationalTo
                                 ))}
                             </select>
                         </div>
-                        <ShowInternationalTournamentTable tournamentTitle={getLeague()} tournamentTeams={internationalTournamentTeams} />
+                        <ShowInternationalTournamentTable tournamentTitle={getLeague()} tournamentTeams={internationalTournamentTeams} tournamentMatches={internationalTournamentMatches} />
                     </div>
                 )}
             </div>

@@ -2,7 +2,7 @@ import { Top50Countries } from "../Models/Countries";
 import AllTeams from "../Models/Teams";
 import { firstNames } from "../Models/Names/FirstNames";
 import { lastNames } from "../Models/Names/LastNames";
-import { type Player, type Team, type NationalTeam, type League, type Tournament, type LeagueTeam, type InternationalFriendly, type InternationalTournament, type TournamentTeam } from "../Models/WorldStage";
+import { type Player, type Team, type NationalTeam, type League, type Tournament, type LeagueTeam, type InternationalFriendly, type InternationalTournament, type TournamentTeam, type WorldCup, type WorldCupGroup } from "../Models/WorldStage";
 
 function getRandomPlayerName() {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
@@ -247,7 +247,7 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[]) {
     return nationalTeamPlayers;
 }
 
-export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[]) {
+export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[], WorldCup: WorldCup) {
     // Initialize leagues - get unique league names and create league objects
     const uniqueLeagues = [...new Set(AllTeams.map((t) => t.league))];
 
@@ -267,6 +267,7 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
     uniqueClubTournaments.forEach((tournamentName: string) => {
         const tournament: Tournament = {
             name: tournamentName,
+            currentRound: "First Round",
             teams: [],
             matches: [],
             pastChampions: []
@@ -332,12 +333,7 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
                 tournament?.teams?.push({
                     Team: newTeam,
                     Tournament: tournament,
-                    points: 0,
-                    wins: 0,
-                    losses: 0,
-                    draws: 0,
-                    goalsFor: 0,
-                    goalsAgainst: 0,
+                    nextRound: true,
                 });
             }
         });
@@ -374,16 +370,18 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
         InternationalTournaments.forEach((tournament: InternationalTournament) => {
             if (countryData.tournaments.includes(tournament.name)) {
                 tournament?.teams?.push({
-                    Team: nationalTeam.team,
+                    Team: nationalTeam,
                     Tournament: tournament,
-                    points: 0,
-                    wins: 0,
-                    losses: 0,
-                    draws: 0,
-                    goalsFor: 0,
-                    goalsAgainst: 0,
+                    nextRound: true,
                 });
             }
+        });
+
+        // Add to WorldCup array
+        WorldCup.teams.push({
+            Team: nationalTeam,
+            Tournament: WorldCup,
+            nextRound: true,
         });
 
         // Add to NationalTeams array

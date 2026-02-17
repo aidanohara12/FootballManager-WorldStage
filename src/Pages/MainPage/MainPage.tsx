@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { InternationalTournament, League, Manager, NationalTeam, Team, Tournament } from "../../Models/WorldStage.ts";
+import type { currentYear, InternationalTournament, League, Manager, NationalTeam, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
 import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
@@ -17,8 +17,15 @@ interface MainPageProps {
     userManager: Manager;
     setUserManager: (manager: Manager) => void;
     leagues: League[];
+    setLeagues: (leagues: League[]) => void;
     tournaments: Tournament[];
+    setTournaments: (tournaments: Tournament[]) => void;
     internationalTournaments: InternationalTournament[];
+    setInternationalTournaments: (internationalTournaments: InternationalTournament[]) => void;
+    worldCup: WorldCup;
+    setWorldCup: (worldCup: WorldCup) => void;
+    currentYear: currentYear;
+    setCurrentYear: (currentYear: currentYear) => void;
 }
 
 export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager, leagues, tournaments, internationalTournaments }: MainPageProps) {
@@ -56,7 +63,7 @@ export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeam
                         userManager={userManager}
                     />}
                     {activeTab === "History" && <History />}
-                    {activeTab === "Table" && <Table 
+                    {activeTab === "Table" && <Table
                         allTeams={allTeams}
                         manager={userManager}
                         leagues={leagues}

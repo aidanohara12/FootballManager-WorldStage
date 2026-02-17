@@ -1,3 +1,7 @@
+export interface currentYear {
+    year: number;
+}
+
 export interface Player {
     name: string;
     position: string;
@@ -85,24 +89,45 @@ export interface InternationalFriendly {
 export interface TournamentTeam {
     Team: Team;
     Tournament: Tournament;
-    points: number;
-    wins: number;
-    losses: number;
-    draws: number;
-    goalsFor: number;
-    goalsAgainst: number;
+    nextRound: boolean;
+}
+
+export interface InternationalTournamentTeam {
+    Team: NationalTeam;
+    Tournament: InternationalTournament;
+    nextRound: boolean;
 }
 
 export interface InternationalTournament {
     name: string;
-    teams: TournamentTeam[];
+    teams: InternationalTournamentTeam[];
     matches: Match[];
-    pastChampions: TournamentTeam[];
+    pastChampions: InternationalTournamentTeam[];
 }
 
 export interface Tournament {
     name: string;
     teams: TournamentTeam[];
+    currentRound: string;
     matches: Match[];
     pastChampions: TournamentTeam[];
+}
+
+export interface WorldCupTeam {
+    Team: NationalTeam;
+    Tournament: WorldCup;
+    nextRound: boolean;
+}
+
+export interface WorldCupGroup {
+    name: string;
+    teams: InternationalTournamentTeam[];
+}
+
+export interface WorldCup {
+    teams: WorldCupTeam[];
+    matches: Match[];
+    pastChampions: WorldCupTeam[];
+    currentRound: string;
+    groups: WorldCupGroup[];
 }

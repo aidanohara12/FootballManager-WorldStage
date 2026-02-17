@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { InitPlayers } from "../../Initalizer/InitPlayers";
-import type { InternationalTournament, League, Manager, NationalTeam, Player, Team, Tournament } from "../../Models/WorldStage";
+import type { InternationalTournament, League, Manager, NationalTeam, Player, Team, Tournament, WorldCup, currentYear } from "../../Models/WorldStage";
 import { StartingPage } from "../StartingPage/StartingPage";
 import { MainPage } from "../MainPage/MainPage";
 import { CreateManager } from "../CreateManager/CreateManager";
@@ -21,6 +21,16 @@ export function LayoutPage() {
     const [leagues, setLeagues] = useState<League[]>([]);
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [internationalTournaments, setInternationalTournaments] = useState<InternationalTournament[]>([]);
+    const [worldCup, setWorldCup] = useState<WorldCup>({
+        teams: [],
+        matches: [],
+        pastChampions: [],
+        currentRound: "",
+        groups: []
+    });
+    const [currentYear, setCurrentYear] = useState<currentYear>({
+        year: 2025
+    });
 
     useEffect(() => {
         handleInit();
@@ -33,9 +43,16 @@ export function LayoutPage() {
         const leagues: League[] = [];
         const tournaments: Tournament[] = [];
         const internationalTournaments: InternationalTournament[] = [];
+        const worldCup: WorldCup = {
+            teams: [],
+            matches: [],
+            pastChampions: [],
+            currentRound: "",
+            groups: []
+        };
 
 
-        InitPlayers(players, clubs, nations, leagues, tournaments, internationalTournaments);
+        InitPlayers(players, clubs, nations, leagues, tournaments, internationalTournaments, worldCup);
 
         setAllPlayers(players);
         setClubTeams(clubs);
@@ -43,6 +60,7 @@ export function LayoutPage() {
         setLeagues(leagues);
         setTournaments(tournaments);
         setInternationalTournaments(internationalTournaments);
+        setWorldCup(worldCup);
     };
 
     const handlePageChange = (page: string) => {
@@ -81,8 +99,15 @@ export function LayoutPage() {
                     userManager={userManager}
                     setUserManager={setUserManager}
                     leagues={leagues}
+                    setLeagues={setLeagues}
                     tournaments={tournaments}
+                    setTournaments={setTournaments}
                     internationalTournaments={internationalTournaments}
+                    setInternationalTournaments={setInternationalTournaments}
+                    worldCup={worldCup}
+                    setWorldCup={setWorldCup}
+                    currentYear={currentYear}
+                    setCurrentYear={setCurrentYear}
                 />
             </div>
         );
