@@ -63,19 +63,13 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
         setTeams(updatedTeams);
     }
 
-    function handlePlayerCheck(e: React.ChangeEvent<HTMLInputElement>) {
-        const playerName = e.target.value;
-        const isChecked = e.target.checked;
-
-        if (isChecked) {
-            if (selectedPlayers.length < currentPosition.max) {
-                setSelectedPlayers([...selectedPlayers, playerName]);
-            } else {
-                e.target.checked = false;
-                alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
-            }
-        } else {
+    function handlePlayerToggle(playerName: string) {
+        if (selectedPlayers.includes(playerName)) {
             setSelectedPlayers(selectedPlayers.filter((p) => p !== playerName));
+        } else if (selectedPlayers.length < currentPosition.max) {
+            setSelectedPlayers([...selectedPlayers, playerName]);
+        } else {
+            alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
         }
     }
 
@@ -151,13 +145,13 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
                                 ?.filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
                                 .map((p) => (
-                                    <div key={p.name} className={styles.playerItem}>
+                                    <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
                                         <input
                                             type="checkbox"
                                             id={p.name}
                                             value={p.name}
                                             checked={selectedPlayers.includes(p.name)}
-                                            onChange={(e) => handlePlayerCheck(e)}
+                                            readOnly
                                         />
                                         <div className={styles.playerInfo}>
                                             <div className={styles.playerName}>{p.name}</div>

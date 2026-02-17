@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { currentYear, InternationalTournament, League, Manager, NationalTeam, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
+import type { currentYear, InternationalTournament, League, Manager, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
 import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
@@ -10,6 +10,7 @@ import { History } from "../../Tabs/History/History.tsx";
 import { Table } from "../../Tabs/Table/Table.tsx";
 
 interface MainPageProps {
+    allPlayers: Player[];
     allTeams: Team[];
     setAllTeams: (teams: Team[]) => void;
     nationalTeams: NationalTeam[];
@@ -28,7 +29,7 @@ interface MainPageProps {
     setCurrentYear: (currentYear: currentYear) => void;
 }
 
-export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager, leagues, tournaments, internationalTournaments }: MainPageProps) {
+export function MainPage({ allPlayers, allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager, leagues, setLeagues, tournaments, setTournaments, internationalTournaments, setInternationalTournaments, worldCup, setWorldCup, currentYear, setCurrentYear }: MainPageProps) {
     const [currentPage, setCurrentPage] = useState<string>("SelectNational");
     const [activeTab, setActiveTab] = useState<string>("Schedule");
 
@@ -54,7 +55,16 @@ export function MainPage({ allTeams, setAllTeams, nationalTeams, setNationalTeam
             {currentPage === "MainPage" && (
                 <div className={styles.tabs}>
                     {activeTab === "Schedule" && <Schedule />}
-                    {activeTab === "Stats" && <Stats />}
+                    {activeTab === "Stats" && <Stats
+                        allPlayers={allPlayers}
+                        allTeams={allTeams}
+                        manager={userManager}
+                        leagues={leagues}
+                        tournaments={tournaments}
+                        internationalTournaments={internationalTournaments}
+                        worldCup={worldCup}
+                        currentYear={currentYear}
+                    />}
                     {activeTab === "Team" && <TeamView
                         allTeams={allTeams}
                         setAllTeams={setAllTeams}
