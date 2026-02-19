@@ -1,13 +1,15 @@
+import type { Signal } from "@preact/signals-react";
 import Top50Countries from "../../Models/Countries";
 import type { Player } from "../../Models/WorldStage";
 import styles from "./PlayerAttributesView.module.css";
 
 interface PlayerAttributesViewProps {
     player: Player;
-    setSelectedPlayer: (player: Player | null) => void;
+    selectedPlayer?: Signal<Player | null>;
+    onClose?: () => void;
 }
 
-export function PlayerAttributesView({ player, setSelectedPlayer }: PlayerAttributesViewProps) {
+export function PlayerAttributesView({ player, selectedPlayer, onClose }: PlayerAttributesViewProps) {
     return (
         <div className={styles.playerAttributesView}>
             <div className={styles.playerName}>{player.name}</div>
@@ -96,7 +98,7 @@ export function PlayerAttributesView({ player, setSelectedPlayer }: PlayerAttrib
                     </span>
                 </span>
             </div>
-            <button className={styles.closeButton} onClick={() => setSelectedPlayer(null)}>Close</button>
+            <button className={styles.closeButton} onClick={() => { if (onClose) onClose(); else if (selectedPlayer) selectedPlayer.value = null; }}>Close</button>
         </div>
     );
 }

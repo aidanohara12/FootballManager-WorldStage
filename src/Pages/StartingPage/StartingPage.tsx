@@ -1,12 +1,13 @@
 import React from 'react';
 import logo from '../../assets/Images/logo.png';
 import styles from "./StartingPage.module.css";
+import type { Signal } from '@preact/signals-react';
 
 interface StartingPageProps {
-    setCurrentPage: (page: string) => void;
+    currentPage: Signal<string>;
 }
 
-export function StartingPage({ setCurrentPage }: StartingPageProps) {
+export function StartingPage({ currentPage }: StartingPageProps) {
 
     return (
         <div className={styles.startingPageContainer}>
@@ -16,7 +17,7 @@ export function StartingPage({ setCurrentPage }: StartingPageProps) {
             <div className={styles.welcomeContainer}>
                 <h3>Welcome to Footy Manager: World Stage!</h3>
                 <h3>Click the button below to begin your football journey.</h3>
-                <button onClick={() => setCurrentPage("CreateManager")}>Start</button>
+                <button onClick={() => currentPage.value = "CreateManager"}>Start</button>
             </div>
         </div>
     );

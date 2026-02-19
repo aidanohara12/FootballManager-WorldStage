@@ -65,7 +65,7 @@ export function StatsTable({ leaguePlayers, managerTeam, selectedLeague }: Stats
             {selectedPlayer && (
                 <div className={styles.overlay} onClick={() => setSelectedPlayer(null)}>
                     <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-                        <PlayerAttributesView player={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />
+                        <PlayerAttributesView player={selectedPlayer} onClose={() => setSelectedPlayer(null)} />
                     </div>
                 </div>
             )}

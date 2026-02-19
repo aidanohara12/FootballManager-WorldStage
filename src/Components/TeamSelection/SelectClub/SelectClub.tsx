@@ -1,20 +1,21 @@
-import { useState, useEffect } from "react";
-import type { Team, Player, NationalTeam } from "../../../Models/WorldStage.ts";
+import { use, useEffect } from "react";
+import { signal, type Signal } from "@preact/signals-react";
+import type { Team } from "../../../Models/WorldStage.ts";
 import type { Manager } from "../../../Models/WorldStage.ts";
 import styles from "./SelectClub.module.css";
 import { Top50Countries } from "../../../Models/Countries.ts";
+import { useSignals } from "@preact/signals-react/runtime";
 
 interface SelectClubProps {
-    teams: Team[];
-    setTeams: (teams: Team[]) => void;
-    manager: Manager;
-    setCurrentPage: (page: string) => void;
+    teams: Signal<Team[]>;
+    manager: Signal<Manager>;
+    currentPage: Signal<string>;
 }
+const selectedPlayers = signal<string[]>([]);
+const currentPositionIndex = signal<number>(0);
 
-export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectClubProps) {
-    const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
-    const [currentPositionIndex, setCurrentPositionIndex] = useState<number>(0);
-
+export function SelectClub({ teams, manager, currentPage }: SelectClubProps) {
+    useSignals();
     const positions = [
         { name: "Forward", max: 3 },
         { name: "Midfielder", max: 3 },
@@ -22,10 +23,10 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
         { name: "Goalkeeper", max: 1 }
     ];
 
-    const currentPosition = positions[currentPositionIndex];
+    const currentPosition = positions[currentPositionIndex.value];
 
     function setTeamStartingPlayers() {
-        const updatedTeams = teams.map((team) => {
+        const updatedTeams = teams.value.map((team) => {
             const updatedPlayers = team.players?.map((p) => ({
                 ...p,
                 startingTeam: false
@@ -60,31 +61,31 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
                 players: updatedPlayers
             };
         });
-        setTeams(updatedTeams);
+        teams.value = updatedTeams;
     }
 
     function handlePlayerToggle(playerName: string) {
-        if (selectedPlayers.includes(playerName)) {
-            setSelectedPlayers(selectedPlayers.filter((p) => p !== playerName));
-        } else if (selectedPlayers.length < currentPosition.max) {
-            setSelectedPlayers([...selectedPlayers, playerName]);
+        if (selectedPlayers.value.includes(playerName)) {
+            selectedPlayers.value = selectedPlayers.value.filter((p) => p !== playerName);
+        } else if (selectedPlayers.value.length < currentPosition.max) {
+            selectedPlayers.value = [...selectedPlayers.value, playerName];
         } else {
             alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
         }
     }
 
     function handleNext() {
-        if (selectedPlayers.length !== currentPosition.max) {
+        if (selectedPlayers.value.length !== currentPosition.max) {
             alert(`Please select exactly ${currentPosition.max} ${currentPosition.name}(s)`);
             return;
         }
 
-        const updatedTeams = teams.map((team) => {
-            if (team.name !== manager.team) return team;
+        const updatedTeams = teams.value.map((team) => {
+            if (team.name !== manager.value.team) return team;
 
             const updatedPlayers = team.players?.map((p) => {
                 if (p.position === currentPosition.name) {
-                    return { ...p, startingTeam: selectedPlayers.includes(p.name) };
+                    return { ...p, startingTeam: selectedPlayers.value.includes(p.name) };
                 }
                 return p;
             });
@@ -95,21 +96,20 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
             };
         });
 
-        setTeams(updatedTeams);
+        teams.value = updatedTeams;
 
-        if (currentPositionIndex < positions.length - 1) {
-            setCurrentPositionIndex(currentPositionIndex + 1);
-            setSelectedPlayers([]);
+        if (currentPositionIndex.value < positions.length - 1) {
+            currentPositionIndex.value = currentPositionIndex.value + 1;
+            selectedPlayers.value = [];
         } else {
-            // All positions selected, finalize
-            setCurrentPage("MainPage");
+            currentPage.value = "MainPage";
         }
     }
 
     function handleBack() {
-        if (currentPositionIndex > 0) {
-            setCurrentPositionIndex(currentPositionIndex - 1);
-            setSelectedPlayers([]);
+        if (currentPositionIndex.value > 0) {
+            currentPositionIndex.value = currentPositionIndex.value - 1;
+            selectedPlayers.value = [];
         }
     }
 
@@ -120,21 +120,21 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
     return (
         <div className={styles.selectNationalContainer}>
             <h3>Select Your Club Team Starters!</h3>
-            <h4>Select {currentPosition.name}s ({selectedPlayers.length}/{currentPosition.max})</h4>
+            <h4>Select {currentPosition.name}s ({selectedPlayers.value.length}/{currentPosition.max})</h4>
 
             {/* Progress indicator */}
             <div className={styles.progressIndicator}>
                 {positions.map((_, index) => (
                     <div
                         key={index}
-                        className={`${styles.progressDot} ${index === currentPositionIndex ? styles.active :
-                            index < currentPositionIndex ? styles.completed : ''
+                        className={`${styles.progressDot} ${index === currentPositionIndex.value ? styles.active :
+                            index < currentPositionIndex.value ? styles.completed : ''
                             }`}
                     />
                 ))}
             </div>
 
-            {teams.filter((team) => team.name === manager.team).map((team) => (
+            {teams.value.filter((team) => team.name === manager.value.team).map((team) => (
                 <div key={team.name} className={styles.teamCard}>
                     <h4 style={{ color: team.color }}>{team.name}</h4>
 
@@ -145,12 +145,12 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
                                 ?.filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
                                 .map((p) => (
-                                    <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
+                                    <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
                                         <input
                                             type="checkbox"
                                             id={p.name}
                                             value={p.name}
-                                            checked={selectedPlayers.includes(p.name)}
+                                            checked={selectedPlayers.value.includes(p.name)}
                                             readOnly
                                         />
                                         <div className={styles.playerInfo}>
@@ -176,13 +176,13 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
                     </div>
 
                     <div className={styles.buttonContainer}>
-                        {currentPositionIndex > 0 && (
+                        {currentPositionIndex.value > 0 && (
                             <button className={styles.backButton} onClick={handleBack}>
                                 Back
                             </button>
                         )}
                         <button className={styles.nextButton} onClick={handleNext}>
-                            {currentPositionIndex < positions.length - 1 ? "Next" : "Finish"}
+                            {currentPositionIndex.value < positions.length - 1 ? "Next" : "Finish"}
                         </button>
                     </div>
                 </div>

@@ -1,46 +1,55 @@
+import { useEffect } from "react";
 import type { Manager, NationalTeam, Player, Team } from "../../Models/WorldStage";
+import { signal, type Signal } from "@preact/signals-react";
 import { Formation } from "../../Components/Formation/Formation";
 import styles from "./TeamView.module.css";
-import { useState } from "react";
 import { PlayerAttributesView } from "../../Components/Formation/PlayerAttributesView";
+import { useSignals } from "@preact/signals-react/runtime";
 
 interface TeamViewProps {
-    allTeams: Team[];
-    setAllTeams: (teams: Team[]) => void;
-    nationalTeams: NationalTeam[];
-    setNationalTeams: (teams: NationalTeam[]) => void;
-    userManager: Manager;
+    allTeams: Signal<Team[]>;
+    nationalTeams: Signal<NationalTeam[]>;
+    userManager: Signal<Manager>;
 }
 
-export function TeamView({ allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager }: TeamViewProps) {
-    const [clubTeam, setClubTeam] = useState<Team>(allTeams.find((t) => t.name === userManager.team)!);
-    const [nationalTeam, setNationalTeam] = useState<Team>(nationalTeams.find((nt) => nt.country === userManager.country)?.team ?? allTeams[0]);
-    const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-    const [currentTeam, setCurrentTeam] = useState<string>("Club");
+const clubTeam = signal<Team | null>(null);
+const nationalTeam = signal<Team | null>(null);
+const selectedPlayer = signal<Player | null>(null);
+const currentTeam = signal<string>("Club");
+
+export function TeamView({ allTeams, nationalTeams, userManager }: TeamViewProps) {
+    useSignals();
+
+    useEffect(() => {
+        clubTeam.value = allTeams.value.find((t) => t.name === userManager.value.team) ?? null;
+        nationalTeam.value = nationalTeams.value.find((nt) => nt.country === userManager.value.country)?.team ?? null;
+    }, []);
 
     function switchTeam() {
-        setCurrentTeam(currentTeam === "Club" ? "National" : "Club");
+        currentTeam.value = currentTeam.value === "Club" ? "National" : "Club";
     }
 
     return (
-        <div className={styles.teamViewContainer} onClick={() => setSelectedPlayer(null)}>
+        <div className={styles.teamViewContainer} onClick={() => selectedPlayer.value = null}>
             <div className={styles.teamInfo}>
-                <h4 className={styles.teamName} style={{ color: currentTeam === "Club" ? clubTeam?.color : nationalTeam?.color }}>
-                    {currentTeam === "Club" ? clubTeam?.name : nationalTeam?.name}
+                <h4 className={styles.teamName} style={{ color: currentTeam.value === "Club" ? clubTeam.value?.color : nationalTeam.value?.color }}>
+                    {currentTeam.value === "Club" ? clubTeam.value?.name : nationalTeam.value?.name}
                 </h4>
                 <div>
                     <button onClick={switchTeam}>
-                        {currentTeam === "Club" ? "Switch to National Team" : "Switch to Club Team"}
+                        {currentTeam.value === "Club" ? "Switch to National Team" : "Switch to Club Team"}
                     </button>
                 </div>
             </div>
             <div className={styles.formation}>
-                <Formation currentTeam={currentTeam === "Club" ? clubTeam : nationalTeam} setSelectedPlayer={setSelectedPlayer} clubTeam={currentTeam === "Club"} />
+                {(currentTeam.value === "Club" ? clubTeam.value : nationalTeam.value) && (
+                    <Formation currentTeam={(currentTeam.value === "Club" ? clubTeam.value : nationalTeam.value)!} selectedPlayer={selectedPlayer} clubTeam={currentTeam.value === "Club"} />
+                )}
             </div>
 
-            {selectedPlayer && (
-                <div className={styles.selectedPlayer} onClick={() => setSelectedPlayer(null)}>
-                    <PlayerAttributesView player={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />
+            {selectedPlayer.value && (
+                <div className={styles.selectedPlayer} onClick={() => selectedPlayer.value = null}>
+                    <PlayerAttributesView player={selectedPlayer.value} selectedPlayer={selectedPlayer} />
                 </div>
             )}
         </div>

@@ -10,11 +10,9 @@ interface StatsProps {
     leagues: League[];
     tournaments: Tournament[];
     internationalTournaments: InternationalTournament[];
-    worldCup: WorldCup;
-    currentYear: currentYear;
 }
 
-export function Stats({ allTeams, manager, leagues, tournaments, internationalTournaments, worldCup, currentYear }: StatsProps) {
+export function Stats({ allTeams, manager, leagues, tournaments, internationalTournaments }: StatsProps) {
     const managerTeam = allTeams.find(team => team.name === manager.team);
     const managerLeague = leagues.find((league) => league.teams?.find((team) => team.Team.name === manager.team));
     const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.Team.name === manager.team));
@@ -25,40 +23,11 @@ export function Stats({ allTeams, manager, leagues, tournaments, internationalTo
         ? [managerLeague, ...leagues.filter((league) => league !== managerLeague)]
         : leagues;
 
-    const sortedTournaments = managerTournament
-        ? [managerTournament, ...tournaments.filter((tournament) => tournament !== managerTournament)]
-        : tournaments;
-
-    const sortedInternationalTournaments = managerInternationalTournaments
-        ? [managerInternationalTournaments, ...internationalTournaments.filter((tournament) => tournament !== managerInternationalTournaments)]
-        : internationalTournaments;
-
-    const [selectedOption, setSelectedOption] = useState<string>("Leagues");
+    const [selectedOption ] = useState<string>("Leagues");
 
     const [selectedLeague, setSelectedLeague] = useState<League | null>(managerLeague ?? null);
-    const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(managerTournament ?? null);
-    const [selectedInternationalTournament, setSelectedInternationalTournament] = useState<InternationalTournament | null>(managerInternationalTournaments ?? null);
-
-    function nextOption(): string {
-        if (selectedOption === "Leagues") {
-            return "Tournaments";
-        } else if (selectedOption === "Tournaments") {
-            return "International Tournaments";
-        } else if (selectedOption === "International Tournaments") {
-            return "Leagues";
-        }
-        return "Leagues"; // Default case
-    }
-
-    function handleOptionChange() {
-        if (selectedOption === "Leagues") {
-            setSelectedOption("Tournaments");
-        } else if (selectedOption === "Tournaments") {
-            setSelectedOption("International Tournaments");
-        } else if (selectedOption === "International Tournaments") {
-            setSelectedOption("Leagues");
-        }
-    }
+    const [selectedTournament] = useState<Tournament | null>(managerTournament ?? null);
+    const [selectedInternationalTournament] = useState<InternationalTournament | null>(managerInternationalTournaments ?? null);
 
     function getLeague(): string | undefined {
         if (selectedOption === "Leagues") {

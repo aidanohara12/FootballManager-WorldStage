@@ -1,38 +1,45 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { signal, type Signal } from "@preact/signals-react";
 import { Top50Countries } from "../../Models/Countries.ts";
 import { AllTeams } from "../../Models/Teams.ts";
 import styles from "./CreateManager.module.css";
 import type { Manager, NationalTeam, Team } from "../../Models/WorldStage.ts";
+import { useSignals } from "@preact/signals-react/runtime";
 
 interface CreateManagerProps {
-    setCurrentPage: (page: string) => void;
-    allTeams: Team[];
-    nationalTeams: NationalTeam[];
-    setAllTeams: (teams: Team[]) => void;
-    setNationalTeams: (teams: NationalTeam[]) => void;
-    setUserManager: (manager: Manager) => void;
+    allTeams: Signal<Team[]>;
+    nationalTeams: Signal<NationalTeam[]>;
+    userManager: Signal<Manager>;
+    currentPage: Signal<string>;
 }
 
-export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllTeams, setNationalTeams, setUserManager }: CreateManagerProps) {
-    const [name, setName] = useState<string>("");
-    const [country, setCountry] = useState<string>("Spain");
-    const [league, setLeague] = useState<string>("Premier League");
-    const [team, setTeam] = useState<string>(allTeams.find((team: any) => team.league === league)?.name || "");
-    const [age, setAge] = useState<number>(0);
-    const [type, setType] = useState<string>("scout");
+const name = signal<string>("");
+const country = signal<string>("Spain");
+const league = signal<string>("Premier League");
+const team = signal<string>("");
+const age = signal<number>(25);
+const type = signal<string>("scout");
 
+export function CreateManager({ allTeams, nationalTeams, userManager, currentPage }: CreateManagerProps) {
+    useSignals();
+
+    useEffect(() => {
+        if (!team.value) {
+            team.value = allTeams.value.find((t) => t.league === league.value)?.name || "";
+        }
+    }, []);
     function createManager() {
-        if (!name || age < 20 || age > 70) {
+        if (!name || age.value < 20 || age.value > 70) {
             alert("Please fill in all fields correctly");
             return;
         }
 
         const manager = {
-            name: name,
-            country: country,
-            team: team,
-            age: age,
-            type: type,
+            name: name.value,
+            country: country.value,
+            team: team.value,
+            age: age.value,
+            type: type.value,
             leagueTrophies: 0,
             tournamentTrophies: 0,
             internationalTrophies: 0,
@@ -42,15 +49,15 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
             trophiesWon: []
         };
 
-        const updatedClubTeams = allTeams.map((t) =>
-            t.name === team
+        const updatedClubTeams = allTeams.value.map((t) =>
+            t.name === team.value
                 ? { ...t, manager: { ...manager, type: "Club" } }
                 : t
         );
-        setAllTeams(updatedClubTeams);
+        allTeams.value = updatedClubTeams;
 
-        const updatedNationalTeams = nationalTeams.map((nt) =>
-            nt.country === country
+        const updatedNationalTeams = nationalTeams.value.map((nt) =>
+            nt.country === country.value
                 ? {
                     ...nt,
                     team: {
@@ -60,10 +67,10 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                 }
                 : nt
         );
-        setNationalTeams(updatedNationalTeams);
+        nationalTeams.value = updatedNationalTeams;
 
-        setUserManager(manager);
-        setCurrentPage("MainPage");
+        userManager.value = manager;
+        currentPage.value = "MainPage";
     }
 
 
@@ -79,9 +86,9 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                             type="text"
                             className="form-control"
                             id="name"
-                            value={name}
+                            value={name.value}
                             required={true}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => name.value = e.target.value}
                         />
                     </div>
                     <div>
@@ -91,15 +98,15 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                             type="number"
                             className="form-control"
                             id="age"
-                            value={age}
+                            value={age.value}
                             min={20}
                             max={70}
                             required={true}
-                            onChange={(e) => setAge(parseInt(e.target.value) || 0)}
+                            onChange={(e) => age.value = parseInt(e.target.value) || 0}
                             onBlur={(e) => {
                                 const newAge = parseInt(e.target.value);
-                                if (newAge < 20) setAge(20);
-                                if (newAge > 70) setAge(70);
+                                if (newAge < 20) age.value = 20;
+                                if (newAge > 70) age.value = 70;
                             }}
                         />
                     </div>
@@ -110,8 +117,8 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                     <select
                         className="form-control"
                         id="country"
-                        value={country}
-                        onChange={(e) => setCountry(e.target.value)}
+                        value={country.value}
+                        onChange={(e) => country.value = e.target.value}
                     >
                         {Top50Countries.map((country: any) => (
                             <option key={country.country} value={country.country}>{country.country} {country.flag}</option>
@@ -124,8 +131,8 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                     <select
                         className="form-control"
                         id="league"
-                        value={league}
-                        onChange={(e) => setLeague(e.target.value)}
+                        value={league.value}
+                        onChange={(e) => league.value = e.target.value}
                     >
                         <option value="Premier League">Premier League</option>
                         <option value="La Liga">La Liga</option>
@@ -142,11 +149,11 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                     <select
                         className="form-control"
                         id="club"
-                        value={team}
-                        onChange={(e) => setTeam(e.target.value)}
+                        value={team.value}
+                        onChange={(e) => team.value = e.target.value}
                     >
-                        {AllTeams.filter((team: any) => team.league === league).map((team: any, index: number) => (
-                            <option key={index} value={team.name}>{team.name}</option>
+                        {AllTeams.filter((t: any) => t.league === league.value).map((t: any, index: number) => (
+                            <option key={index} value={t.name}>{t.name}</option>
                         ))}
                     </select>
                 </div>
@@ -156,8 +163,8 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
                     <select
                         className="form-control"
                         id="type"
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
+                        value={type.value}
+                        onChange={(e) => type.value = e.target.value}
                     >
                         <option value="scout">Scout- Recruits better players</option>
                         <option value="tactitian">Tactitian- Improves team strategy for matches</option>

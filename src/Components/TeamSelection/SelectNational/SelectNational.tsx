@@ -1,20 +1,23 @@
-import { useState, useEffect } from "react";
+import { use, useEffect } from "react";
+import { signal, type Signal } from "@preact/signals-react";
 import type { NationalTeam, Player } from "../../../Models/WorldStage.ts";
 import Top50Countries from "../../../Models/Countries.ts";
 import type { Manager } from "../../../Models/WorldStage.ts";
 import styles from "./SelectNational.module.css";
+import { useSignals } from "@preact/signals-react/runtime";
 
 interface SelectNationalProps {
-    nationalTeams: NationalTeam[];
-    setNationalTeams: (teams: NationalTeam[]) => void;
-    manager: Manager;
-    setCurrentPage: (page: string) => void;
+    nationalTeams: Signal<NationalTeam[]>;
+    manager: Signal<Manager>;
+    currentPage: Signal<string>;
 }
 
-export function SelectNational({ nationalTeams, setNationalTeams, manager, setCurrentPage }: SelectNationalProps) {
-    const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
-    const [allSelectedPlayers, setAllSelectedPlayers] = useState<string[]>([]); // Track all selections
-    const [currentPositionIndex, setCurrentPositionIndex] = useState<number>(0);
+const selectedPlayers = signal<string[]>([]);
+const allSelectedPlayers = signal<string[]>([]);
+const currentPositionIndex = signal<number>(0);
+
+export function SelectNational({ nationalTeams, manager, currentPage }: SelectNationalProps) {
+    useSignals();
 
     const positions = [
         { name: "Forward", max: 3 },
@@ -23,10 +26,10 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
         { name: "Goalkeeper", max: 1 }
     ];
 
-    const currentPosition = positions[currentPositionIndex];
+    const currentPosition = positions[currentPositionIndex.value];
 
     function setNationalTeamStartingPlayers() {
-        const updatedTeams = nationalTeams.map((nt) => {
+        const updatedTeams = nationalTeams.value.map((nt) => {
             const updatedPlayers = nt.team.players?.map((p) => ({
                 ...p,
                 startingNational: false
@@ -64,37 +67,34 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                 }
             };
         });
-        setNationalTeams(updatedTeams);
+        nationalTeams.value = updatedTeams;
     }
 
     function handlePlayerToggle(playerName: string) {
-        if (selectedPlayers.includes(playerName)) {
-            setSelectedPlayers(selectedPlayers.filter((p) => p !== playerName));
-        } else if (selectedPlayers.length < currentPosition.max) {
-            setSelectedPlayers([...selectedPlayers, playerName]);
+        if (selectedPlayers.value.includes(playerName)) {
+            selectedPlayers.value = selectedPlayers.value.filter((p) => p !== playerName);
+        } else if (selectedPlayers.value.length < currentPosition.max) {
+            selectedPlayers.value = [...selectedPlayers.value, playerName];
         } else {
             alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
         }
     }
 
     function handleNext() {
-        if (selectedPlayers.length !== currentPosition.max) {
+        if (selectedPlayers.value.length !== currentPosition.max) {
             alert(`Please select exactly ${currentPosition.max} ${currentPosition.name}(s)`);
             return;
         }
 
-        // Add current selections to the full list
-        const updatedAllSelected = [...allSelectedPlayers, ...selectedPlayers];
-        setAllSelectedPlayers(updatedAllSelected);
+        const updatedAllSelected = [...allSelectedPlayers.value, ...selectedPlayers.value];
+        allSelectedPlayers.value = updatedAllSelected;
 
-        if (currentPositionIndex < positions.length - 1) {
-            // Move to next position
-            setCurrentPositionIndex(currentPositionIndex + 1);
-            setSelectedPlayers([]);
+        if (currentPositionIndex.value < positions.length - 1) {
+            currentPositionIndex.value = currentPositionIndex.value + 1;
+            selectedPlayers.value = [];
         } else {
-            // All positions selected, update the national team
-            const updatedTeams = nationalTeams.map((nt) => {
-                if (nt.country !== manager.country) return nt;
+            const updatedTeams = nationalTeams.value.map((nt) => {
+                if (nt.country !== manager.value.country) return nt;
 
                 const updatedPlayers = nt.team.players?.map((p) => ({
                     ...p,
@@ -110,15 +110,15 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                 };
             });
 
-            setNationalTeams(updatedTeams);
-            setCurrentPage("SelectClub");
+            nationalTeams.value = updatedTeams;
+            currentPage.value = "SelectClub";
         }
     }
 
     function handleBack() {
-        if (currentPositionIndex > 0) {
-            setCurrentPositionIndex(currentPositionIndex - 1);
-            setSelectedPlayers([]);
+        if (currentPositionIndex.value > 0) {
+            currentPositionIndex.value = currentPositionIndex.value - 1;
+            selectedPlayers.value = [];
         }
     }
 
@@ -129,21 +129,21 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
     return (
         <div className={styles.selectNationalContainer}>
             <h3>Select Your National Team Starters!</h3>
-            <h4>Select {currentPosition.name}s ({selectedPlayers.length}/{currentPosition.max})</h4>
+            <h4>Select {currentPosition.name}s ({selectedPlayers.value.length}/{currentPosition.max})</h4>
 
             {/* Progress indicator */}
             <div className={styles.progressIndicator}>
                 {positions.map((_, index) => (
                     <div
                         key={index}
-                        className={`${styles.progressDot} ${index === currentPositionIndex ? styles.active :
-                            index < currentPositionIndex ? styles.completed : ''
+                        className={`${styles.progressDot} ${index === currentPositionIndex.value ? styles.active :
+                            index < currentPositionIndex.value ? styles.completed : ''
                             }`}
                     />
                 ))}
             </div>
 
-            {nationalTeams.filter((nt) => nt.country === manager.country).map((nt) => (
+            {nationalTeams.value.filter((nt) => nt.country === manager.value.country).map((nt) => (
                 <div key={nt.country} className={styles.teamCard}>
                     <h4>{Top50Countries.find((c) => c.country === nt.country)?.flag} {nt.country} {Top50Countries.find((c) => c.country === nt.country)?.flag}</h4>
 
@@ -154,12 +154,12 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                                 ?.filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
                                 .map((p) => (
-                                    <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
+                                    <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
                                         <input
                                             type="checkbox"
                                             id={p.name}
                                             value={p.name}
-                                            checked={selectedPlayers.includes(p.name)}
+                                            checked={selectedPlayers.value.includes(p.name)}
                                             readOnly
                                         />
                                         <div className={styles.playerInfo}>
@@ -185,13 +185,13 @@ export function SelectNational({ nationalTeams, setNationalTeams, manager, setCu
                     </div>
 
                     <div className={styles.buttonContainer}>
-                        {currentPositionIndex > 0 && (
+                        {currentPositionIndex.value > 0 && (
                             <button className={styles.backButton} onClick={handleBack}>
                                 Back
                             </button>
                         )}
                         <button className={styles.nextButton} onClick={handleNext}>
-                            {currentPositionIndex < positions.length - 1 ? "Next" : "Finish"}
+                            {currentPositionIndex.value < positions.length - 1 ? "Next" : "Finish"}
                         </button>
                     </div>
                 </div>

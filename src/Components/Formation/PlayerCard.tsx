@@ -1,13 +1,14 @@
 import type { Player } from "../../Models/WorldStage";
 import { Top50Countries } from "../../Models/Countries.ts";
 import styles from "./Formation.module.css";
+import type { Signal } from "@preact/signals-react";
 
 interface PlayerCardProps {
     player: Player;
-    setSelectedPlayer: (player: Player | null) => void;
+    selectedPlayer: Signal<Player | null>;
 }
 
-export function PlayerCard({ player, setSelectedPlayer }: PlayerCardProps) {
+export function PlayerCard({ player, selectedPlayer }: PlayerCardProps) {
     const countryFlag = Top50Countries.find((c) => c.country === player.country)?.flag || "🌍";
 
     const positionMapping: Record<"Forward" | "Midfielder" | "Defender" | "Goalkeeper", string> = {
@@ -18,7 +19,7 @@ export function PlayerCard({ player, setSelectedPlayer }: PlayerCardProps) {
     };
 
     return (
-        <div className={styles.playerCard} onClick={() => setSelectedPlayer(player)}>
+        <div className={styles.playerCard} onClick={(e) => { e.stopPropagation(); selectedPlayer.value = player; }}>
             <div className={styles.playerName}>{player.name}: {positionMapping[player.position as "Forward" | "Midfielder" | "Defender" | "Goalkeeper"]}</div>
 
             <div className={styles.playerStats}>

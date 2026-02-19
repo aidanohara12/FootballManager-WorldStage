@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { signal, useSignal, type Signal } from "@preact/signals-react";
 import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
@@ -8,93 +8,78 @@ import { Stats } from "../../Tabs/Stats/Stats.tsx";
 import { TeamView } from "../../Tabs/Team/TeamView.tsx";
 import { History } from "../../Tabs/History/History.tsx";
 import { Table } from "../../Tabs/Table/Table.tsx";
+import { useSignals } from "@preact/signals-react/runtime";
 
 interface MainPageProps {
-    allPlayers: Player[];
-    allTeams: Team[];
-    setAllTeams: (teams: Team[]) => void;
-    nationalTeams: NationalTeam[];
-    setNationalTeams: (teams: NationalTeam[]) => void;
-    userManager: Manager;
-    setUserManager: (manager: Manager) => void;
-    leagues: League[];
-    setLeagues: (leagues: League[]) => void;
-    tournaments: Tournament[];
-    setTournaments: (tournaments: Tournament[]) => void;
-    internationalTournaments: InternationalTournament[];
-    setInternationalTournaments: (internationalTournaments: InternationalTournament[]) => void;
-    worldCup: WorldCup;
-    setWorldCup: (worldCup: WorldCup) => void;
-    currentYear: currentYear;
-    setCurrentYear: (currentYear: currentYear) => void;
-    achievements: Achievements;
-    setAchievements: (achievements: Achievements) => void;
-    managerHistory: ManagerHistory;
-    setManagerHistory: (managerHistory: ManagerHistory) => void;
+    allPlayers: Signal<Player[]>;
+    allTeams: Signal<Team[]>;
+    nationalTeams: Signal<NationalTeam[]>;
+    userManager: Signal<Manager>;
+    leagues: Signal<League[]>;
+    tournaments: Signal<Tournament[]>;
+    internationalTournaments: Signal<InternationalTournament[]>;
+    worldCup: Signal<WorldCup>;
+    currentYear: Signal<currentYear>;
+    achievements: Signal<Achievements>;
+    managerHistory: Signal<ManagerHistory>;
 }
 
-export function MainPage({ allPlayers, allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager, leagues, setLeagues, tournaments, setTournaments, internationalTournaments, setInternationalTournaments, worldCup, setWorldCup, currentYear, setCurrentYear, achievements, setAchievements, managerHistory, setManagerHistory }: MainPageProps) {
-    const [currentPage, setCurrentPage] = useState<string>("SelectNational");
-    const [activeTab, setActiveTab] = useState<string>("Schedule");
+const currentPage = signal<string>("SelectNational");
+const activeTab = signal<string>("Schedule");
 
-    //Leagues and Tournaments
+export function MainPage({ allPlayers, allTeams, nationalTeams, userManager, leagues, tournaments, internationalTournaments, worldCup, currentYear, achievements, managerHistory }: MainPageProps) {
+    useSignals();
     return (
         <div className={styles.mainPageContainer}>
-            {currentPage === "SelectNational" && (
+            {currentPage.value === "SelectNational" && (
                 <SelectNational
                     nationalTeams={nationalTeams}
-                    setNationalTeams={setNationalTeams}
                     manager={userManager}
-                    setCurrentPage={setCurrentPage}
+                    currentPage={currentPage}
                 />
             )}
-            {currentPage === "SelectClub" && (
+            {currentPage.value === "SelectClub" && (
                 <SelectClub
                     teams={allTeams}
-                    setTeams={setAllTeams}
                     manager={userManager}
-                    setCurrentPage={setCurrentPage}
+                    currentPage={currentPage}
                 />
             )}
-            {currentPage === "MainPage" && (
+            {currentPage.value === "MainPage" && (
                 <div className={styles.tabs}>
-                    {activeTab === "Schedule" && <Schedule />}
-                    {activeTab === "Stats" && <Stats
-                        allPlayers={allPlayers}
-                        allTeams={allTeams}
-                        manager={userManager}
-                        leagues={leagues}
-                        tournaments={tournaments}
-                        internationalTournaments={internationalTournaments}
-                        worldCup={worldCup}
-                        currentYear={currentYear}
+                    {activeTab.value === "Schedule" && <Schedule />}
+                    {activeTab.value === "Stats" && <Stats
+                        allPlayers={allPlayers.value}
+                        allTeams={allTeams.value}
+                        manager={userManager.value}
+                        leagues={leagues.value}
+                        tournaments={tournaments.value}
+                        internationalTournaments={internationalTournaments.value}
                     />}
-                    {activeTab === "Team" && <TeamView
+                    {activeTab.value === "Team" && <TeamView
                         allTeams={allTeams}
-                        setAllTeams={setAllTeams}
                         nationalTeams={nationalTeams}
-                        setNationalTeams={setNationalTeams}
                         userManager={userManager}
                     />}
-                    {activeTab === "History" && <History
-                        manager={userManager}
-                        achievements={achievements}
-                        managerHistory={managerHistory}
-                        currentYear={currentYear}
+                    {activeTab.value === "History" && <History
+                        manager={userManager.value}
+                        achievements={achievements.value}
+                        managerHistory={managerHistory.value}
+                        currentYear={currentYear.value}
                     />}
-                    {activeTab === "Table" && <Table
-                        allTeams={allTeams}
-                        manager={userManager}
-                        leagues={leagues}
-                        tournaments={tournaments}
-                        internationalTournaments={internationalTournaments}
+                    {activeTab.value === "Table" && <Table
+                        allTeams={allTeams.value}
+                        manager={userManager.value}
+                        leagues={leagues.value}
+                        tournaments={tournaments.value}
+                        internationalTournaments={internationalTournaments.value}
                     />}
                     <div className={styles.tabButtons}>
-                        <button className={activeTab === "Schedule" ? styles.activeTab : ""} onClick={() => setActiveTab("Schedule")}>Schedule</button>
-                        <button className={activeTab === "Team" ? styles.activeTab : ""} onClick={() => setActiveTab("Team")}>Team</button>
-                        <button className={activeTab === "Table" ? styles.activeTab : ""} onClick={() => setActiveTab("Table")}>Table</button>
-                        <button className={activeTab === "Stats" ? styles.activeTab : ""} onClick={() => setActiveTab("Stats")}>Stats</button>
-                        <button className={activeTab === "History" ? styles.activeTab : ""} onClick={() => setActiveTab("History")}>History</button>
+                        <button className={activeTab.value === "Schedule" ? styles.activeTab : ""} onClick={() => activeTab.value = "Schedule"}>Schedule</button>
+                        <button className={activeTab.value === "Team" ? styles.activeTab : ""} onClick={() => activeTab.value = "Team"}>Team</button>
+                        <button className={activeTab.value === "Table" ? styles.activeTab : ""} onClick={() => activeTab.value = "Table"}>Table</button>
+                        <button className={activeTab.value === "Stats" ? styles.activeTab : ""} onClick={() => activeTab.value = "Stats"}>Stats</button>
+                        <button className={activeTab.value === "History" ? styles.activeTab : ""} onClick={() => activeTab.value = "History"}>History</button>
                     </div>
                 </div>
             )}
