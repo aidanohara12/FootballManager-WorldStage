@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { InitPlayers } from "../../Initalizer/InitPlayers";
-import type { InternationalTournament, League, Manager, NationalTeam, Player, Team, Tournament, WorldCup, currentYear } from "../../Models/WorldStage";
+import type { Achievements, InternationalTournament, League, Manager, ManagerHistory, NationalTeam, Player, Team, Tournament, WorldCup, currentYear } from "../../Models/WorldStage";
 import { StartingPage } from "../StartingPage/StartingPage";
 import { MainPage } from "../MainPage/MainPage";
 import { CreateManager } from "../CreateManager/CreateManager";
@@ -16,7 +16,14 @@ export function LayoutPage() {
         country: "",
         team: "",
         age: 0,
-        type: ""
+        type: "",
+        leagueTrophies: 0,
+        tournamentTrophies: 0,
+        internationalTrophies: 0,
+        careerWins: 0,
+        careerLosses: 0,
+        careerDraws: 0,
+        trophiesWon: []
     });
     const [leagues, setLeagues] = useState<League[]>([]);
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -29,7 +36,36 @@ export function LayoutPage() {
         groups: []
     });
     const [currentYear, setCurrentYear] = useState<currentYear>({
-        year: 2025
+        year: 2026,
+        yearsCompleted: 0
+    });
+    const [achievements, setAchievements] = useState<Achievements>({
+        playFirstSeason: false,
+        play10Seasons: false,
+        play50Seasons: false,
+        play100Seasons: false,
+        playFirstTournament: false,
+        winTheLeague: false,
+        win10Leagues: false,
+        win50Leagues: false,
+        get100Points: false,
+        invincibleSeason: false,
+        winAnInternationalTournament: false,
+        winFirstTrophy: false,
+        winTheWorldCup: false,
+        win10Trophies: false,
+        win50Trophies: false,
+        win100Trophies: false,
+        getA99Overall: false,
+        getA99Potential: false
+    });
+    const [managerHistory, setManagerHistory] = useState<ManagerHistory>({
+        topGoalScorrers: [],
+        topAssistScorrers: [],
+        topCleanSheets: [],
+        topGoalScorersByYear: {},
+        topAssistScorersByYear: {},
+        topCleanSheetsByYear: {}
     });
 
     useEffect(() => {
@@ -92,6 +128,7 @@ export function LayoutPage() {
         return (
             <div className={styles.layoutPageContainer}>
                 <MainPage
+                    allPlayers={allPlayers}
                     allTeams={clubTeams}
                     setAllTeams={setClubTeams}
                     nationalTeams={nationalTeams}
@@ -108,6 +145,10 @@ export function LayoutPage() {
                     setWorldCup={setWorldCup}
                     currentYear={currentYear}
                     setCurrentYear={setCurrentYear}
+                    achievements={achievements}
+                    setAchievements={setAchievements}
+                    managerHistory={managerHistory}
+                    setManagerHistory={setManagerHistory}
                 />
             </div>
         );

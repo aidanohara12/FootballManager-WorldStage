@@ -79,7 +79,7 @@ export function Table({ allTeams, manager, leagues, tournaments, internationalTo
     return (
         <div>
             <div className={styles.topContainer}>
-                <h3>{getLeague()}</h3>
+                <h3 className={styles.title}>{getLeague()}</h3>
                 <button onClick={handleOptionChange}>Change To {nextOption()}</button>
             </div>
             <div className={styles.tableContainer}>
@@ -88,7 +88,7 @@ export function Table({ allTeams, manager, leagues, tournaments, internationalTo
                 {selectedOption === "Leagues" && (
                     <div>
                         <div className={styles.selectContainer}>
-                            <h3>Leagues</h3>
+                            <h3 className={styles.subTitle}>Leagues</h3>
                             <select value={selectedLeague?.name ?? ''} onChange={(e) => {
                                 const league = sortedLeagues.find(l => l.name === e.target.value);
                                 setSelectedLeague(league ?? null);

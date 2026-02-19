@@ -54,3 +54,17 @@
 .selectContainer select:focus {
     border-bottom-color: var(--secondary-color);
 }
+
+.subTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--secondary-color)
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--secondary-color)
+}

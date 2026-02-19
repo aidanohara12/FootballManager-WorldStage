@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { League, Player, Team } from "../../Models/WorldStage";
+import PlayerAttributesView from "../Formation/PlayerAttributesView";
 import styles from "./StatsTable.module.css";
 
 interface StatsTableProps {
@@ -12,13 +13,12 @@ export function StatsTable({ leaguePlayers, managerTeam, selectedLeague }: Stats
     const [selectedTeam, setSelectedTeam] = useState<Team | undefined>(managerTeam);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
-    const sortedTeams = selectedLeague?.teams?.sort((a, b) => {
-        if (a.Team.name === managerTeam?.name) return 1;
-        if (b.Team.name === managerTeam?.name) return -1;
-        if (a.Team.name < b.Team.name) return -1;
-        if (a.Team.name > b.Team.name) return 1;
-        return 0;
-    });
+    useEffect(() => {
+        const firstTeam = selectedLeague?.teams?.[0]?.Team;
+        setSelectedTeam(firstTeam ?? managerTeam);
+    }, [selectedLeague]);
+
+    const sortedTeams = selectedLeague?.teams;
 
     return (
         <div className={styles.tableContainer}>
@@ -33,22 +33,42 @@ export function StatsTable({ leaguePlayers, managerTeam, selectedLeague }: Stats
                 </select>
             </div>
             <div className={styles.table}>
-                <div className={styles.tableHeader}>
-                    <div className={styles.tableHeaderRow}>
-                        <div className={styles.tableHeaderCell}>Team</div>
+                <div className={styles.tableBody}>
+                    <div className={styles.table}>
+                        <div className={styles.tableHeader}>
+                            <div className={styles.tableHeaderRow}>
+                                <div className={styles.tableHeaderCell}>Player</div>
+                                <div className={styles.tableHeaderCell}>Goals</div>
+                                <div className={styles.tableHeaderCell}>Assists</div>
+                                <div className={styles.tableHeaderCell}>G/A</div>
+                            </div>
+                        </div>
+                        <div className={styles.tableBody}>
+                            {selectedTeam?.players?.sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists)).map((player) => {
+                                const playerGoals = player.leagueGoals + player.countryGoals;
+                                const playerAssists = player.leagueAssists + player.countryAssists;
+                                const playerGoalsAssists = playerGoals + playerAssists;
+                                return (
+                                    <div key={player.name} className={styles.tableRow} onClick={() => setSelectedPlayer(player)}>
+                                        <div className={styles.teamName}>{player.name}</div>
+                                        <div className={styles.statCell}>{playerGoals}</div>
+                                        <div className={styles.statCell}>{playerAssists}</div>
+                                        <div className={styles.statCell}>{playerGoalsAssists}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
-                <div className={styles.tableBody}>
-                    {leaguePlayers?.map((player) => {
-
-                        return (
-                            <div key={player?.name} className={styles.tableRow}>
-                                <div className={styles.teamName}>{player?.name}</div>
-                            </div>
-                        );
-                    })}
-                </div>
             </div>
+
+            {selectedPlayer && (
+                <div className={styles.overlay} onClick={() => setSelectedPlayer(null)}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <PlayerAttributesView player={selectedPlayer} setSelectedPlayer={setSelectedPlayer} />
+                    </div>
+                </div>
+            )}
         </div >
     );
 }

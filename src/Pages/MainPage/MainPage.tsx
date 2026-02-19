@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { currentYear, InternationalTournament, League, Manager, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
+import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
 import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
@@ -27,9 +27,13 @@ interface MainPageProps {
     setWorldCup: (worldCup: WorldCup) => void;
     currentYear: currentYear;
     setCurrentYear: (currentYear: currentYear) => void;
+    achievements: Achievements;
+    setAchievements: (achievements: Achievements) => void;
+    managerHistory: ManagerHistory;
+    setManagerHistory: (managerHistory: ManagerHistory) => void;
 }
 
-export function MainPage({ allPlayers, allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager, leagues, setLeagues, tournaments, setTournaments, internationalTournaments, setInternationalTournaments, worldCup, setWorldCup, currentYear, setCurrentYear }: MainPageProps) {
+export function MainPage({ allPlayers, allTeams, setAllTeams, nationalTeams, setNationalTeams, userManager, setUserManager, leagues, setLeagues, tournaments, setTournaments, internationalTournaments, setInternationalTournaments, worldCup, setWorldCup, currentYear, setCurrentYear, achievements, setAchievements, managerHistory, setManagerHistory }: MainPageProps) {
     const [currentPage, setCurrentPage] = useState<string>("SelectNational");
     const [activeTab, setActiveTab] = useState<string>("Schedule");
 
@@ -72,7 +76,12 @@ export function MainPage({ allPlayers, allTeams, setAllTeams, nationalTeams, set
                         setNationalTeams={setNationalTeams}
                         userManager={userManager}
                     />}
-                    {activeTab === "History" && <History />}
+                    {activeTab === "History" && <History
+                        manager={userManager}
+                        achievements={achievements}
+                        managerHistory={managerHistory}
+                        currentYear={currentYear}
+                    />}
                     {activeTab === "Table" && <Table
                         allTeams={allTeams}
                         manager={userManager}

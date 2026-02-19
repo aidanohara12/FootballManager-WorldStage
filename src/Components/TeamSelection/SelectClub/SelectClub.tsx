@@ -83,8 +83,8 @@ export function SelectClub({ teams, setTeams, manager, setCurrentPage }: SelectC
             if (team.name !== manager.team) return team;
 
             const updatedPlayers = team.players?.map((p) => {
-                if (selectedPlayers.includes(p.name)) {
-                    return { ...p, startingTeam: true };
+                if (p.position === currentPosition.name) {
+                    return { ...p, startingTeam: selectedPlayers.includes(p.name) };
                 }
                 return p;
             });

@@ -162,7 +162,16 @@ function createRandomPlayer(position: string, team: string, countryName?: string
         value: playerValue,
         contract: {
             4: playerValue,
-        }
+        },
+        leagueGoals: 0,
+        leagueAssists: 0,
+        countryGoals: 0,
+        countryAssists: 0,
+        cleanSheets: 0,
+        totalGoals: 0,
+        totalAssists: 0,
+        awards: 0,
+        trophies: 0
     };
     return player;
 }
@@ -301,7 +310,14 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
                 country: Top50Countries[Math.floor(Math.random() * Top50Countries.length)].country,
                 team: teamData.name,
                 age: Math.floor(Math.random() * (60 - 25 + 1)) + 25,
-                type: "Club"
+                type: "Club",
+                leagueTrophies: 0,
+                tournamentTrophies: 0,
+                internationalTrophies: 0,
+                careerWins: 0,
+                careerLosses: 0,
+                careerDraws: 0,
+                trophiesWon: []
             },
             color: teamData.color,
             players: [],
@@ -353,7 +369,14 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
                     country: countryData.country,
                     team: countryData.country,
                     age: Math.floor(Math.random() * (60 - 25 + 1)) + 25,
-                    type: "National"
+                    type: "National",
+                    leagueTrophies: 0,
+                    tournamentTrophies: 0,
+                    internationalTrophies: 0,
+                    careerWins: 0,
+                    careerLosses: 0,
+                    careerDraws: 0,
+                    trophiesWon: []
                 },
                 color: '',
                 players: [],

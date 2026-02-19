@@ -29,6 +29,29 @@ function getWinner(matchup: Matchup): string {
     return "TBD";
 }
 
+function findMatch(matches: Match[], home: string, away: string): Matchup {
+    const match = matches.find(
+        m =>
+            (m.homeTeam.name === home && m.awayTeam.name === away) ||
+            (m.homeTeam.name === away && m.awayTeam.name === home)
+    );
+    if (match) {
+        return {
+            home: match.homeTeam.name,
+            away: match.awayTeam.name,
+            homeScore: match.homeScore,
+            awayScore: match.awayScore,
+        };
+    }
+    return { home, away, homeScore: null, awayScore: null };
+}
+
+function nextPowerOf2(n: number): number {
+    let p = 1;
+    while (p < n) p *= 2;
+    return p;
+}
+
 function buildBracket(teams: TournamentTeam[], matches: Match[]): Matchup[][] {
     const rounds: Matchup[][] = [];
     const teamNames = teams.map(t => t.Team.name);
@@ -36,59 +59,88 @@ function buildBracket(teams: TournamentTeam[], matches: Match[]): Matchup[][] {
 
     if (totalTeams < 2) return rounds;
 
-    // Seed first round: 1 vs last, 2 vs second-last, etc.
-    const firstRound: Matchup[] = [];
-    const half = Math.floor(totalTeams / 2);
-    for (let i = 0; i < half; i++) {
-        const home = teamNames[i];
-        const away = teamNames[totalTeams - 1 - i];
+    const bracketSize = nextPowerOf2(totalTeams);
+    const numByes = bracketSize - totalTeams;
+    // Number of play-in matches (teams that must play to get into the main bracket)
+    const numPlayInMatches = totalTeams - bracketSize / 2;
 
-        const match = matches.find(
-            m =>
-                (m.homeTeam.name === home && m.awayTeam.name === away) ||
-                (m.homeTeam.name === away && m.awayTeam.name === home)
-        );
-
-        if (match) {
-            firstRound.push({
-                home: match.homeTeam.name,
-                away: match.awayTeam.name,
-                homeScore: match.homeScore,
-                awayScore: match.awayScore,
-            });
-        } else {
-            firstRound.push({ home, away, homeScore: null, awayScore: null });
+    // Top seeds get byes, lower seeds play in the preliminary round
+    // Bye teams: seeds 1 through numByes (indices 0..numByes-1)
+    // Play-in teams: the remaining seeds pair up (best remaining vs worst remaining)
+    if (numPlayInMatches > 0) {
+        const playInRound: Matchup[] = [];
+        const playInTeams = teamNames.slice(numByes); // lower-seeded teams that must play in
+        for (let i = 0; i < playInTeams.length / 2; i++) {
+            const home = playInTeams[i];
+            const away = playInTeams[playInTeams.length - 1 - i];
+            playInRound.push(findMatch(matches, home, away));
         }
+        rounds.push(playInRound);
     }
-    rounds.push(firstRound);
+
+    // Build the main bracket round (bracketSize / 2 matchups)
+    // Slots are filled by: bye teams in seeded order + winners of play-in matches
+    const mainRoundSlots: string[] = [];
+    // Interleave bye teams and play-in winners by seed position
+    const playInRound = numPlayInMatches > 0 ? rounds[0] : null;
+
+    // Build a seeded list: for each slot in the full bracket, determine if it's a bye team or a play-in winner
+    // Seeds 1..numByes are byes, seeds (numByes+1)..totalTeams played in
+    // We pair seed 1 vs seed bracketSize, seed 2 vs seed bracketSize-1, etc.
+    // But since some seeds played in, we replace those with their play-in result
+    for (let i = 0; i < bracketSize / 2; i++) {
+        const topSeed = i; // 0-indexed seed
+        // Determine top team for this matchup
+        let topTeam: string;
+        if (topSeed < numByes) {
+            topTeam = teamNames[topSeed]; // bye team
+        } else {
+            // play-in winner
+            const playInIdx = topSeed - numByes;
+            topTeam = playInRound ? getWinner(playInRound[playInIdx]) : "TBD";
+        }
+
+        // Determine bottom team for this matchup
+        let bottomTeam: string;
+        // bottomSeed maps to a team index: but bracket slots beyond totalTeams don't exist
+        // The bottom seed in terms of actual team index
+        const bottomTeamIndex = bracketSize - 1 - i;
+        if (bottomTeamIndex < numByes) {
+            bottomTeam = teamNames[bottomTeamIndex];
+        } else if (bottomTeamIndex < totalTeams) {
+            // This team played in the play-in round - find which play-in match they were in
+            const playInTeams = teamNames.slice(numByes);
+            const playInIdx = playInTeams.length - 1 - (bottomTeamIndex - numByes);
+            if (playInIdx >= 0 && playInIdx < (playInRound?.length ?? 0)) {
+                bottomTeam = playInRound ? getWinner(playInRound[playInIdx]) : "TBD";
+            } else {
+                bottomTeam = "TBD";
+            }
+        } else {
+            bottomTeam = "TBD"; // empty bracket slot
+        }
+
+        mainRoundSlots.push(topTeam);
+        mainRoundSlots.push(bottomTeam);
+    }
+
+    // Now pair up the main round slots
+    const mainRound: Matchup[] = [];
+    for (let i = 0; i < mainRoundSlots.length; i += 2) {
+        const home = mainRoundSlots[i];
+        const away = mainRoundSlots[i + 1];
+        mainRound.push(findMatch(matches, home, away));
+    }
+    rounds.push(mainRound);
 
     // Build subsequent rounds from winners
-    let prevRound = firstRound;
+    let prevRound = mainRound;
     while (prevRound.length > 1) {
         const nextRound: Matchup[] = [];
         for (let i = 0; i < prevRound.length; i += 2) {
             const winner1 = getWinner(prevRound[i]);
             const winner2 = i + 1 < prevRound.length ? getWinner(prevRound[i + 1]) : "TBD";
-
-            const home = winner1;
-            const away = winner2;
-
-            const match = matches.find(
-                m =>
-                    (m.homeTeam.name === home && m.awayTeam.name === away) ||
-                    (m.homeTeam.name === away && m.awayTeam.name === home)
-            );
-
-            if (match) {
-                nextRound.push({
-                    home: match.homeTeam.name,
-                    away: match.awayTeam.name,
-                    homeScore: match.homeScore,
-                    awayScore: match.awayScore,
-                });
-            } else {
-                nextRound.push({ home, away, homeScore: null, awayScore: null });
-            }
+            nextRound.push(findMatch(matches, winner1, winner2));
         }
         rounds.push(nextRound);
         prevRound = nextRound;
@@ -104,6 +156,7 @@ export function ShowTournamentTable({
     const teams = tournamentTeams ?? [];
     const matches = tournamentMatches ?? [];
     const rounds = buildBracket(teams, matches);
+    const hasPlayIn = teams.length > 0 && nextPowerOf2(teams.length) !== teams.length;
 
     if (teams.length === 0) {
         return <div className={styles.tableContainer}>No teams in this tournament.</div>;
@@ -113,8 +166,9 @@ export function ShowTournamentTable({
         <div className={styles.bracketContainer}>
             <div className={styles.bracket}>
                 {rounds.map((round, roundIndex) => {
+                    const isPlayIn = hasPlayIn && roundIndex === 0;
                     const teamsInRound = round.length * 2;
-                    const roundName = getRoundName(teamsInRound);
+                    const roundName = isPlayIn ? "Play-In" : getRoundName(teamsInRound);
                     return (
                         <div key={roundIndex} className={styles.roundColumn}>
                             <div className={styles.roundTitle}>{roundName}</div>

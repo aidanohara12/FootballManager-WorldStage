@@ -32,7 +32,14 @@ export function CreateManager({ setCurrentPage, allTeams, nationalTeams, setAllT
             country: country,
             team: team,
             age: age,
-            type: type
+            type: type,
+            leagueTrophies: 0,
+            tournamentTrophies: 0,
+            internationalTrophies: 0,
+            careerWins: 0,
+            careerLosses: 0,
+            careerDraws: 0,
+            trophiesWon: []
         };
 
         const updatedClubTeams = allTeams.map((t) =>

@@ -15,12 +15,12 @@ export function PlayerAttributesView({ player, setSelectedPlayer }: PlayerAttrib
             <div className={styles.playerStats}>
                 <span className={styles.statBadge}>
                     <span className={styles.statLabel}>Position:</span>
-                    <span>{player.position}</span>
+                    <span className={styles.statLabel}>{player.position}</span>
                 </span>
 
                 <span className={styles.statBadge}>
                     <span className={styles.statLabel}>Age:</span>
-                    <span>{player.age}</span>
+                    <span className={styles.statLabel}>{player.age}</span>
                 </span>
 
                 <span className={styles.statBadge}>
@@ -40,33 +40,58 @@ export function PlayerAttributesView({ player, setSelectedPlayer }: PlayerAttrib
 
                 <span className={styles.statBadge}>
                     <span className={styles.statLabel}>Team:</span>
-                    <span>{player.team}</span>
+                    <span className={styles.statLabel}>{player.team}</span>
                 </span>
 
                 <span className={styles.statBadge}>
                     <span className={styles.statLabel}>Value:</span>
-                    <span>${(player.value).toFixed(1)}M</span>
+                    <span className={styles.statLabel}>${(player.value).toFixed(1)}M</span>
                 </span>
 
                 {player.startingNational !== undefined && (
                     <span className={styles.statBadge}>
                         <span className={styles.statLabel}>National Starter:</span>
-                        <span>{player.startingNational ? 'Yes' : 'No'}</span>
+                        <span className={styles.statLabel}>{player.startingNational ? 'Yes' : 'No'}</span>
                     </span>
                 )}
 
                 {player.startingTeam !== undefined && (
                     <span className={styles.statBadge}>
                         <span className={styles.statLabel}>Team Starter:</span>
-                        <span>{player.startingTeam ? 'Yes' : 'No'}</span>
+                        <span className={styles.statLabel}>{player.startingTeam ? 'Yes' : 'No'}</span>
                     </span>
                 )}
+
+                <span className={styles.statBadge}>
+                    <span className={styles.statLabel}>Season Goals:</span>
+                    <span className={styles.statLabel}>{(player.leagueGoals + player.countryGoals)}</span>
+                </span>
+
+                <span className={styles.statBadge}>
+                    <span className={styles.statLabel}>Season Assists:</span>
+                    <span className={styles.statLabel}>{(player.leagueAssists + player.countryAssists)}</span>
+                </span>
+
+                <span className={styles.statBadge}>
+                    <span className={styles.statLabel}>Season G/A:</span>
+                    <span className={styles.statLabel}>{(player.leagueGoals + player.countryGoals) + (player.leagueAssists + player.countryAssists)}</span>
+                </span>
+
+                <span className={styles.statBadge}>
+                    <span className={styles.statLabel}>Awards:</span>
+                    <span className={styles.statLabel}>{player.awards}</span>
+                </span>
+
+                <span className={styles.statBadge}>
+                    <span className={styles.statLabel}>Trophies:</span>
+                    <span className={styles.statLabel}>{player.trophies}</span>
+                </span>
 
                 <span className={styles.statBadge}>
                     <span className={styles.statLabel}>Contract:</span>
                     <span>
                         {Object.entries(player.contract).map(([year, value]) => (
-                            <span key={year}>{year}: ${(value).toFixed(1)}M/yr </span>
+                            <span key={year} className={styles.statLabel}>{year}: ${(value).toFixed(1)}M/yr </span>
                         ))}
                     </span>
                 </span>

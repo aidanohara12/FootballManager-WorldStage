@@ -1,0 +1,41 @@
+.title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--secondary-color)
+}
+
+.subTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color)
+}
+
+.select {
+    width: 20%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--primary-color, #00A86B);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: white;
+    color: var(--secondary-color, #1A1A1A);
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.select:focus {
+    box-shadow: 0 0 0 3px rgba(0, 168, 107, 0.2);
+}
+
+.select:hover {
+    border-color: var(--primary-color, #00A86B);
+}
+
+.select option {
+    background: var(--primary-color, #00A86B);
+    color: var(--secondary-color, #1A1A1A);
+}

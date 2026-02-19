@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { currentYear, InternationalTournament, League, Manager, Team, Tournament, WorldCup } from "../../Models/WorldStage";
+import type { currentYear, InternationalTournament, League, Manager, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage";
 import styles from "./Stats.module.css";
 import { StatsTable } from "../../Components/StatsTable/StatsTable";
 
@@ -70,8 +70,17 @@ export function Stats({ allTeams, manager, leagues, tournaments, internationalTo
         }
         return undefined;
     }
-    //get the players for the selected league
-    const leaguePlayers = leagues.find((league) => league.name === selectedLeague?.name)?.teams?.flatMap((team) => team.Team.players);
+
+    function getLeaguePlayers(): (Player | undefined)[] | undefined {
+        if (selectedOption === "Leagues") {
+            return selectedLeague?.teams?.flatMap((team) => team.Team.players);
+        } else if (selectedOption === "Tournaments") {
+            return tournamentPlayers;
+        } else if (selectedOption === "International Tournaments") {
+            return internationalTournamentPlayers;
+        }
+        return undefined;
+    }
     //get the players for the selected tournament
     const tournamentPlayers = tournaments.find((tournament) => tournament.name === selectedTournament?.name)?.teams?.flatMap((team) => team.Team.players);
     //get the players for the selected international tournament
@@ -79,13 +88,13 @@ export function Stats({ allTeams, manager, leagues, tournaments, internationalTo
 
     return (
         <div>
-            <h2>{getLeague()}</h2>
+            <h2 className={styles.title}>{getLeague()}</h2>
             <div className={styles.statsContainer}>
                 <div className={styles.stats}>
                     <div className={styles.stat}>
-                        <h3>League Stats</h3>
+                        <h3 className={styles.subTitle}>League Stats</h3>
                         <div>
-                            <select value={selectedLeague?.name ?? ''} onChange={(e) => {
+                            <select className={styles.select} value={selectedLeague?.name ?? ''} onChange={(e) => {
                                 const league = sortedLeagues.find(l => l.name === e.target.value);
                                 setSelectedLeague(league ?? null);
                             }}>
@@ -94,7 +103,7 @@ export function Stats({ allTeams, manager, leagues, tournaments, internationalTo
                                 ))}
                             </select>
                         </div>
-                        <StatsTable leaguePlayers={leaguePlayers} managerTeam={managerTeam} selectedLeague={selectedLeague} />
+                        <StatsTable leaguePlayers={getLeaguePlayers()} managerTeam={managerTeam} selectedLeague={selectedLeague} />
                     </div>
                 </div>
             </div>
