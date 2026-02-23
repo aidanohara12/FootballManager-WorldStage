@@ -1,6 +1,16 @@
 export interface currentYear {
     year: number;
+    currentMonth: string;
+    currentDay: number;
+    currentDayOfWeek: string;
     yearsCompleted: number;
+    isInternationalBreak: boolean;
+    leagueWeek: number;
+    yearMatches: Match[];
+}
+
+export interface Week {
+    weekDays: Record<string, number>;
 }
 
 export interface Player {
@@ -46,8 +56,9 @@ export interface Team {
     league?: string;
     manager: Manager;
     color: string;
-    players?: Player[];
+    players: Player[];
     moneyToSpend: number;
+    form: string[];
 }
 
 export interface NationalTeam {
@@ -58,6 +69,7 @@ export interface NationalTeam {
 export interface LeagueTeam {
     Team: Team;
     League: League;
+    Schedule: Match[];
     points: number;
     wins: number;
     losses: number;
@@ -76,8 +88,9 @@ export interface Match {
     awayScorers: Player[];
     homeAssists: Player[];
     awayAssists: Player[];
-    league: League;
-    tournament: Tournament;
+    isLeagueMatch: boolean;
+    isTournamentMatch: boolean;
+    isInternationalMatch: boolean;
 }
 
 export interface League {

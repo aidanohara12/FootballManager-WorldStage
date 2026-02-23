@@ -7,6 +7,13 @@ interface ShowLeagueTableProps {
 }
 
 export function ShowLeagueTable({ leagueTitle, leageTeams }: ShowLeagueTableProps) {
+    function getTeamPoints(team: LeagueTeam) {
+        return team.points * 3 + team.draws;
+    }
+
+    function getTeamGoalDiff(team: LeagueTeam) {
+        return team.goalsFor - team.goalsAgainst;
+    }
     return (
         <div className={styles.tableContainer}>
             <div className={styles.table}>
@@ -21,7 +28,7 @@ export function ShowLeagueTable({ leagueTitle, leageTeams }: ShowLeagueTableProp
                     </div>
                 </div>
                 <div className={styles.tableBody}>
-                    {leageTeams?.map((team) => {
+                    {leageTeams?.sort((a, b) => getTeamPoints(b) - getTeamPoints(a)).sort((a, b) => getTeamGoalDiff(b) - getTeamGoalDiff(a)).map((team) => {
                         const goalDiff = team.goalsFor - team.goalsAgainst;
                         const goalDiffClass = goalDiff > 0 ? styles.positive : goalDiff < 0 ? styles.negative : styles.neutral;
 

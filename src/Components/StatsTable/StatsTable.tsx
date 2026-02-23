@@ -1,21 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { League, Player, Team } from "../../Models/WorldStage";
 import PlayerAttributesView from "../Formation/PlayerAttributesView";
 import styles from "./StatsTable.module.css";
 
 interface StatsTableProps {
     leaguePlayers: (Player | undefined)[] | undefined;
-    managerTeam: Team | undefined;
+    managerTeam: Team;
     selectedLeague: League | null;
 }
 
 export function StatsTable({ leaguePlayers, managerTeam, selectedLeague }: StatsTableProps) {
-    const [selectedTeam, setSelectedTeam] = useState<Team | undefined>(managerTeam);
+    const [selectedTeam, setSelectedTeam] = useState<Team>(managerTeam);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+    const isFirstRender = useRef(true);
 
     useEffect(() => {
-        const firstTeam = selectedLeague?.teams?.[0]?.Team;
-        setSelectedTeam(firstTeam ?? managerTeam);
+        setSelectedTeam(managerTeam);
+    }, [managerTeam]);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        if (selectedLeague) {
+            const managerInLeague = selectedLeague.teams?.find(t => t.Team.name === managerTeam.name)?.Team;
+            setSelectedTeam(managerInLeague ?? selectedLeague.teams?.[0]?.Team ?? managerTeam);
+        }
     }, [selectedLeague]);
 
     const sortedTeams = selectedLeague?.teams;
@@ -23,7 +34,7 @@ export function StatsTable({ leaguePlayers, managerTeam, selectedLeague }: Stats
     return (
         <div className={styles.tableContainer}>
             <div>
-                <select value={selectedLeague?.teams?.find(t => t.Team.name === selectedTeam?.name)?.Team.name ?? ''} onChange={(e) => {
+                <select value={selectedTeam?.name ?? ''} onChange={(e) => {
                     const team = selectedLeague?.teams?.find(t => t.Team.name === e.target.value)?.Team;
                     setSelectedTeam(team ?? managerTeam);
                 }}>

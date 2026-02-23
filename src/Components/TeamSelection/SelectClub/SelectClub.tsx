@@ -1,6 +1,6 @@
 import { use, useEffect } from "react";
 import { signal, type Signal } from "@preact/signals-react";
-import type { Team } from "../../../Models/WorldStage.ts";
+import type { Team, League } from "../../../Models/WorldStage.ts";
 import type { Manager } from "../../../Models/WorldStage.ts";
 import styles from "./SelectClub.module.css";
 import { Top50Countries } from "../../../Models/Countries.ts";
@@ -8,13 +8,14 @@ import { useSignals } from "@preact/signals-react/runtime";
 
 interface SelectClubProps {
     teams: Signal<Team[]>;
+    leagues: Signal<League[]>;
     manager: Signal<Manager>;
     currentPage: Signal<string>;
 }
 const selectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 
-export function SelectClub({ teams, manager, currentPage }: SelectClubProps) {
+export function SelectClub({ teams, leagues, manager, currentPage }: SelectClubProps) {
     useSignals();
     const positions = [
         { name: "Forward", max: 3 },
@@ -24,6 +25,16 @@ export function SelectClub({ teams, manager, currentPage }: SelectClubProps) {
     ];
 
     const currentPosition = positions[currentPositionIndex.value];
+
+    function syncLeagues(updatedTeams: Team[]) {
+        leagues.value = leagues.value.map((l) => ({
+            ...l,
+            teams: l.teams.map((lt) => {
+                const updated = updatedTeams.find((t) => t.name === lt.Team.name);
+                return updated ? { ...lt, Team: updated } : lt;
+            })
+        }));
+    }
 
     function setTeamStartingPlayers() {
         const updatedTeams = teams.value.map((team) => {
@@ -62,6 +73,7 @@ export function SelectClub({ teams, manager, currentPage }: SelectClubProps) {
             };
         });
         teams.value = updatedTeams;
+        syncLeagues(updatedTeams);
     }
 
     function handlePlayerToggle(playerName: string) {
@@ -97,6 +109,7 @@ export function SelectClub({ teams, manager, currentPage }: SelectClubProps) {
         });
 
         teams.value = updatedTeams;
+        syncLeagues(updatedTeams);
 
         if (currentPositionIndex.value < positions.length - 1) {
             currentPositionIndex.value = currentPositionIndex.value + 1;
@@ -114,6 +127,8 @@ export function SelectClub({ teams, manager, currentPage }: SelectClubProps) {
     }
 
     useEffect(() => {
+        currentPositionIndex.value = 0;
+        selectedPlayers.value = [];
         setTeamStartingPlayers();
     }, []);
 

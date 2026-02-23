@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { signal } from "@preact/signals-react"
 import { InitPlayers } from "../../Initalizer/InitPlayers";
-import type { Achievements, InternationalTournament, League, Manager, ManagerHistory, NationalTeam, Player, Team, Tournament, WorldCup, currentYear } from "../../Models/WorldStage";
+import type { Achievements, InternationalTournament, League, LeagueTeam, Manager, ManagerHistory, Match, NationalTeam, Player, Team, Tournament, WorldCup, currentYear } from "../../Models/WorldStage";
 import { StartingPage } from "../StartingPage/StartingPage";
 import { MainPage } from "../MainPage/MainPage";
 import { CreateManager } from "../CreateManager/CreateManager";
 import styles from "./LayoutPage.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
+import { createSchedule } from "../../Utils/CreateSchedule";
+import AllTeams from "../../Models/Teams";
 
 const currentPage = signal<string>("StartingPage");
 const allPlayers = signal<Player[]>([]);
@@ -37,8 +39,14 @@ const worldCup = signal<WorldCup>({
     groups: []
 });
 const currentYear = signal<currentYear>({
-    year: 2026,
-    yearsCompleted: 0
+    year: 2025,
+    yearsCompleted: 0,
+    leagueWeek: 1,
+    currentMonth: "August",
+    currentDay: 1,
+    currentDayOfWeek: "Friday",
+    isInternationalBreak: false,
+    yearMatches: []
 });
 const achievements = signal<Achievements>({
     playFirstSeason: false,
@@ -101,6 +109,7 @@ export function LayoutPage() {
         tournaments.value = tournamentsTemp;
         internationalTournaments.value = internationalTournamentsTemp;
         worldCup.value = worldCupTemp;
+
     };
 
     if (currentPage.value === "StartingPage") {
@@ -117,6 +126,7 @@ export function LayoutPage() {
                 <CreateManager
                     allTeams={clubTeams}
                     nationalTeams={nationalTeams}
+                    leagues={leagues}
                     userManager={userManager}
                     currentPage={currentPage}
                 />

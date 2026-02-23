@@ -14,7 +14,7 @@ export function ManagerStats({ manager, managerHistory, currentYear }: ManagerSt
     const [selectedYear, setSelectedYear] = useState<number>(currentYear);
 
     const allYears: number[] = [];
-    for (let y = currentYear; y >= 2026; y--) {
+    for (let y = currentYear; y >= 2025; y--) {
         allYears.push(y);
     }
 

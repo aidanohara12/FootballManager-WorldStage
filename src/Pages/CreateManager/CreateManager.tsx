@@ -3,12 +3,13 @@ import { signal, type Signal } from "@preact/signals-react";
 import { Top50Countries } from "../../Models/Countries.ts";
 import { AllTeams } from "../../Models/Teams.ts";
 import styles from "./CreateManager.module.css";
-import type { Manager, NationalTeam, Team } from "../../Models/WorldStage.ts";
+import type { Manager, NationalTeam, Team, League } from "../../Models/WorldStage.ts";
 import { useSignals } from "@preact/signals-react/runtime";
 
 interface CreateManagerProps {
     allTeams: Signal<Team[]>;
     nationalTeams: Signal<NationalTeam[]>;
+    leagues: Signal<League[]>;
     userManager: Signal<Manager>;
     currentPage: Signal<string>;
 }
@@ -20,7 +21,7 @@ const team = signal<string>("");
 const age = signal<number>(25);
 const type = signal<string>("scout");
 
-export function CreateManager({ allTeams, nationalTeams, userManager, currentPage }: CreateManagerProps) {
+export function CreateManager({ allTeams, nationalTeams, leagues, userManager, currentPage }: CreateManagerProps) {
     useSignals();
 
     useEffect(() => {
@@ -49,12 +50,20 @@ export function CreateManager({ allTeams, nationalTeams, userManager, currentPag
             trophiesWon: []
         };
 
-        const updatedClubTeams = allTeams.value.map((t) =>
-            t.name === team.value
-                ? { ...t, manager: { ...manager, type: "Club" } }
-                : t
-        );
-        allTeams.value = updatedClubTeams;
+        const clubManager = { ...manager, type: "Club" };
+
+        const updatedLeagues = leagues.value.map((l) => ({
+            ...l,
+            teams: l.teams.map((lt) =>
+                lt.Team.name === team.value
+                    ? { ...lt, Team: { ...lt.Team, manager: clubManager } }
+                    : lt
+            )
+        }));
+        leagues.value = updatedLeagues;
+
+        // Rebuild allTeams from leagues so they share the same team objects
+        allTeams.value = updatedLeagues.flatMap((l) => l.teams.map((lt) => lt.Team));
 
         const updatedNationalTeams = nationalTeams.value.map((nt) =>
             nt.country === country.value
@@ -132,7 +141,10 @@ export function CreateManager({ allTeams, nationalTeams, userManager, currentPag
                         className="form-control"
                         id="league"
                         value={league.value}
-                        onChange={(e) => league.value = e.target.value}
+                        onChange={(e) => {
+                            league.value = e.target.value;
+                            team.value = AllTeams.find((t: any) => t.league === e.target.value)?.name || "";
+                        }}
                     >
                         <option value="Premier League">Premier League</option>
                         <option value="La Liga">La Liga</option>
@@ -166,8 +178,8 @@ export function CreateManager({ allTeams, nationalTeams, userManager, currentPag
                         value={type.value}
                         onChange={(e) => type.value = e.target.value}
                     >
-                        <option value="scout">Scout- Recruits better players</option>
-                        <option value="tactitian">Tactitian- Improves team strategy for matches</option>
+                        <option value="Scout">Scout- Recruits better players</option>
+                        <option value="Tactitian">Tactitian- Improves team strategy for matches</option>
                         <option value="Developer">Developer- Improves player development and training</option>
                     </select>
                 </div>

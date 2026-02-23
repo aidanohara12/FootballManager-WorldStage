@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { signal, useSignal, type Signal } from "@preact/signals-react";
-import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
+import type { Achievements, currentYear, InternationalTournament, League, LeagueTeam, Manager, ManagerHistory, Match, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
+import { createSchedule } from "../../Utils/CreateSchedule.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
 import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
@@ -26,9 +28,32 @@ interface MainPageProps {
 
 const currentPage = signal<string>("SelectNational");
 const activeTab = signal<string>("Schedule");
+const scheduleCreated = signal<boolean>(false);
 
 export function MainPage({ allPlayers, allTeams, nationalTeams, userManager, leagues, tournaments, internationalTournaments, worldCup, currentYear, achievements, managerHistory }: MainPageProps) {
     useSignals();
+
+    if (currentPage.value === "MainPage" && !scheduleCreated.value) {
+        leagues.value.forEach((league: League) => {
+            const fullSchedule = createSchedule(league, currentYear);
+            league.teams.forEach((team: LeagueTeam) => {
+                team.Schedule = fullSchedule.filter(
+                    (m: Match) => m.homeTeam === team.Team || m.awayTeam === team.Team
+                ).sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            });
+        });
+
+        leagues.value.forEach((league: League) => {
+            league.teams.forEach((team: LeagueTeam) => {
+                team.Schedule.forEach((match: Match) => {
+                    currentYear.value.yearMatches.push(match);
+                });
+            });
+        });
+
+        scheduleCreated.value = true;
+    }
+
     return (
         <div className={styles.mainPageContainer}>
             {currentPage.value === "SelectNational" && (
@@ -41,13 +66,21 @@ export function MainPage({ allPlayers, allTeams, nationalTeams, userManager, lea
             {currentPage.value === "SelectClub" && (
                 <SelectClub
                     teams={allTeams}
+                    leagues={leagues}
                     manager={userManager}
                     currentPage={currentPage}
                 />
             )}
             {currentPage.value === "MainPage" && (
                 <div className={styles.tabs}>
-                    {activeTab.value === "Schedule" && <Schedule />}
+                    {activeTab.value === "Schedule" && <Schedule
+                        allTeams={allTeams}
+                        manager={userManager}
+                        leagues={leagues}
+                        tournaments={tournaments}
+                        internationalTournaments={internationalTournaments}
+                        currentYear={currentYear}
+                    />}
                     {activeTab.value === "Stats" && <Stats
                         allPlayers={allPlayers.value}
                         allTeams={allTeams.value}

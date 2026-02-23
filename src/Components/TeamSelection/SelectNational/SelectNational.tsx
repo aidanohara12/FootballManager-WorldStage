@@ -123,6 +123,9 @@ export function SelectNational({ nationalTeams, manager, currentPage }: SelectNa
     }
 
     useEffect(() => {
+        currentPositionIndex.value = 0;
+        selectedPlayers.value = [];
+        allSelectedPlayers.value = [];
         setNationalTeamStartingPlayers();
     }, []);
 

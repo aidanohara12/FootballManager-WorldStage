@@ -14,6 +14,7 @@ interface StatsProps {
 
 export function Stats({ allTeams, manager, leagues, tournaments, internationalTournaments }: StatsProps) {
     const managerTeam = allTeams.find(team => team.name === manager.team);
+    console.log(managerTeam);
     const managerLeague = leagues.find((league) => league.teams?.find((team) => team.Team.name === manager.team));
     const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.Team.name === manager.team));
     const managerInternationalTournaments = internationalTournaments.find((tournament) => tournament.teams?.find((team) => team.Team.team.name === manager.country));
@@ -23,7 +24,7 @@ export function Stats({ allTeams, manager, leagues, tournaments, internationalTo
         ? [managerLeague, ...leagues.filter((league) => league !== managerLeague)]
         : leagues;
 
-    const [selectedOption ] = useState<string>("Leagues");
+    const [selectedOption] = useState<string>("Leagues");
 
     const [selectedLeague, setSelectedLeague] = useState<League | null>(managerLeague ?? null);
     const [selectedTournament] = useState<Tournament | null>(managerTournament ?? null);
@@ -72,7 +73,7 @@ export function Stats({ allTeams, manager, leagues, tournaments, internationalTo
                                 ))}
                             </select>
                         </div>
-                        <StatsTable leaguePlayers={getLeaguePlayers()} managerTeam={managerTeam} selectedLeague={selectedLeague} />
+                        <StatsTable leaguePlayers={getLeaguePlayers()} managerTeam={managerTeam ?? allTeams[0]} selectedLeague={selectedLeague} />
                     </div>
                 </div>
             </div>

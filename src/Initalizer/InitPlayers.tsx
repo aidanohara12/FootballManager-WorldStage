@@ -163,6 +163,8 @@ function createRandomPlayer(position: string, team: string, countryName?: string
         contract: {
             4: playerValue,
         },
+        startingNational: false,
+        startingTeam: false,
         leagueGoals: 0,
         leagueAssists: 0,
         countryGoals: 0,
@@ -321,6 +323,7 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
             },
             color: teamData.color,
             players: [],
+            form: [],
             moneyToSpend: 250
         };
 
@@ -332,6 +335,7 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
             if (league.name === teamData.league) {
                 league?.teams?.push({
                     Team: newTeam,
+                    Schedule: [],
                     League: league,
                     points: 0,
                     wins: 0,
@@ -380,7 +384,8 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
                 },
                 color: '',
                 players: [],
-                moneyToSpend: 0
+                moneyToSpend: 0,
+                form: []
             },
             country: countryData.country
         };

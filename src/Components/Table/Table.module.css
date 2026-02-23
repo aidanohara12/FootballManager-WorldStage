@@ -1,0 +1,114 @@
+.tableContainer {
+    min-width: 350px;
+    margin: 0 auto;
+}
+
+.table {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1.5px solid var(--primary-color, #00A86B);
+    overflow: hidden;
+    font-size: 0.7rem;
+}
+
+.tableHeader {
+    background: linear-gradient(135deg, var(--primary-color, #00A86B) 0%, #008f5d 100%);
+    padding: 0.35rem 0.5rem;
+}
+
+.tableHeaderRow {
+    display: flex;
+    align-items: center;
+}
+
+.tableHeaderCell {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tableHeaderCell:first-child {
+    flex: 2.5;
+}
+
+.tableHeaderCell:not(:first-child) {
+    flex: 1;
+    text-align: center;
+}
+
+.tableBody {
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.tableBody::-webkit-scrollbar {
+    width: 4px;
+}
+
+.tableBody::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #00A86B);
+    border-radius: 4px;
+}
+
+.tableRow {
+    display: flex;
+    align-items: center;
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tableRow:last-child {
+    border-bottom: none;
+}
+
+.tableRow:hover {
+    background: #e8f5e9;
+}
+
+.tableRow:nth-child(even) {
+    background: #fafafa;
+}
+
+.tableRow:nth-child(even):hover {
+    background: #e8f5e9;
+}
+
+.teamName {
+    flex: 2.5;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--secondary-color, #1A1A1A);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.statCell {
+    flex: 1;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--secondary-color, #1A1A1A);
+}
+
+.goalDifference {
+    flex: 1;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.positive {
+    color: var(--primary-color, #00A86B);
+}
+
+.negative {
+    color: #e53935;
+}
+
+.neutral {
+    color: #888;
+}

@@ -19,6 +19,7 @@ const currentTeam = signal<string>("Club");
 
 export function TeamView({ allTeams, nationalTeams, userManager }: TeamViewProps) {
     useSignals();
+    console.log("teamView", allTeams.value);
 
     useEffect(() => {
         clubTeam.value = allTeams.value.find((t) => t.name === userManager.value.team) ?? null;
