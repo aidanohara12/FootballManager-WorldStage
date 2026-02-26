@@ -5,16 +5,18 @@ import type { Signal } from "@preact/signals-react";
 
 interface FormationProps {
     currentTeam: Team;
+    playersMap: Map<string, Player>;
     selectedPlayer: Signal<Player | null>;
     clubTeam: boolean;
 }
 
-export function Formation({ currentTeam, selectedPlayer, clubTeam }: FormationProps) {
-    const currentTeamForwards = currentTeam.players?.filter((p) => p.position === "Forward").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
-    const currentTeamMidfielders = currentTeam.players?.filter((p) => p.position === "Midfielder").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
-    const currentTeamDefenders = currentTeam.players?.filter((p) => p.position === "Defender").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
-    const currentTeamGoalkeepers = currentTeam.players?.filter((p) => p.position === "Goalkeeper").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
-    const currentTeamBench = currentTeam.players?.filter((p) => clubTeam ? !p.startingTeam : !p.startingNational).sort((a, b) => b.overall - a.overall);
+export function Formation({ currentTeam, playersMap, selectedPlayer, clubTeam }: FormationProps) {
+    const allPlayers = currentTeam.players.map((name) => playersMap.get(name)!).filter(Boolean);
+    const currentTeamForwards = allPlayers.filter((p) => p.position === "Forward").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamMidfielders = allPlayers.filter((p) => p.position === "Midfielder").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamDefenders = allPlayers.filter((p) => p.position === "Defender").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamGoalkeepers = allPlayers.filter((p) => p.position === "Goalkeeper").filter((p) => clubTeam ? p.startingTeam : p.startingNational);
+    const currentTeamBench = allPlayers.filter((p) => clubTeam ? !p.startingTeam : !p.startingNational).sort((a, b) => b.overall - a.overall);
     return (
         <div className={styles.formation}>
             <div className={styles.starters}>

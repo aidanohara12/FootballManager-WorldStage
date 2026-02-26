@@ -1,5 +1,6 @@
 import { type Signal } from "@preact/signals-react";
-import type { currentYear } from "../Models/WorldStage";
+import type { Achievements, currentYear, League, Manager, ManagerHistory, Match, Player, Team } from "../Models/WorldStage";
+import { createSchedule, finishSeason } from "./CreateSchedule";
 
 export const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const daysOfTheMonth: Record<string, number> = {
@@ -39,7 +40,7 @@ export function getNextDay(currentDay: string): string {
     }
 }
 
-export function moveToNextDay(currentYear: Signal<currentYear>) {
+export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Record<string, boolean>, leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, manager: Signal<Manager>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>) {
     const cur = currentYear.value;
     const nextDayOfWeek = getNextDay(cur.currentDayOfWeek);
     const maxDays = daysOfTheMonth[cur.currentMonth];
@@ -49,9 +50,11 @@ export function moveToNextDay(currentYear: Signal<currentYear>) {
     let yearsCompleted = cur.yearsCompleted;
     if (currentYear.value.currentDayOfWeek === "Monday") {
         if (currentYear.value.leagueWeek === 38) {
+            finishSeason(leagues, manager, currentYear, teamsMap, playerMap, managerHistory, achievements);
             currentYear.value.leagueWeek = 0;
+        } else if (currentYear.value.leagueWeek > 0) {
+            currentYear.value.leagueWeek++;
         }
-        currentYear.value.leagueWeek++;
     }
 
     if (nextDay > maxDays) {
@@ -66,7 +69,18 @@ export function moveToNextDay(currentYear: Signal<currentYear>) {
     }
 
     if (nextMonth === "August" && nextDay === 1) {
-        yearsCompleted = cur.yearsCompleted + 1;
+        currentYear.value.leagueWeek = 1;
+        leagues.value.forEach((league: League) => {
+            const fullSchedule = createSchedule(league, currentYear);
+            league.teams.forEach((teamName: string) => {
+                const team = teamsMap.value.get(teamName);
+                if (team) {
+                    team.Schedule = fullSchedule.filter(
+                        (m: Match) => m.homeTeamName === teamName || m.awayTeamName === teamName
+                    ).sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                }
+            });
+        });
     }
 
     currentYear.value = {
@@ -77,4 +91,9 @@ export function moveToNextDay(currentYear: Signal<currentYear>) {
         year: nextYear,
         yearsCompleted,
     };
+
+    const nextMonthNumber = months.indexOf(nextMonth) + 1;
+    const nextDayString = `${String(nextMonthNumber).padStart(2, "0")}/${String(nextDay).padStart(2, "0")}/${nextYear}`;
+
+    isSimulated[nextDayString] = false;
 }

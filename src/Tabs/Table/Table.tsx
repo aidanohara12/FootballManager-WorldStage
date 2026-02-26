@@ -6,17 +6,17 @@ import { ShowInternationalTournamentTable } from "../../Components/Table/ShowTab
 import styles from "./Table.module.css";
 
 interface TableProps {
-    allTeams: Team[];
+    teamsMap: Map<string, Team>;
     manager: Manager;
     leagues: League[];
     tournaments: Tournament[];
     internationalTournaments: InternationalTournament[];
 }
 
-export function Table({ allTeams, manager, leagues, tournaments, internationalTournaments }: TableProps) {
-    const managerLeague = leagues.find((league) => league.teams?.find((team) => team.Team.name === manager.team));
-    const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.Team.name === manager.team));
-    const managerInternationalTournaments = internationalTournaments.find((tournament) => tournament.teams?.find((team) => team.Team.team.name === manager.country));
+export function Table({ teamsMap, manager, leagues, tournaments, internationalTournaments }: TableProps) {
+    const managerLeague = leagues.find((league) => league.teams?.includes(manager.team));
+    const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.team));
+    const managerInternationalTournaments = internationalTournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.country));
 
     // Sorted arrays with user's league/tournament first
     const sortedLeagues = managerLeague
@@ -69,7 +69,8 @@ export function Table({ allTeams, manager, leagues, tournaments, internationalTo
         return undefined;
     }
     //get the teams for the selected league
-    const leagueTeams = leagues.find((league) => league.name === selectedLeague?.name)?.teams;
+    const leagueTeamNames = leagues.find((league) => league.name === selectedLeague?.name)?.teams;
+    const leagueTeams = leagueTeamNames?.map((name) => teamsMap.get(name)).filter((t): t is Team => !!t);
     //get the teams for the selected tournament
     const tournamentTeams = tournaments.find((tournament) => tournament.name === selectedTournament?.name)?.teams;
     const tournamentMatches = tournaments.find((tournament) => tournament.name === selectedTournament?.name)?.matches;
@@ -98,7 +99,7 @@ export function Table({ allTeams, manager, leagues, tournaments, internationalTo
                                 ))}
                             </select>
                         </div>
-                        <ShowLeagueTable leagueTitle={getLeague()} leageTeams={leagueTeams} />
+                        <ShowLeagueTable leagueTitle={getLeague()} leageTeams={leagueTeams} managerTeam={teamsMap.get(manager.team)!} />
                     </div>
                 )}
 

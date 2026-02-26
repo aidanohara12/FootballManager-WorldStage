@@ -13,6 +13,11 @@ export interface Week {
     weekDays: Record<string, number>;
 }
 
+export interface trophy {
+    trophy: string;
+    trophyType: string;
+}
+
 export interface Player {
     name: string;
     position: string;
@@ -48,7 +53,7 @@ export interface Manager {
     careerWins: number;
     careerLosses: number;
     careerDraws: number;
-    trophiesWon: string[];
+    trophiesWon: trophy[];
 }
 
 export interface Team {
@@ -56,19 +61,10 @@ export interface Team {
     league?: string;
     manager: Manager;
     color: string;
-    players: Player[];
+    players: string[];
     moneyToSpend: number;
     form: string[];
-}
-
-export interface NationalTeam {
-    team: Team;
-    country: string;
-}
-
-export interface LeagueTeam {
-    Team: Team;
-    League: League;
+    leagueName: string;
     Schedule: Match[];
     points: number;
     wins: number;
@@ -78,16 +74,21 @@ export interface LeagueTeam {
     goalsAgainst: number;
 }
 
+export interface NationalTeam {
+    team: Team;
+    country: string;
+}
+
 export interface Match {
-    homeTeam: Team;
-    awayTeam: Team;
+    homeTeamName: string;
+    awayTeamName: string;
     date: string;
     homeScore: number;
     awayScore: number;
-    homeScorers: Player[];
-    awayScorers: Player[];
-    homeAssists: Player[];
-    awayAssists: Player[];
+    homeScorers: [string, string][];
+    awayScorers: [string, string][];
+    homeAssists: [string, string][];
+    awayAssists: [string, string][];
     isLeagueMatch: boolean;
     isTournamentMatch: boolean;
     isInternationalMatch: boolean;
@@ -95,9 +96,9 @@ export interface Match {
 
 export interface League {
     name: string;
-    teams: LeagueTeam[];
+    teams: string[];
     matches: Match[];
-    pastChampions: LeagueTeam[];
+    pastChampions: string[];
 }
 
 export interface InternationalFriendly {
@@ -106,14 +107,14 @@ export interface InternationalFriendly {
 }
 
 export interface TournamentTeam {
-    Team: Team;
-    Tournament: Tournament;
+    teamName: string;
+    tournamentName: string;
     nextRound: boolean;
 }
 
 export interface InternationalTournamentTeam {
-    Team: NationalTeam;
-    Tournament: InternationalTournament;
+    teamName: string;
+    tournamentName: string;
     nextRound: boolean;
 }
 
@@ -133,14 +134,13 @@ export interface Tournament {
 }
 
 export interface WorldCupTeam {
-    Team: NationalTeam;
-    Tournament: WorldCup;
+    teamName: string;
     nextRound: boolean;
 }
 
 export interface WorldCupGroup {
     name: string;
-    teams: InternationalTournamentTeam[];
+    teams: WorldCupTeam[];
 }
 
 export interface WorldCup {
@@ -174,16 +174,14 @@ export interface Achievements {
 }
 
 export interface yearPlayerStats {
-    player: Player;
+    stat: string;
+    player: string;
     goals: number;
     assists: number;
     cleanSheets: number;
 }
 
 export interface ManagerHistory {
-    topGoalScorrers: Player[];
-    topAssistScorrers: Player[];
-    topCleanSheets: Player[];
     topGoalScorersByYear: Record<number, yearPlayerStats>;
     topAssistScorersByYear: Record<number, yearPlayerStats>;
     topCleanSheetsByYear: Record<number, yearPlayerStats>;

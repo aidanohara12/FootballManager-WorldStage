@@ -112,3 +112,17 @@
 .neutral {
     color: #888;
 }
+
+.managerTeam {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+    border-left: 3px solid #3b82f6;
+}
+
+.managerTeam:hover {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.25), rgba(59, 130, 246, 0.1));
+}
+
+.managerText {
+    color: #3b82f6 !important;
+    font-weight: 600;
+}

@@ -1,18 +1,17 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { signal } from "@preact/signals-react"
 import { InitPlayers } from "../../Initalizer/InitPlayers";
-import type { Achievements, InternationalTournament, League, LeagueTeam, Manager, ManagerHistory, Match, NationalTeam, Player, Team, Tournament, WorldCup, currentYear } from "../../Models/WorldStage";
+import type { Achievements, InternationalTournament, League, Manager, ManagerHistory, NationalTeam, Player, Team, Tournament, WorldCup, currentYear } from "../../Models/WorldStage";
 import { StartingPage } from "../StartingPage/StartingPage";
 import { MainPage } from "../MainPage/MainPage";
 import { CreateManager } from "../CreateManager/CreateManager";
 import styles from "./LayoutPage.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
-import { createSchedule } from "../../Utils/CreateSchedule";
-import AllTeams from "../../Models/Teams";
 
 const currentPage = signal<string>("StartingPage");
 const allPlayers = signal<Player[]>([]);
-const clubTeams = signal<Team[]>([]);
+const teamsMap = signal<Map<string, Team>>(new Map());
+const playersMap = signal<Map<string, Player>>(new Map());
 const nationalTeams = signal<NationalTeam[]>([]);
 const userManager = signal<Manager>({
     name: "",
@@ -86,7 +85,8 @@ export function LayoutPage() {
 
     const handleInit = () => {
         const players: Player[] = [];
-        const clubs: Team[] = [];
+        const teamsMapTemp = new Map<string, Team>();
+        const playersMapTemp = new Map<string, Player>();
         const nations: NationalTeam[] = [];
         const leaguesTemp: League[] = [];
         const tournamentsTemp: Tournament[] = [];
@@ -100,10 +100,11 @@ export function LayoutPage() {
         };
 
 
-        InitPlayers(players, clubs, nations, leaguesTemp, tournamentsTemp, internationalTournamentsTemp, worldCupTemp);
+        InitPlayers(players, teamsMapTemp, playersMapTemp, nations, leaguesTemp, tournamentsTemp, internationalTournamentsTemp, worldCupTemp);
 
         allPlayers.value = players;
-        clubTeams.value = clubs;
+        teamsMap.value = teamsMapTemp;
+        playersMap.value = playersMapTemp;
         nationalTeams.value = nations;
         leagues.value = leaguesTemp;
         tournaments.value = tournamentsTemp;
@@ -124,9 +125,8 @@ export function LayoutPage() {
         return (
             <div className={styles.layoutPageContainer}>
                 <CreateManager
-                    allTeams={clubTeams}
+                    teamsMap={teamsMap}
                     nationalTeams={nationalTeams}
-                    leagues={leagues}
                     userManager={userManager}
                     currentPage={currentPage}
                 />
@@ -137,7 +137,8 @@ export function LayoutPage() {
             <div className={styles.layoutPageContainer}>
                 <MainPage
                     allPlayers={allPlayers}
-                    allTeams={clubTeams}
+                    teamsMap={teamsMap}
+                    playersMap={playersMap}
                     nationalTeams={nationalTeams}
                     userManager={userManager}
                     leagues={leagues}

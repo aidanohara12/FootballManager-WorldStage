@@ -1,5 +1,5 @@
 import { type currentYear } from './../Models/WorldStage';
-import type { League, Team, Match } from "../Models/WorldStage";
+import type { Achievements, League, Manager, ManagerHistory, Match, NationalTeam, Player, Team, yearPlayerStats } from "../Models/WorldStage";
 import type { Signal } from '@preact/signals-react';
 
 export function createSchedule(league: League, currentYear: Signal<currentYear>): Match[] {
@@ -61,7 +61,12 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
 
     // Generate Saturday dates starting from Aug 2, 2025 (one game per week)
     const weekendDates: Date[] = [];
-    const seasonStart = new Date(2025, 7, 2); // Aug 2, 2025 (Saturday)
+    const year = currentYear.value.year;
+    // Find the first Saturday in August
+    const aug1 = new Date(year, 7, 1);
+    const dayOfWeek = aug1.getDay(); // 0=Sun, 6=Sat
+    const firstSaturday = dayOfWeek === 6 ? 1 : 1 + ((6 - dayOfWeek + 7) % 7);
+    const seasonStart = new Date(year, 7, firstSaturday);
     let current = new Date(seasonStart);
 
     while (weekendDates.length < rounds.length) {
@@ -82,8 +87,8 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
         const matchDate = formatDate(weekendDates[r]);
         for (const fixture of round) {
             const match: Match = {
-                homeTeam: teams[fixture.home].Team,
-                awayTeam: teams[fixture.away].Team,
+                homeTeamName: teams[fixture.home],
+                awayTeamName: teams[fixture.away],
                 date: matchDate,
                 homeScore: 0,
                 awayScore: 0,
@@ -100,4 +105,147 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
     }
 
     return schedule;
+}
+
+export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>, currentYear: Signal<currentYear>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>): void {
+    // Increment yearsCompleted before checking achievements so season-count checks work
+    currentYear.value = {
+        ...currentYear.value,
+        yearsCompleted: currentYear.value.yearsCompleted + 1,
+    };
+
+    leagues.value.forEach(league => {
+        league.teams.forEach(team => {
+            const curTeam = teamsMap.value.get(team);
+            if (curTeam) {
+                if(curTeam.manager.name === manager.value.name) {
+                    checkAchievements(manager, currentYear, achievements, teamsMap, playerMap);
+                }
+                if (curTeam.manager.name === manager.value.name) {
+                    let allPlayers: Player[] = [];
+                    curTeam.players.forEach(player => {
+                        const curPlayer = playerMap.value.get(player);
+                        if (curPlayer) {
+                            allPlayers.push(curPlayer);
+                        }
+                    });
+                    const topGoalScorer = [...allPlayers].sort((a, b) => b.totalGoals - a.totalGoals)[0];
+                    const topAssistScorer = [...allPlayers].sort((a, b) => b.totalAssists - a.totalAssists)[0];
+                    const topCleanSheets = [...allPlayers].sort((a, b) => b.cleanSheets - a.cleanSheets)[0];
+                    const goalPlayerStats: yearPlayerStats = {
+                        stat: "Goals",
+                        player: topGoalScorer.name,
+                        goals: topGoalScorer.totalGoals,
+                        assists: 0,
+                        cleanSheets: 0
+                    };
+                    const assistPlayerStats: yearPlayerStats = {
+                        stat: "Assists",
+                        player: topAssistScorer.name,
+                        goals: 0,
+                        assists: topAssistScorer.totalAssists,
+                        cleanSheets: 0
+                    };
+                    const cleanSheetPlayerStats: yearPlayerStats = {
+                        stat: "Clean Sheets",
+                        player: topCleanSheets.name,
+                        goals: 0,
+                        assists: 0,
+                        cleanSheets: topCleanSheets.cleanSheets
+                    };
+                    managerHistory.value = {
+                        topGoalScorersByYear: { ...managerHistory.value.topGoalScorersByYear, [currentYear.value.year]: goalPlayerStats },
+                        topAssistScorersByYear: { ...managerHistory.value.topAssistScorersByYear, [currentYear.value.year]: assistPlayerStats },
+                        topCleanSheetsByYear: { ...managerHistory.value.topCleanSheetsByYear, [currentYear.value.year]: cleanSheetPlayerStats },
+                    };
+                }
+                // Reset stats after recording history
+                curTeam.points = 0;
+                curTeam.wins = 0;
+                curTeam.losses = 0;
+                curTeam.draws = 0;
+                curTeam.goalsFor = 0;
+                curTeam.goalsAgainst = 0;
+                curTeam.form = [];
+                curTeam.Schedule = [];
+            }
+        });
+    });
+
+}
+
+export function checkAchievements(manager: Signal<Manager>, currentYear: Signal<currentYear>, achievements: Signal<Achievements>, teamMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>): void {
+    const updated = { ...achievements.value };
+
+    if (currentYear.value.yearsCompleted >= 1) {
+        updated.playFirstSeason = true;
+        updated.playFirstTournament = true;
+    }
+    if (currentYear.value.yearsCompleted >= 10) {
+        updated.play10Seasons = true;
+    }
+    if (currentYear.value.yearsCompleted >= 50) {
+        updated.play50Seasons = true;
+    }
+    if (currentYear.value.yearsCompleted >= 100) {
+        updated.play100Seasons = true;
+    }
+    const leaguesWon = manager.value.trophiesWon.filter(trophy => trophy.trophyType === "League").length;
+    const internationalTournamentsWon = manager.value.trophiesWon.filter(trophy => trophy.trophyType === "International Tournament").length;
+    if (leaguesWon >= 1) {
+        updated.winTheLeague = true;
+    }
+    if (leaguesWon >= 10) {
+        updated.win10Leagues = true;
+    }
+    if (leaguesWon >= 50) {
+        updated.win50Leagues = true;
+    }
+    const managerTeam = teamMap.value.get(manager.value.team);
+    if (!managerTeam) {
+        achievements.value = updated;
+        return;
+    }
+    if (managerTeam.points >= 100) {
+        updated.get100Points = true;
+    }
+    if (managerTeam.losses === 0) {
+        updated.invincibleSeason = true;
+    }
+    if (internationalTournamentsWon >= 1) {
+        updated.winAnInternationalTournament = true;
+    }
+    if (manager.value.trophiesWon.length >= 1) {
+        updated.winFirstTrophy = true;
+    }
+    const wonWorldCup = manager.value.trophiesWon.filter(trophy => trophy.trophyType === "World Cup").length;
+    if (wonWorldCup >= 1) {
+        updated.winTheWorldCup = true;
+    }
+    if (manager.value.trophiesWon.length >= 10) {
+        updated.win10Trophies = true;
+    }
+    if (manager.value.trophiesWon.length >= 50) {
+        updated.win50Trophies = true;
+    }
+    const managerPlayers = managerTeam.players.map(player => playerMap.value.get(player));
+    if (!managerPlayers) {
+        achievements.value = updated;
+        return;
+    }
+    const overall99 = managerPlayers.filter(player => player ? player.overall >= 99 : false).length;
+    const potential99 = managerPlayers.filter(player => player ? player.potential >= 99 : false).length;
+    if (overall99 >= 1) {
+        updated.getA99Overall = true;
+    }
+    if (potential99 >= 1) {
+        updated.getA99Potential = true;
+    }
+
+    achievements.value = updated;
+}
+
+
+export function improvePlayer(player: Player): void {
+
 }

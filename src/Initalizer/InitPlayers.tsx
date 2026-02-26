@@ -2,7 +2,7 @@ import { Top50Countries } from "../Models/Countries";
 import AllTeams from "../Models/Teams";
 import { firstNames } from "../Models/Names/FirstNames";
 import { lastNames } from "../Models/Names/LastNames";
-import { type Player, type Team, type NationalTeam, type League, type Tournament, type LeagueTeam, type InternationalFriendly, type InternationalTournament, type TournamentTeam, type WorldCup, type WorldCupGroup } from "../Models/WorldStage";
+import { type Player, type Team, type NationalTeam, type League, type Tournament, type InternationalTournament, type WorldCup } from "../Models/WorldStage";
 
 function getRandomPlayerName() {
     const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
@@ -178,34 +178,47 @@ function createRandomPlayer(position: string, team: string, countryName?: string
     return player;
 }
 
-function createPlayersForTeam(team: Team, AllPlayers: Player[]) {
+function createUniquePlayer(position: string, teamName: string, PlayersMap: Map<string, Player>, countryName?: string): Player {
+    let player = createRandomPlayer(position, teamName, countryName);
+    while (PlayersMap.has(player.name)) {
+        player = createRandomPlayer(position, teamName, countryName);
+        player.name = getRandomPlayerName();
+    }
+    return player;
+}
+
+function addPlayer(position: string, teamName: string, players: Player[], AllPlayers: Player[], PlayersMap: Map<string, Player>, countryName?: string) {
+    const player = createUniquePlayer(position, teamName, PlayersMap, countryName);
+    players.push(player);
+    AllPlayers.push(player);
+    PlayersMap.set(player.name, player);
+}
+
+function createPlayersForTeam(team: Team, AllPlayers: Player[], PlayersMap: Map<string, Player>) {
     const players: Player[] = [];
 
     //create forwards
     for (let i = 0; i < 5; i++) {
-        players.push(createRandomPlayer("Forward", team.name));
+        addPlayer("Forward", team.name, players, AllPlayers, PlayersMap);
     }
     //create midfielders
     for (let i = 0; i < 5; i++) {
-        players.push(createRandomPlayer("Midfielder", team.name));
+        addPlayer("Midfielder", team.name, players, AllPlayers, PlayersMap);
     }
     //create defenders
     for (let i = 0; i < 6; i++) {
-        players.push(createRandomPlayer("Defender", team.name));
+        addPlayer("Defender", team.name, players, AllPlayers, PlayersMap);
     }
     //create goalkeepers
     for (let i = 0; i < 2; i++) {
-        players.push(createRandomPlayer("Goalkeeper", team.name));
+        addPlayer("Goalkeeper", team.name, players, AllPlayers, PlayersMap);
     }
 
-    // Assign players to THIS team object
-    team.players = players;
-
-    // Add all players to the global player list
-    AllPlayers.push(...players);
+    // Assign player names to team
+    team.players = players.map((p) => p.name);
 }
 
-function getNationalTeamPlayers(nation: string, AllPlayers: Player[]) {
+function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap: Map<string, Player>): string[] {
     const nationalTeamPlayers = AllPlayers.filter((player: Player) => player.country === nation);
 
     let forwardCount = 0;
@@ -228,37 +241,41 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[]) {
 
     // Fill in missing positions
     while (forwardCount < 5) {
-        const player = createRandomPlayer("Forward", "Free Agent", nation);
+        const player = createUniquePlayer("Forward", "Free Agent", PlayersMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
+        PlayersMap.set(player.name, player);
         forwardCount++;
     }
 
     while (midfielderCount < 5) {
-        const player = createRandomPlayer("Midfielder", "Free Agent", nation);
+        const player = createUniquePlayer("Midfielder", "Free Agent", PlayersMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
+        PlayersMap.set(player.name, player);
         midfielderCount++;
     }
 
     while (defenderCount < 6) {
-        const player = createRandomPlayer("Defender", "Free Agent", nation);
+        const player = createUniquePlayer("Defender", "Free Agent", PlayersMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
+        PlayersMap.set(player.name, player);
         defenderCount++;
     }
 
     while (goalkeeperCount < 2) {
-        const player = createRandomPlayer("Goalkeeper", "Free Agent", nation);
+        const player = createUniquePlayer("Goalkeeper", "Free Agent", PlayersMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
+        PlayersMap.set(player.name, player);
         goalkeeperCount++;
     }
 
-    return nationalTeamPlayers;
+    return nationalTeamPlayers.map((p) => p.name);
 }
 
-export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[], WorldCup: WorldCup) {
+export function InitPlayers(AllPlayers: Player[], TeamsMap: Map<string, Team>, PlayersMap: Map<string, Player>, NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[], WorldCup: WorldCup) {
     // Initialize leagues - get unique league names and create league objects
     const uniqueLeagues = [...new Set(AllTeams.map((t) => t.league))];
 
@@ -324,26 +341,24 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
             color: teamData.color,
             players: [],
             form: [],
-            moneyToSpend: 250
+            moneyToSpend: 250,
+            leagueName: teamData.league,
+            Schedule: [],
+            points: 0,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
         };
 
-        // Add to ClubTeams array
-        ClubTeams.push(newTeam);
+        // Add to TeamsMap
+        TeamsMap.set(newTeam.name, newTeam);
 
-        // Add to Leagues array as LeagueTeam
+        // Add team name to Leagues array
         Leagues.forEach((league: League) => {
             if (league.name === teamData.league) {
-                league?.teams?.push({
-                    Team: newTeam,
-                    Schedule: [],
-                    League: league,
-                    points: 0,
-                    wins: 0,
-                    losses: 0,
-                    draws: 0,
-                    goalsFor: 0,
-                    goalsAgainst: 0,
-                });
+                league?.teams?.push(newTeam.name);
             }
         });
 
@@ -351,15 +366,15 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
         Tournaments.forEach((tournament: Tournament) => {
             if (tournament.name === teamData.tournament) {
                 tournament?.teams?.push({
-                    Team: newTeam,
-                    Tournament: tournament,
+                    teamName: newTeam.name,
+                    tournamentName: tournament.name,
                     nextRound: true,
                 });
             }
         });
 
         // Create players for this team (will update newTeam.players)
-        createPlayersForTeam(newTeam, AllPlayers);
+        createPlayersForTeam(newTeam, AllPlayers, PlayersMap);
     });
 
     // Initialize National Teams
@@ -385,21 +400,32 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
                 color: '',
                 players: [],
                 moneyToSpend: 0,
-                form: []
+                form: [],
+                leagueName: '',
+                Schedule: [],
+                points: 0,
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                goalsFor: 0,
+                goalsAgainst: 0,
             },
             country: countryData.country
         };
 
         // Get players for this national team
-        const players = getNationalTeamPlayers(countryData.country, AllPlayers);
-        nationalTeam.team.players = players;
+        const playerNames = getNationalTeamPlayers(countryData.country, AllPlayers, PlayersMap);
+        nationalTeam.team.players = playerNames;
+
+        // Add national team to TeamsMap
+        TeamsMap.set(nationalTeam.team.name, nationalTeam.team);
 
         // Add to International Tournaments array
         InternationalTournaments.forEach((tournament: InternationalTournament) => {
             if (countryData.tournaments.includes(tournament.name)) {
                 tournament?.teams?.push({
-                    Team: nationalTeam,
-                    Tournament: tournament,
+                    teamName: nationalTeam.country,
+                    tournamentName: tournament.name,
                     nextRound: true,
                 });
             }
@@ -407,8 +433,7 @@ export function InitPlayers(AllPlayers: Player[], ClubTeams: Team[], NationalTea
 
         // Add to WorldCup array
         WorldCup.teams.push({
-            Team: nationalTeam,
-            Tournament: WorldCup,
+            teamName: nationalTeam.country,
             nextRound: true,
         });
 

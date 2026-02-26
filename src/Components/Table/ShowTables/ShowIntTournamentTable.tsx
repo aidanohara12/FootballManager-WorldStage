@@ -31,7 +31,7 @@ function getWinner(matchup: Matchup): string {
 
 function buildBracket(teams: InternationalTournamentTeam[], matches: Match[]): Matchup[][] {
     const rounds: Matchup[][] = [];
-    const teamNames = teams.map(t => t.Team.team.name);
+    const teamNames = teams.map(t => t.teamName);
     const totalTeams = teamNames.length;
 
     if (totalTeams < 2) return rounds;
@@ -45,14 +45,14 @@ function buildBracket(teams: InternationalTournamentTeam[], matches: Match[]): M
 
         const match = matches.find(
             m =>
-                (m.homeTeam.name === home && m.awayTeam.name === away) ||
-                (m.homeTeam.name === away && m.awayTeam.name === home)
+                (m.homeTeamName === home && m.awayTeamName === away) ||
+                (m.homeTeamName === away && m.awayTeamName === home)
         );
 
         if (match) {
             firstRound.push({
-                home: match.homeTeam.name,
-                away: match.awayTeam.name,
+                home: match.homeTeamName,
+                away: match.awayTeamName,
                 homeScore: match.homeScore,
                 awayScore: match.awayScore,
             });
@@ -75,14 +75,14 @@ function buildBracket(teams: InternationalTournamentTeam[], matches: Match[]): M
 
             const match = matches.find(
                 m =>
-                    (m.homeTeam.name === home && m.awayTeam.name === away) ||
-                    (m.homeTeam.name === away && m.awayTeam.name === home)
+                    (m.homeTeamName === home && m.awayTeamName === away) ||
+                    (m.homeTeamName === away && m.awayTeamName === home)
             );
 
             if (match) {
                 nextRound.push({
-                    home: match.homeTeam.name,
-                    away: match.awayTeam.name,
+                    home: match.homeTeamName,
+                    away: match.awayTeamName,
                     homeScore: match.homeScore,
                     awayScore: match.awayScore,
                 });

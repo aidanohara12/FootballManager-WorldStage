@@ -1,18 +1,23 @@
-import type { LeagueTeam } from "../../Models/WorldStage";
+import type { Team } from "../../Models/WorldStage";
 import styles from "./Table.module.css";
 
 interface TableProps {
     leagueTitle: string | undefined;
-    leageTeams: LeagueTeam[] | undefined;
+    leageTeams: Team[] | undefined;
+    managerTeam?: Team;
 }
 
-export function MiniTable({ leagueTitle, leageTeams }: TableProps) {
-    function getTeamPoints(team: LeagueTeam) {
-        return team.points * 3 + team.draws;
+export function MiniTable({ leagueTitle, leageTeams, managerTeam }: TableProps) {
+    function getTeamPoints(team: Team) {
+        return team.points;
     }
 
-    function getTeamGoalDiff(team: LeagueTeam) {
+    function getTeamGoalDiff(team: Team) {
         return team.goalsFor - team.goalsAgainst;
+    }
+
+    function isManagerTeam(team: Team) {
+        return managerTeam && team.name === managerTeam.name;
     }
 
     return (
@@ -29,18 +34,18 @@ export function MiniTable({ leagueTitle, leageTeams }: TableProps) {
                     </div>
                 </div>
                 <div className={styles.tableBody}>
-                    {leageTeams?.sort((a, b) => getTeamPoints(b) - getTeamPoints(a)).sort((a, b) => getTeamGoalDiff(b) - getTeamGoalDiff(a)).map((team) => {
+                    {leageTeams?.sort((a, b) => getTeamGoalDiff(b) - getTeamGoalDiff(a)).sort((a, b) => getTeamPoints(b) - getTeamPoints(a)).map((team) => {
                         const goalDiff = team.goalsFor - team.goalsAgainst;
                         const goalDiffClass = goalDiff > 0 ? styles.positive : goalDiff < 0 ? styles.negative : styles.neutral;
 
                         return (
-                            <div key={team.Team.name} className={styles.tableRow}>
-                                <div className={styles.teamName}>{team.Team.name}</div>
-                                <div className={styles.statCell}>{team.points}</div>
-                                <div className={styles.statCell}>{team.wins}</div>
-                                <div className={styles.statCell}>{team.losses}</div>
-                                <div className={styles.statCell}>{team.draws}</div>
-                                <div className={`${styles.goalDifference} ${goalDiffClass}`}>
+                            <div key={team.name} className={`${styles.tableRow} ${isManagerTeam(team) ? styles.managerTeam : ''}`}>
+                                <div className={`${styles.teamName} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.name}</div>
+                                <div className={`${styles.statCell} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.points}</div>
+                                <div className={`${styles.statCell} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.wins}</div>
+                                <div className={`${styles.statCell} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.losses}</div>
+                                <div className={`${styles.statCell} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.draws}</div>
+                                <div className={`${styles.goalDifference} ${goalDiffClass} ${isManagerTeam(team) ? styles.managerText : ''}`}>
                                     {goalDiff > 0 ? `+${goalDiff}` : goalDiff}
                                 </div>
                             </div>

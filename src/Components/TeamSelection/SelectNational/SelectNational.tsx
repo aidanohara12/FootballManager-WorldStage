@@ -1,4 +1,4 @@
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 import { signal, type Signal } from "@preact/signals-react";
 import type { NationalTeam, Player } from "../../../Models/WorldStage.ts";
 import Top50Countries from "../../../Models/Countries.ts";
@@ -8,6 +8,7 @@ import { useSignals } from "@preact/signals-react/runtime";
 
 interface SelectNationalProps {
     nationalTeams: Signal<NationalTeam[]>;
+    playersMap: Signal<Map<string, Player>>;
     manager: Signal<Manager>;
     currentPage: Signal<string>;
 }
@@ -16,7 +17,7 @@ const selectedPlayers = signal<string[]>([]);
 const allSelectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 
-export function SelectNational({ nationalTeams, manager, currentPage }: SelectNationalProps) {
+export function SelectNational({ nationalTeams, playersMap, manager, currentPage }: SelectNationalProps) {
     useSignals();
 
     const positions = [
@@ -28,46 +29,40 @@ export function SelectNational({ nationalTeams, manager, currentPage }: SelectNa
 
     const currentPosition = positions[currentPositionIndex.value];
 
+    function getTeamPlayers(playerNames: string[]): Player[] {
+        return playerNames.map((name) => playersMap.value.get(name)!).filter(Boolean);
+    }
+
     function setNationalTeamStartingPlayers() {
-        const updatedTeams = nationalTeams.value.map((nt) => {
-            const updatedPlayers = nt.team.players?.map((p) => ({
-                ...p,
-                startingNational: false
-            }));
+        nationalTeams.value.forEach((nt) => {
+            const players = getTeamPlayers(nt.team.players);
+            players.forEach((p) => p.startingNational = false);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Forward")
+            players
+                .filter((p) => p.position === "Forward")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 3)
                 .forEach((p) => p.startingNational = true);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Midfielder")
+            players
+                .filter((p) => p.position === "Midfielder")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 3)
                 .forEach((p) => p.startingNational = true);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Defender")
+            players
+                .filter((p) => p.position === "Defender")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 4)
                 .forEach((p) => p.startingNational = true);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Goalkeeper")
+            players
+                .filter((p) => p.position === "Goalkeeper")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 1)
                 .forEach((p) => p.startingNational = true);
-
-            return {
-                ...nt,
-                team: {
-                    ...nt.team,
-                    players: updatedPlayers
-                }
-            };
         });
-        nationalTeams.value = updatedTeams;
+        nationalTeams.value = [...nationalTeams.value];
     }
 
     function handlePlayerToggle(playerName: string) {
@@ -93,24 +88,15 @@ export function SelectNational({ nationalTeams, manager, currentPage }: SelectNa
             currentPositionIndex.value = currentPositionIndex.value + 1;
             selectedPlayers.value = [];
         } else {
-            const updatedTeams = nationalTeams.value.map((nt) => {
-                if (nt.country !== manager.value.country) return nt;
-
-                const updatedPlayers = nt.team.players?.map((p) => ({
-                    ...p,
-                    startingNational: updatedAllSelected.includes(p.name)
-                }));
-
-                return {
-                    ...nt,
-                    team: {
-                        ...nt.team,
-                        players: updatedPlayers
-                    }
-                };
-            });
-
-            nationalTeams.value = updatedTeams;
+            // Set startingNational on player objects in playersMap
+            const managerNT = nationalTeams.value.find((nt) => nt.country === manager.value.country);
+            if (managerNT) {
+                const players = getTeamPlayers(managerNT.team.players);
+                players.forEach((p) => {
+                    p.startingNational = updatedAllSelected.includes(p.name);
+                });
+            }
+            nationalTeams.value = [...nationalTeams.value];
             currentPage.value = "SelectClub";
         }
     }
@@ -129,6 +115,9 @@ export function SelectNational({ nationalTeams, manager, currentPage }: SelectNa
         setNationalTeamStartingPlayers();
     }, []);
 
+    const managerNT = nationalTeams.value.find((nt) => nt.country === manager.value.country);
+    const managerNTPlayers = managerNT ? getTeamPlayers(managerNT.team.players) : [];
+
     return (
         <div className={styles.selectNationalContainer}>
             <h3>Select Your National Team Starters!</h3>
@@ -146,15 +135,15 @@ export function SelectNational({ nationalTeams, manager, currentPage }: SelectNa
                 ))}
             </div>
 
-            {nationalTeams.value.filter((nt) => nt.country === manager.value.country).map((nt) => (
-                <div key={nt.country} className={styles.teamCard}>
-                    <h4>{Top50Countries.find((c) => c.country === nt.country)?.flag} {nt.country} {Top50Countries.find((c) => c.country === nt.country)?.flag}</h4>
+            {managerNT && (
+                <div key={managerNT.country} className={styles.teamCard}>
+                    <h4>{Top50Countries.find((c) => c.country === managerNT.country)?.flag} {managerNT.country} {Top50Countries.find((c) => c.country === managerNT.country)?.flag}</h4>
 
                     <div className={styles.positionSection}>
                         <h5>{currentPosition.name}s</h5>
                         <div className={styles.playerList}>
-                            {nt.team.players
-                                ?.filter((p) => p.position === currentPosition.name)
+                            {managerNTPlayers
+                                .filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
                                 .map((p) => (
                                     <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
@@ -198,7 +187,7 @@ export function SelectNational({ nationalTeams, manager, currentPage }: SelectNa
                         </button>
                     </div>
                 </div>
-            ))}
+            )}
         </div>
     );
 }

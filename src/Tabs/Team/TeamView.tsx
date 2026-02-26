@@ -7,7 +7,8 @@ import { PlayerAttributesView } from "../../Components/Formation/PlayerAttribute
 import { useSignals } from "@preact/signals-react/runtime";
 
 interface TeamViewProps {
-    allTeams: Signal<Team[]>;
+    teamsMap: Signal<Map<string, Team>>;
+    playersMap: Signal<Map<string, Player>>;
     nationalTeams: Signal<NationalTeam[]>;
     userManager: Signal<Manager>;
 }
@@ -17,12 +18,11 @@ const nationalTeam = signal<Team | null>(null);
 const selectedPlayer = signal<Player | null>(null);
 const currentTeam = signal<string>("Club");
 
-export function TeamView({ allTeams, nationalTeams, userManager }: TeamViewProps) {
+export function TeamView({ teamsMap, playersMap, nationalTeams, userManager }: TeamViewProps) {
     useSignals();
-    console.log("teamView", allTeams.value);
 
     useEffect(() => {
-        clubTeam.value = allTeams.value.find((t) => t.name === userManager.value.team) ?? null;
+        clubTeam.value = teamsMap.value.get(userManager.value.team) ?? null;
         nationalTeam.value = nationalTeams.value.find((nt) => nt.country === userManager.value.country)?.team ?? null;
     }, []);
 
@@ -44,7 +44,7 @@ export function TeamView({ allTeams, nationalTeams, userManager }: TeamViewProps
             </div>
             <div className={styles.formation}>
                 {(currentTeam.value === "Club" ? clubTeam.value : nationalTeam.value) && (
-                    <Formation currentTeam={(currentTeam.value === "Club" ? clubTeam.value : nationalTeam.value)!} selectedPlayer={selectedPlayer} clubTeam={currentTeam.value === "Club"} />
+                    <Formation currentTeam={(currentTeam.value === "Club" ? clubTeam.value : nationalTeam.value)!} playersMap={playersMap.value} selectedPlayer={selectedPlayer} clubTeam={currentTeam.value === "Club"} />
                 )}
             </div>
 

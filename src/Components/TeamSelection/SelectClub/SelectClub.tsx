@@ -1,21 +1,22 @@
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 import { signal, type Signal } from "@preact/signals-react";
-import type { Team, League } from "../../../Models/WorldStage.ts";
+import type { Team, Player } from "../../../Models/WorldStage.ts";
 import type { Manager } from "../../../Models/WorldStage.ts";
 import styles from "./SelectClub.module.css";
 import { Top50Countries } from "../../../Models/Countries.ts";
 import { useSignals } from "@preact/signals-react/runtime";
 
 interface SelectClubProps {
-    teams: Signal<Team[]>;
-    leagues: Signal<League[]>;
+    teamsMap: Signal<Map<string, Team>>;
+    playersMap: Signal<Map<string, Player>>;
+    leagues: Signal<import("../../../Models/WorldStage.ts").League[]>;
     manager: Signal<Manager>;
     currentPage: Signal<string>;
 }
 const selectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 
-export function SelectClub({ teams, leagues, manager, currentPage }: SelectClubProps) {
+export function SelectClub({ teamsMap, playersMap, manager, currentPage }: SelectClubProps) {
     useSignals();
     const positions = [
         { name: "Forward", max: 3 },
@@ -26,54 +27,43 @@ export function SelectClub({ teams, leagues, manager, currentPage }: SelectClubP
 
     const currentPosition = positions[currentPositionIndex.value];
 
-    function syncLeagues(updatedTeams: Team[]) {
-        leagues.value = leagues.value.map((l) => ({
-            ...l,
-            teams: l.teams.map((lt) => {
-                const updated = updatedTeams.find((t) => t.name === lt.Team.name);
-                return updated ? { ...lt, Team: updated } : lt;
-            })
-        }));
+    function getTeamPlayers(team: Team): Player[] {
+        return team.players.map((name) => playersMap.value.get(name)!).filter(Boolean);
     }
 
     function setTeamStartingPlayers() {
-        const updatedTeams = teams.value.map((team) => {
-            const updatedPlayers = team.players?.map((p) => ({
-                ...p,
-                startingTeam: false
-            }));
+        teamsMap.value.forEach((team) => {
+            const players = getTeamPlayers(team);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Forward")
+            players.forEach((p) => p.startingTeam = false);
+
+            players
+                .filter((p) => p.position === "Forward")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 3)
                 .forEach((p) => p.startingTeam = true);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Midfielder")
+            players
+                .filter((p) => p.position === "Midfielder")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 3)
                 .forEach((p) => p.startingTeam = true);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Defender")
+            players
+                .filter((p) => p.position === "Defender")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 4)
                 .forEach((p) => p.startingTeam = true);
 
-            updatedPlayers
-                ?.filter((p) => p.position === "Goalkeeper")
+            players
+                .filter((p) => p.position === "Goalkeeper")
                 .sort((a, b) => b.overall - a.overall)
                 .slice(0, 1)
                 .forEach((p) => p.startingTeam = true);
-
-            return {
-                ...team,
-                players: updatedPlayers
-            };
         });
-        teams.value = updatedTeams;
-        syncLeagues(updatedTeams);
+
+        teamsMap.value = new Map(teamsMap.value);
+        playersMap.value = new Map(playersMap.value);
     }
 
     function handlePlayerToggle(playerName: string) {
@@ -92,24 +82,16 @@ export function SelectClub({ teams, leagues, manager, currentPage }: SelectClubP
             return;
         }
 
-        const updatedTeams = teams.value.map((team) => {
-            if (team.name !== manager.value.team) return team;
-
-            const updatedPlayers = team.players?.map((p) => {
+        const team = teamsMap.value.get(manager.value.team);
+        if (team) {
+            const players = getTeamPlayers(team);
+            players.forEach((p) => {
                 if (p.position === currentPosition.name) {
-                    return { ...p, startingTeam: selectedPlayers.value.includes(p.name) };
+                    p.startingTeam = selectedPlayers.value.includes(p.name);
                 }
-                return p;
             });
-
-            return {
-                ...team,
-                players: updatedPlayers
-            };
-        });
-
-        teams.value = updatedTeams;
-        syncLeagues(updatedTeams);
+            teamsMap.value = new Map(teamsMap.value);
+        }
 
         if (currentPositionIndex.value < positions.length - 1) {
             currentPositionIndex.value = currentPositionIndex.value + 1;
@@ -132,6 +114,9 @@ export function SelectClub({ teams, leagues, manager, currentPage }: SelectClubP
         setTeamStartingPlayers();
     }, []);
 
+    const managerTeam = teamsMap.value.get(manager.value.team);
+    const managerTeamPlayers = managerTeam ? getTeamPlayers(managerTeam) : [];
+
     return (
         <div className={styles.selectNationalContainer}>
             <h3>Select Your Club Team Starters!</h3>
@@ -149,15 +134,15 @@ export function SelectClub({ teams, leagues, manager, currentPage }: SelectClubP
                 ))}
             </div>
 
-            {teams.value.filter((team) => team.name === manager.value.team).map((team) => (
-                <div key={team.name} className={styles.teamCard}>
-                    <h4 style={{ color: team.color }}>{team.name}</h4>
+            {managerTeam && (
+                <div key={managerTeam.name} className={styles.teamCard}>
+                    <h4 style={{ color: managerTeam.color }}>{managerTeam.name}</h4>
 
                     <div className={styles.positionSection}>
                         <h5>{currentPosition.name}s</h5>
                         <div className={styles.playerList}>
-                            {team.players
-                                ?.filter((p) => p.position === currentPosition.name)
+                            {managerTeamPlayers
+                                .filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
                                 .map((p) => (
                                     <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
@@ -201,7 +186,7 @@ export function SelectClub({ teams, leagues, manager, currentPage }: SelectClubP
                         </button>
                     </div>
                 </div>
-            ))}
+            )}
         </div>
     );
 }

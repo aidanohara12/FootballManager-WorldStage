@@ -10,11 +10,11 @@ interface ManagerStatsProps {
 
 export function ManagerStats({ manager, managerHistory, currentYear }: ManagerStatsProps) {
     const [selectedOption, setSelectedOption] = useState<string>("Top Goal Scorers");
-    const leaderBoard = ["Top Goal Scorers", "Top Assist Scorers", "Top Clean Sheets", "Top Goal Scorers By Year", "Top Assist Scorers By Year", "Top Clean Sheets By Year"];
+    const leaderBoard = ["Top Goal Scorers By Year", "Top Assist Scorers By Year", "Top Clean Sheets By Year"];
     const [selectedYear, setSelectedYear] = useState<number>(currentYear);
 
     const allYears: number[] = [];
-    for (let y = currentYear; y >= 2025; y--) {
+    for (let y = currentYear; y >= 2026; y--) {
         allYears.push(y);
     }
 
@@ -33,63 +33,45 @@ export function ManagerStats({ manager, managerHistory, currentYear }: ManagerSt
                         <option key={index} value={leader}>{leader}</option>
                     ))}
                 </select>
-                {selectedOption === "Top Goal Scorers" && (
-                    <div className={styles.leaderBoard}>
-                        {managerHistory.topGoalScorrers.map((player, index) => (
-                            <div key={index} className={styles.player}>
-                                <div className={styles.playerName}>{player.name}</div>
-                                <div className={styles.playerGoals}>{player.totalGoals}</div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {selectedOption === "Top Assist Scorers" && (
-                    <div className={styles.leaderBoard}>
-                        {managerHistory.topGoalScorrers.map((player, index) => (
-                            <div key={index} className={styles.player}>
-                                <div className={styles.playerName}>{player.name}</div>
-                                <div className={styles.playerAssists}>{player.totalAssists}</div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-                {selectedOption === "Top Clean Sheets" && (
-                    <div className={styles.leaderBoard}>
-                        {managerHistory.topCleanSheets.map((player, index) => (
-                            <div key={index} className={styles.player}>
-                                <div className={styles.playerName}>{player.name}</div>
-                                <div className={styles.playerCleanSheets}>{player.cleanSheets}</div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+                    {allYears.map((year, index) => (
+                        <option key={index} value={year}>{year}</option>
+                    ))}
+                </select>
                 {selectedOption === "Top Goal Scorers By Year" && (
                     <div className={styles.leaderBoard}>
-                        <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-                            {allYears.map((year, index) => (
-                                <option key={index} value={year}>{year}</option>
-                            ))}
-                        </select>
-                        <div key={managerHistory.topGoalScorersByYear[selectedYear].player.name} className={styles.player}>
-                            <div className={styles.playerName}>{managerHistory.topGoalScorersByYear[selectedYear].player.name}</div>
-                            <div className={styles.playerGoals}>{managerHistory.topGoalScorersByYear[selectedYear].goals}</div>
-                        </div>
+                        {managerHistory.topGoalScorersByYear[selectedYear] ? (
+                            <div key={managerHistory.topGoalScorersByYear[selectedYear].player} className={styles.player}>
+                                <div className={styles.playerName}>{managerHistory.topGoalScorersByYear[selectedYear].player}</div>
+                                <div className={styles.playerGoals}>{managerHistory.topGoalScorersByYear[selectedYear].goals}</div>
+                            </div>
+                        ) : (
+                            <div className={styles.player}>No data for this year</div>
+                        )}
                     </div>
                 )}
                 {selectedOption === "Top Assist Scorers By Year" && (
                     <div className={styles.leaderBoard}>
-                        <div key={managerHistory.topAssistScorersByYear[selectedYear].player.name} className={styles.player}>
-                            <div className={styles.playerName}>{managerHistory.topAssistScorersByYear[selectedYear].player.name}</div>
-                            <div className={styles.playerGoals}>{managerHistory.topAssistScorersByYear[selectedYear].assists}</div>
-                        </div>
+                        {managerHistory.topAssistScorersByYear[selectedYear] ? (
+                            <div key={managerHistory.topAssistScorersByYear[selectedYear].player} className={styles.player}>
+                                <div className={styles.playerName}>{managerHistory.topAssistScorersByYear[selectedYear].player}</div>
+                                <div className={styles.playerGoals}>{managerHistory.topAssistScorersByYear[selectedYear].assists}</div>
+                            </div>
+                        ) : (
+                            <div className={styles.player}>No data for this year</div>
+                        )}
                     </div>
                 )}
                 {selectedOption === "Top Clean Sheets By Year" && (
                     <div className={styles.leaderBoard}>
-                        <div key={managerHistory.topCleanSheetsByYear[selectedYear].player.name} className={styles.player}>
-                            <div className={styles.playerName}>{managerHistory.topCleanSheetsByYear[selectedYear].player.name}</div>
-                            <div className={styles.playerCleanSheets}>{managerHistory.topCleanSheetsByYear[selectedYear].cleanSheets}</div>
-                        </div>
+                        {managerHistory.topCleanSheetsByYear[selectedYear] ? (
+                            <div key={managerHistory.topCleanSheetsByYear[selectedYear].player} className={styles.player}>
+                                <div className={styles.playerName}>{managerHistory.topCleanSheetsByYear[selectedYear].player}</div>
+                                <div className={styles.playerCleanSheets}>{managerHistory.topCleanSheetsByYear[selectedYear].cleanSheets}</div>
+                            </div>
+                        ) : (
+                            <div className={styles.player}>No data for this year</div>
+                        )}
                     </div>
                 )}
             </div>

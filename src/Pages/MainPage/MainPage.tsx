@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { signal, useSignal, type Signal } from "@preact/signals-react";
-import type { Achievements, currentYear, InternationalTournament, League, LeagueTeam, Manager, ManagerHistory, Match, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
+import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, Match, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
 import { createSchedule } from "../../Utils/CreateSchedule.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
@@ -14,7 +14,8 @@ import { useSignals } from "@preact/signals-react/runtime";
 
 interface MainPageProps {
     allPlayers: Signal<Player[]>;
-    allTeams: Signal<Team[]>;
+    teamsMap: Signal<Map<string, Team>>;
+    playersMap: Signal<Map<string, Player>>;
     nationalTeams: Signal<NationalTeam[]>;
     userManager: Signal<Manager>;
     leagues: Signal<League[]>;
@@ -30,22 +31,26 @@ const currentPage = signal<string>("SelectNational");
 const activeTab = signal<string>("Schedule");
 const scheduleCreated = signal<boolean>(false);
 
-export function MainPage({ allPlayers, allTeams, nationalTeams, userManager, leagues, tournaments, internationalTournaments, worldCup, currentYear, achievements, managerHistory }: MainPageProps) {
+export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, userManager, leagues, tournaments, internationalTournaments, worldCup, currentYear, achievements, managerHistory }: MainPageProps) {
     useSignals();
 
     if (currentPage.value === "MainPage" && !scheduleCreated.value) {
         leagues.value.forEach((league: League) => {
             const fullSchedule = createSchedule(league, currentYear);
-            league.teams.forEach((team: LeagueTeam) => {
-                team.Schedule = fullSchedule.filter(
-                    (m: Match) => m.homeTeam === team.Team || m.awayTeam === team.Team
-                ).sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            league.teams.forEach((teamName: string) => {
+                const team = teamsMap.value.get(teamName);
+                if (team) {
+                    team.Schedule = fullSchedule.filter(
+                        (m: Match) => m.homeTeamName === teamName || m.awayTeamName === teamName
+                    ).sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                }
             });
         });
 
         leagues.value.forEach((league: League) => {
-            league.teams.forEach((team: LeagueTeam) => {
-                team.Schedule.forEach((match: Match) => {
+            league.teams.forEach((teamName: string) => {
+                const team = teamsMap.value.get(teamName);
+                team?.Schedule.forEach((match: Match) => {
                     currentYear.value.yearMatches.push(match);
                 });
             });
@@ -59,13 +64,15 @@ export function MainPage({ allPlayers, allTeams, nationalTeams, userManager, lea
             {currentPage.value === "SelectNational" && (
                 <SelectNational
                     nationalTeams={nationalTeams}
+                    playersMap={playersMap}
                     manager={userManager}
                     currentPage={currentPage}
                 />
             )}
             {currentPage.value === "SelectClub" && (
                 <SelectClub
-                    teams={allTeams}
+                    teamsMap={teamsMap}
+                    playersMap={playersMap}
                     leagues={leagues}
                     manager={userManager}
                     currentPage={currentPage}
@@ -74,23 +81,28 @@ export function MainPage({ allPlayers, allTeams, nationalTeams, userManager, lea
             {currentPage.value === "MainPage" && (
                 <div className={styles.tabs}>
                     {activeTab.value === "Schedule" && <Schedule
-                        allTeams={allTeams}
+                        teamsMap={teamsMap}
+                        playersMap={playersMap}
                         manager={userManager}
                         leagues={leagues}
                         tournaments={tournaments}
                         internationalTournaments={internationalTournaments}
                         currentYear={currentYear}
+                        achievements={achievements}
+                        managerHistory={managerHistory}
                     />}
                     {activeTab.value === "Stats" && <Stats
                         allPlayers={allPlayers.value}
-                        allTeams={allTeams.value}
+                        teamsMap={teamsMap.value}
+                        playersMap={playersMap.value}
                         manager={userManager.value}
                         leagues={leagues.value}
                         tournaments={tournaments.value}
                         internationalTournaments={internationalTournaments.value}
                     />}
                     {activeTab.value === "Team" && <TeamView
-                        allTeams={allTeams}
+                        teamsMap={teamsMap}
+                        playersMap={playersMap}
                         nationalTeams={nationalTeams}
                         userManager={userManager}
                     />}
@@ -101,7 +113,7 @@ export function MainPage({ allPlayers, allTeams, nationalTeams, userManager, lea
                         currentYear={currentYear.value}
                     />}
                     {activeTab.value === "Table" && <Table
-                        allTeams={allTeams.value}
+                        teamsMap={teamsMap.value}
                         manager={userManager.value}
                         leagues={leagues.value}
                         tournaments={tournaments.value}

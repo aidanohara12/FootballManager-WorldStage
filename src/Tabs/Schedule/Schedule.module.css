@@ -31,6 +31,7 @@
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     padding: 2rem;
+    margin-top: -1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -61,16 +62,102 @@
 }
 
 .game {
-    width: 10rem;
-    height: 10rem;
-    background-color: var(--tertiary-color);
+    width: fit-content;
+    min-width: 300px;
+    background-color: white;
     color: black;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 2rem;
     text-align: center;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 1rem 0;
+}
 
+.gameClickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gameClickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+.gameMatchup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+.gameTeamName {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    flex: 1;
+}
+
+.gameTeamName:first-child {
+    text-align: right;
+}
+
+.gameTeamName:last-child {
+    text-align: left;
+}
+
+.gameVs {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.gameResult {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f0f0f0;
+    width: 100%;
+}
+
+.gameScoreLine {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.gameScore {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary-color, #00A86B);
+}
+
+.gameDash {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ccc;
+}
+
+.gameViewLink {
+    font-size: 0.75rem;
+    color: #999;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.noGame {
+    color: #888;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 2rem 0;
 }
 
 .simButtom {
@@ -104,9 +191,44 @@
     transform: translateY(0);
 }
 
+.simButtom button:disabled {
+    background-color: #cccccc;
+}
+
 .miniTableTitle {
     font-size: 1.2rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
     text-align: center;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    position: relative;
+}
+
+.gameHeader {
+    display: flex;
+    margin-top: -1.5rem;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.gameHeader h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 0.35rem;
 }

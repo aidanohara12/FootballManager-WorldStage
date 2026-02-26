@@ -15,12 +15,12 @@ export function History({ manager, achievements, managerHistory, currentYear }: 
         <div className={styles.historyContainer}>
             <div className={styles.trophiesContainer}>
                 <div>
-                    <div className={styles.trophiesTitle}>Trophie Cabnet</div>
+                    <div className={styles.trophiesTitle}>Trophy Cabnet</div>
                     <div className={styles.tint}>
                         {manager.trophiesWon.map((trophie, index) => (
                             <div key={index} className={styles.trophy}>
                                 <h4>🏆</h4>
-                                <div className={styles.trophyName}>{trophie}</div>
+                                <div className={styles.trophyName}>{trophie.trophy}</div>
                             </div>
                         ))}
                     </div>

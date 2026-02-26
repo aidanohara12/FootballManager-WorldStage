@@ -2,18 +2,22 @@ import logo from '../../assets/Images/logo.png';
 import styles from './Schedule.module.css';
 import WeekSchedule from "../../Components/WeekSchedule/WeekSchedule";
 import { signal, type Signal } from '@preact/signals-react';
-import type { Team, Manager, League, Tournament, InternationalTournament, currentYear, Match } from '../../Models/WorldStage';
+import type { Team, Manager, League, Tournament, InternationalTournament, currentYear, Match, Player, Achievements, ManagerHistory } from '../../Models/WorldStage';
 import MiniTable from "../../Components/Table/Table";
 import { useSignals } from '@preact/signals-react/runtime';
 import { moveToNextDay } from "../../Utils/Calendar";
 import { simulateGame } from "../../Utils/SimulateGame";
+import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
 interface ScheduleProps {
-    allTeams: Signal<Team[]>;
+    teamsMap: Signal<Map<string, Team>>;
+    playersMap: Signal<Map<string, Player>>;
     manager: Signal<Manager>;
     leagues: Signal<League[]>;
     tournaments: Signal<Tournament[]>;
     internationalTournaments: Signal<InternationalTournament[]>;
     currentYear: Signal<currentYear>;
+    managerHistory: Signal<ManagerHistory>;
+    achievements: Signal<Achievements>;
 }
 
 const monthToNumber: Record<string, number> = {
@@ -32,15 +36,38 @@ const monthToNumber: Record<string, number> = {
 };
 
 const matches = signal<Match[]>([]);
+const isSimulated: Record<string, boolean> = {};
+const matchClicked = signal<Match | undefined>(undefined);
 
-export function Schedule({ allTeams, manager, leagues, tournaments, internationalTournaments, currentYear }: ScheduleProps) {
-    const managerTeam = allTeams.value.find(t => t.name === manager.value.team);
-    const leageTeams = leagues.value.find((l) => l.teams[0].League.name === managerTeam?.league)?.teams;
-    const managerLeagueTeam = leagues.value.find((l) => l.name === managerTeam?.league)?.teams?.find((t) => t.Team.name === manager.value.team);
+export function Schedule({ teamsMap, playersMap, manager, leagues, tournaments, internationalTournaments, currentYear, managerHistory, achievements }: ScheduleProps) {
+    const managerTeam = teamsMap.value.get(manager.value.team);
+    const leagueTeamNames = leagues.value.find((l) => l.name === managerTeam?.league)?.teams;
+    const leageTeams = leagueTeamNames?.map((name) => teamsMap.value.get(name)).filter((t): t is Team => !!t);
     const date = `${String(monthToNumber[currentYear.value.currentMonth]).padStart(2, "0")}/${String(currentYear.value.currentDay).padStart(2, "0")}/${currentYear.value.year}`;
-    const foundMatch = managerLeagueTeam?.Schedule.find(m => m.date === date);
+    const foundMatch = managerTeam?.Schedule.find(m => m.date === date);
     const todayMatch = foundMatch ? signal<Match>(foundMatch) : undefined;
     useSignals();
+
+    function simulateDay() {
+        const simulated = new Set<string>();
+        leagues.value.forEach((league) => {
+            league.teams.forEach((teamName) => {
+                const team = teamsMap.value.get(teamName);
+                if (!team) return;
+                const hasMatch = team.Schedule.find(m => m.date === date);
+                if (hasMatch) {
+                    const matchKey = `${hasMatch.homeTeamName}-${hasMatch.awayTeamName}`;
+                    if (simulated.has(matchKey)) return;
+                    simulated.add(matchKey);
+                    const matchSignal = signal<Match>(hasMatch);
+                    simulateGame(matchSignal, teamsMap.value, playersMap.value, manager);
+                }
+            });
+        });
+        // Trigger signal re-render so UI updates
+        teamsMap.value = new Map(teamsMap.value);
+        isSimulated[date] = true;
+    }
 
     return (
         <div>
@@ -54,20 +81,45 @@ export function Schedule({ allTeams, manager, leagues, tournaments, internationa
                         currentYear={currentYear}
                         manager={manager}
                     />
-                    <div className={styles.game}>
-                        {(() => {
-                            return todayMatch ? (
-                                <h3>{todayMatch.value.homeTeam.name} vs {todayMatch.value.awayTeam.name}</h3>
-                            ) : (
-                                <h3>No Games Scheduled</h3>
-                            );
-                        })()}
-                    </div>
+                    {todayMatch ? (
+                        <div
+                            className={`${styles.game} ${isSimulated[date] ? styles.gameClickable : ''}`}
+                            onClick={() => isSimulated[date] && (matchClicked.value = todayMatch.value)}
+                        >
+                            <div className={styles.gameHeader}>
+                                <h4>Matchweek: {currentYear.value.leagueWeek}</h4>
+                            </div>
+                            <div className={styles.gameMatchup}>
+                                <span className={styles.gameTeamName}>{todayMatch.value.homeTeamName}</span>
+                                <span className={styles.gameVs}>vs</span>
+                                <span className={styles.gameTeamName}>{todayMatch.value.awayTeamName}</span>
+                            </div>
+                            {isSimulated[date] && (
+                                <div className={styles.gameResult}>
+                                    <div className={styles.gameScoreLine}>
+                                        <span className={styles.gameScore}>{todayMatch.value.homeScore}</span>
+                                        <span className={styles.gameDash}>-</span>
+                                        <span className={styles.gameScore}>{todayMatch.value.awayScore}</span>
+                                    </div>
+                                    <span className={styles.gameViewLink}>Click to view match details</span>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className={styles.game}>
+                            <span className={styles.noGame}>No Games Scheduled</span>
+                        </div>
+                    )}
                     <div className={styles.simButtom}>
-                        {todayMatch && (
-                            <button onClick={() => simulateGame(todayMatch, allTeams, leagues)}>Simulate Game</button>
+                        {todayMatch && !isSimulated[date] && (
+                            <button onClick={simulateDay}>Simulate Game</button>
                         )}
-                        <button onClick={() => moveToNextDay(currentYear)}>Simulate to next day</button>
+                        <button
+                            disabled={!!todayMatch && !isSimulated[date]}
+                            onClick={() => moveToNextDay(currentYear, isSimulated, leagues, teamsMap, playersMap, manager, managerHistory, achievements)}
+                        >
+                            Simulate to next day
+                        </button>
                     </div>
                 </div>
                 <div className={styles.miniTable}>
@@ -75,9 +127,17 @@ export function Schedule({ allTeams, manager, leagues, tournaments, internationa
                     <MiniTable
                         leagueTitle="League Table"
                         leageTeams={leageTeams}
+                        managerTeam={managerTeam}
                     />
                 </div>
             </div>
+            {matchClicked.value && (
+                <div className={styles.overlay} onClick={() => matchClicked.value = undefined}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <MatchOverview match={matchClicked} playersMap={playersMap.value} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

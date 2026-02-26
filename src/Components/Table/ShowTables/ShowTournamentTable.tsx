@@ -32,13 +32,13 @@ function getWinner(matchup: Matchup): string {
 function findMatch(matches: Match[], home: string, away: string): Matchup {
     const match = matches.find(
         m =>
-            (m.homeTeam.name === home && m.awayTeam.name === away) ||
-            (m.homeTeam.name === away && m.awayTeam.name === home)
+            (m.homeTeamName === home && m.awayTeamName === away) ||
+            (m.homeTeamName === away && m.awayTeamName === home)
     );
     if (match) {
         return {
-            home: match.homeTeam.name,
-            away: match.awayTeam.name,
+            home: match.homeTeamName,
+            away: match.awayTeamName,
             homeScore: match.homeScore,
             awayScore: match.awayScore,
         };
@@ -54,7 +54,7 @@ function nextPowerOf2(n: number): number {
 
 function buildBracket(teams: TournamentTeam[], matches: Match[]): Matchup[][] {
     const rounds: Matchup[][] = [];
-    const teamNames = teams.map(t => t.Team.name);
+    const teamNames = teams.map(t => t.teamName);
     const totalTeams = teamNames.length;
 
     if (totalTeams < 2) return rounds;

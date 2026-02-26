@@ -36,7 +36,7 @@
 
 .tableHeaderRow {
     display: grid;
-    grid-template-columns: 3fr 1fr 1fr 1fr 1fr 1.5fr;
+    grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr;
     gap: 1rem;
     padding: 1rem;
     font-weight: bold;
@@ -56,7 +56,7 @@
 
 .tableRow {
     display: grid;
-    grid-template-columns: 3fr 1fr 1fr 1fr 1fr 1.5fr;
+    grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr;
     gap: 1rem;
     padding: 1rem;
     border-bottom: 1px solid #f0f0f0;
@@ -192,4 +192,26 @@
     .tableHeaderCell {
         font-size: 0.75rem;
     }
+}
+
+.form {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #666;
+    white-space: nowrap;
+}
+
+.managerTeam {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+    border-left: 3px solid #3b82f6;
+}
+
+.managerTeam:hover {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.25), rgba(59, 130, 246, 0.1));
+}
+
+.managerText {
+    color: #3b82f6 !important;
+    font-weight: 600;
 }
