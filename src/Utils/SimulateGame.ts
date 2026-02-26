@@ -13,10 +13,11 @@ function positionAvg(teamPlayers: Player[], position: string): number {
 
 function autoAssignStarters(team: Team, playersMap: Map<string, Player>): void {
     const players = getPlayers(team, playersMap);
-    const hasStarters = players.some((p) => p.startingTeam);
-    if (hasStarters) return;
+    const starterCount = players.filter((p) => p.startingTeam).length;
+    if (starterCount >= 11) return;
 
-    // Pick best players by position: 3 FW, 3 MF, 4 DF, 1 GK = 11
+    // Reset and re-pick best players by position: 3 FW, 3 MF, 4 DF, 1 GK = 11
+    players.forEach((p) => p.startingTeam = false);
     const byPos = (pos: string) => players
         .filter((p) => p.position === pos)
         .sort((a, b) => b.overall - a.overall);

@@ -92,9 +92,7 @@ export function PlayerAttributesView({ player, selectedPlayer, onClose }: Player
                 <span className={styles.statBadge}>
                     <span className={styles.statLabel}>Contract:</span>
                     <span>
-                        {Object.entries(player.contract).map(([year, value]) => (
-                            <span key={year} className={styles.statLabel}>{year}: ${(value).toFixed(1)}M/yr </span>
-                        ))}
+                        <span className={styles.statLabel}>{player.contractYrs}: ${(player.contractAmount).toFixed(1)}M/yr </span>
                     </span>
                 </span>
             </div>

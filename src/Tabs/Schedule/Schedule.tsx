@@ -2,12 +2,13 @@ import logo from '../../assets/Images/logo.png';
 import styles from './Schedule.module.css';
 import WeekSchedule from "../../Components/WeekSchedule/WeekSchedule";
 import { signal, type Signal } from '@preact/signals-react';
-import type { Team, Manager, League, Tournament, InternationalTournament, currentYear, Match, Player, Achievements, ManagerHistory } from '../../Models/WorldStage';
+import type { Team, Manager, League, Tournament, InternationalTournament, currentYear, Match, Player, Achievements, ManagerHistory, NationalTeam } from '../../Models/WorldStage';
 import MiniTable from "../../Components/Table/Table";
 import { useSignals } from '@preact/signals-react/runtime';
 import { moveToNextDay } from "../../Utils/Calendar";
 import { simulateGame } from "../../Utils/SimulateGame";
 import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
+import LeagueWeekMatches from '../../Components/LeagueWeekMatches/LeagueWeekMatches';
 interface ScheduleProps {
     teamsMap: Signal<Map<string, Team>>;
     playersMap: Signal<Map<string, Player>>;
@@ -18,6 +19,7 @@ interface ScheduleProps {
     currentYear: Signal<currentYear>;
     managerHistory: Signal<ManagerHistory>;
     achievements: Signal<Achievements>;
+    nationalTeams: Signal<NationalTeam[]>;
 }
 
 const monthToNumber: Record<string, number> = {
@@ -39,13 +41,27 @@ const matches = signal<Match[]>([]);
 const isSimulated: Record<string, boolean> = {};
 const matchClicked = signal<Match | undefined>(undefined);
 
-export function Schedule({ teamsMap, playersMap, manager, leagues, tournaments, internationalTournaments, currentYear, managerHistory, achievements }: ScheduleProps) {
+export function Schedule({ teamsMap, playersMap, manager, leagues, tournaments, internationalTournaments, currentYear, managerHistory, achievements, nationalTeams }: ScheduleProps) {
     const managerTeam = teamsMap.value.get(manager.value.team);
     const leagueTeamNames = leagues.value.find((l) => l.name === managerTeam?.league)?.teams;
     const leageTeams = leagueTeamNames?.map((name) => teamsMap.value.get(name)).filter((t): t is Team => !!t);
     const date = `${String(monthToNumber[currentYear.value.currentMonth]).padStart(2, "0")}/${String(currentYear.value.currentDay).padStart(2, "0")}/${currentYear.value.year}`;
     const foundMatch = managerTeam?.Schedule.find(m => m.date === date);
     const todayMatch = foundMatch ? signal<Match>(foundMatch) : undefined;
+    const allMatchesForWeek: Match[] = [];
+    const seenMatchKeys = new Set<string>();
+    leagueTeamNames?.forEach((teamName) => {
+        const team = teamsMap.value.get(teamName);
+        if (!team) return;
+        const match = team.Schedule.find(m => m.date === date);
+        if (match) {
+            const key = `${match.homeTeamName}-${match.awayTeamName}`;
+            if (!seenMatchKeys.has(key)) {
+                seenMatchKeys.add(key);
+                allMatchesForWeek.push(match);
+            }
+        }
+    });
     useSignals();
 
     function simulateDay() {
@@ -116,19 +132,30 @@ export function Schedule({ teamsMap, playersMap, manager, leagues, tournaments, 
                         )}
                         <button
                             disabled={!!todayMatch && !isSimulated[date]}
-                            onClick={() => moveToNextDay(currentYear, isSimulated, leagues, teamsMap, playersMap, manager, managerHistory, achievements)}
+                            onClick={() => moveToNextDay(currentYear, isSimulated, leagues, teamsMap, playersMap, manager, managerHistory, achievements, nationalTeams)}
                         >
                             Simulate to next day
                         </button>
                     </div>
                 </div>
                 <div className={styles.miniTable}>
-                    <h4 className={styles.miniTableTitle}>League Table</h4>
-                    <MiniTable
-                        leagueTitle="League Table"
-                        leageTeams={leageTeams}
-                        managerTeam={managerTeam}
-                    />
+                    <div>
+                        <h4 className={styles.miniTableTitle}>League Table</h4>
+                        <MiniTable
+                            leagueTitle="League Table"
+                            leageTeams={leageTeams}
+                            managerTeam={managerTeam}
+                        />
+                    </div>
+                    <div className={styles.matchTable}>
+                        <h4 className={styles.miniTableTitle}>League Matches</h4>
+                        <LeagueWeekMatches
+                            allMatches={allMatchesForWeek}
+                            matchClicked={matchClicked}
+                            teamsMap={teamsMap}
+                            playersMap={playersMap}
+                        />
+                    </div>
                 </div>
             </div>
             {matchClicked.value && (

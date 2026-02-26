@@ -40,23 +40,21 @@ export function getNextDay(currentDay: string): string {
     }
 }
 
-export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Record<string, boolean>, leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, manager: Signal<Manager>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>) {
+export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Record<string, boolean>, leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, manager: Signal<Manager>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>) {
     const cur = currentYear.value;
     const nextDayOfWeek = getNextDay(cur.currentDayOfWeek);
     const maxDays = daysOfTheMonth[cur.currentMonth];
     let nextDay = cur.currentDay + 1;
     let nextMonth = cur.currentMonth;
     let nextYear = cur.year;
-    let yearsCompleted = cur.yearsCompleted;
     if (currentYear.value.currentDayOfWeek === "Monday") {
         if (currentYear.value.leagueWeek === 38) {
-            finishSeason(leagues, manager, currentYear, teamsMap, playerMap, managerHistory, achievements);
+            finishSeason(leagues, manager, currentYear, teamsMap, playerMap, managerHistory, achievements, nationalTeams);
             currentYear.value.leagueWeek = 0;
         } else if (currentYear.value.leagueWeek > 0) {
             currentYear.value.leagueWeek++;
         }
     }
-
     if (nextDay > maxDays) {
         nextDay = 1;
         const monthIndex = months.indexOf(cur.currentMonth);
@@ -84,12 +82,11 @@ export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Rec
     }
 
     currentYear.value = {
-        ...cur,
+        ...currentYear.value,
         currentDay: nextDay,
         currentDayOfWeek: nextDayOfWeek,
         currentMonth: nextMonth,
         year: nextYear,
-        yearsCompleted,
     };
 
     const nextMonthNumber = months.indexOf(nextMonth) + 1;

@@ -90,6 +90,7 @@ export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, user
                         currentYear={currentYear}
                         achievements={achievements}
                         managerHistory={managerHistory}
+                        nationalTeams={nationalTeams}
                     />}
                     {activeTab.value === "Stats" && <Stats
                         allPlayers={allPlayers.value}

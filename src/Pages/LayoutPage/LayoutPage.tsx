@@ -68,9 +68,6 @@ const achievements = signal<Achievements>({
     getA99Potential: false
 });
 const managerHistory = signal<ManagerHistory>({
-    topGoalScorrers: [],
-    topAssistScorrers: [],
-    topCleanSheets: [],
     topGoalScorersByYear: {},
     topAssistScorersByYear: {},
     topCleanSheetsByYear: {}

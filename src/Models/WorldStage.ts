@@ -29,7 +29,8 @@ export interface Player {
     age: number;
     potential: number;
     value: number;
-    contract: Record<number, number>;
+    contractYrs: number;
+    contractAmount: number;
     leagueGoals: number;
     leagueAssists: number;
     countryGoals: number;
@@ -97,6 +98,7 @@ export interface Match {
 export interface League {
     name: string;
     teams: string[];
+    topFour: string[];
     matches: Match[];
     pastChampions: string[];
 }

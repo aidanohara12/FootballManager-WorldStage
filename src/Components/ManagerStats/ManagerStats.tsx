@@ -9,8 +9,8 @@ interface ManagerStatsProps {
 }
 
 export function ManagerStats({ manager, managerHistory, currentYear }: ManagerStatsProps) {
-    const [selectedOption, setSelectedOption] = useState<string>("Top Goal Scorers");
-    const leaderBoard = ["Top Goal Scorers By Year", "Top Assist Scorers By Year", "Top Clean Sheets By Year"];
+    const [selectedOption, setSelectedOption] = useState<string>("Select Stat");
+    const leaderBoard = ["Select Stat", "Top Goal Scorers By Year", "Top Assist Scorers By Year", "Top Clean Sheets By Year"];
     const [selectedYear, setSelectedYear] = useState<number>(currentYear);
 
     const allYears: number[] = [];
@@ -33,11 +33,13 @@ export function ManagerStats({ manager, managerHistory, currentYear }: ManagerSt
                         <option key={index} value={leader}>{leader}</option>
                     ))}
                 </select>
-                <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
-                    {allYears.map((year, index) => (
-                        <option key={index} value={year}>{year}</option>
-                    ))}
-                </select>
+                {selectedOption !== "Select Stat" && (
+                    <select value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value))}>
+                        {allYears.map((year, index) => (
+                            <option key={index} value={year}>{year}</option>
+                        ))}
+                    </select>
+                )}
                 {selectedOption === "Top Goal Scorers By Year" && (
                     <div className={styles.leaderBoard}>
                         {managerHistory.topGoalScorersByYear[selectedYear] ? (

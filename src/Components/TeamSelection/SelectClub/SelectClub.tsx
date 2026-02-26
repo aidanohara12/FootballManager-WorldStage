@@ -5,6 +5,7 @@ import type { Manager } from "../../../Models/WorldStage.ts";
 import styles from "./SelectClub.module.css";
 import { Top50Countries } from "../../../Models/Countries.ts";
 import { useSignals } from "@preact/signals-react/runtime";
+import { setTeamStartingPlayers, getTeamPlayersClub } from "../../../Utils/TeamPlayers";
 
 interface SelectClubProps {
     teamsMap: Signal<Map<string, Team>>;
@@ -27,45 +28,6 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
 
     const currentPosition = positions[currentPositionIndex.value];
 
-    function getTeamPlayers(team: Team): Player[] {
-        return team.players.map((name) => playersMap.value.get(name)!).filter(Boolean);
-    }
-
-    function setTeamStartingPlayers() {
-        teamsMap.value.forEach((team) => {
-            const players = getTeamPlayers(team);
-
-            players.forEach((p) => p.startingTeam = false);
-
-            players
-                .filter((p) => p.position === "Forward")
-                .sort((a, b) => b.overall - a.overall)
-                .slice(0, 3)
-                .forEach((p) => p.startingTeam = true);
-
-            players
-                .filter((p) => p.position === "Midfielder")
-                .sort((a, b) => b.overall - a.overall)
-                .slice(0, 3)
-                .forEach((p) => p.startingTeam = true);
-
-            players
-                .filter((p) => p.position === "Defender")
-                .sort((a, b) => b.overall - a.overall)
-                .slice(0, 4)
-                .forEach((p) => p.startingTeam = true);
-
-            players
-                .filter((p) => p.position === "Goalkeeper")
-                .sort((a, b) => b.overall - a.overall)
-                .slice(0, 1)
-                .forEach((p) => p.startingTeam = true);
-        });
-
-        teamsMap.value = new Map(teamsMap.value);
-        playersMap.value = new Map(playersMap.value);
-    }
-
     function handlePlayerToggle(playerName: string) {
         if (selectedPlayers.value.includes(playerName)) {
             selectedPlayers.value = selectedPlayers.value.filter((p) => p !== playerName);
@@ -84,7 +46,7 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
 
         const team = teamsMap.value.get(manager.value.team);
         if (team) {
-            const players = getTeamPlayers(team);
+            const players = getTeamPlayersClub(team, playersMap);
             players.forEach((p) => {
                 if (p.position === currentPosition.name) {
                     p.startingTeam = selectedPlayers.value.includes(p.name);
@@ -111,11 +73,11 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
     useEffect(() => {
         currentPositionIndex.value = 0;
         selectedPlayers.value = [];
-        setTeamStartingPlayers();
+        setTeamStartingPlayers(teamsMap, playersMap);
     }, []);
 
     const managerTeam = teamsMap.value.get(manager.value.team);
-    const managerTeamPlayers = managerTeam ? getTeamPlayers(managerTeam) : [];
+    const managerTeamPlayers = managerTeam ? getTeamPlayersClub(managerTeam, playersMap) : [];
 
     return (
         <div className={styles.selectNationalContainer}>
@@ -142,9 +104,9 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
                         <h5>{currentPosition.name}s</h5>
                         <div className={styles.playerList}>
                             {managerTeamPlayers
-                                .filter((p) => p.position === currentPosition.name)
-                                .sort((a, b) => b.overall - a.overall)
-                                .map((p) => (
+                                .filter((p: any) => p.position === currentPosition.name)
+                                .sort((a: any, b: any) => b.overall - a.overall)
+                                .map((p: any) => (
                                     <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
                                         <input
                                             type="checkbox"

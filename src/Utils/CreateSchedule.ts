@@ -1,5 +1,6 @@
 import { type currentYear } from './../Models/WorldStage';
 import type { Achievements, League, Manager, ManagerHistory, Match, NationalTeam, Player, Team, yearPlayerStats } from "../Models/WorldStage";
+import { updateClubTeams, getNationalAllTeamPlayers } from "../Utils/TeamPlayers";
 import type { Signal } from '@preact/signals-react';
 
 export function createSchedule(league: League, currentYear: Signal<currentYear>): Match[] {
@@ -107,18 +108,39 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
     return schedule;
 }
 
-export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>, currentYear: Signal<currentYear>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>): void {
+export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>, currentYear: Signal<currentYear>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>): void {
     // Increment yearsCompleted before checking achievements so season-count checks work
     currentYear.value = {
         ...currentYear.value,
         yearsCompleted: currentYear.value.yearsCompleted + 1,
     };
-
+    manager.value.age++;
     leagues.value.forEach(league => {
+        const leagueTeams = league.teams;
+        const allLeagueTeams: Team[] = [];
+        leagueTeams.forEach(team => {
+            allLeagueTeams.push(teamsMap.value.get(team) as Team);
+        });
+        const winner = allLeagueTeams.sort((a, b) => b.points - a.points)[0];
+        league.pastChampions.push(winner.name);
+        winner.manager.trophiesWon.push({
+            trophy: league.name,
+            trophyType: "League"
+        });
+        winner.players.forEach(player => {
+            const playerTeam = playerMap.value.get(player);
+            if (playerTeam) {
+                playerTeam.trophies++;
+            }
+        });
+        league.topFour = [];
+        const topFour = allLeagueTeams.sort((a, b) => b.points - a.points).slice(0, 4);
+        league.topFour = topFour.map((t) => t.name);
         league.teams.forEach(team => {
             const curTeam = teamsMap.value.get(team);
             if (curTeam) {
-                if(curTeam.manager.name === manager.value.name) {
+
+                if (curTeam.manager.name === manager.value.name) {
                     checkAchievements(manager, currentYear, achievements, teamsMap, playerMap);
                 }
                 if (curTeam.manager.name === manager.value.name) {
@@ -159,7 +181,24 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                         topCleanSheetsByYear: { ...managerHistory.value.topCleanSheetsByYear, [currentYear.value.year]: cleanSheetPlayerStats },
                     };
                 }
-                // Reset stats after recording history
+                // Improve players based on season performance, then reset their stats
+                curTeam.players.forEach(playerId => {
+                    const curPlayer = playerMap.value.get(playerId);
+                    if (curPlayer) {
+                        improvePlayer({ value: curPlayer } as Signal<Player>, manager);
+                        curPlayer.age += 1;
+                        curPlayer.leagueGoals = 0;
+                        curPlayer.leagueAssists = 0;
+                        curPlayer.countryGoals = 0;
+                        curPlayer.countryAssists = 0;
+                        curPlayer.totalGoals = 0;
+                        curPlayer.totalAssists = 0;
+                        curPlayer.cleanSheets = 0;
+                        curPlayer.contractYrs--;
+                    }
+                });
+
+                // Reset team stats
                 curTeam.points = 0;
                 curTeam.wins = 0;
                 curTeam.losses = 0;
@@ -171,7 +210,8 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
             }
         });
     });
-
+    updateClubTeams(teamsMap, playerMap);
+    getNationalAllTeamPlayers(nationalTeams, playerMap);
 }
 
 export function checkAchievements(manager: Signal<Manager>, currentYear: Signal<currentYear>, achievements: Signal<Achievements>, teamMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>): void {
@@ -246,6 +286,95 @@ export function checkAchievements(manager: Signal<Manager>, currentYear: Signal<
 }
 
 
-export function improvePlayer(player: Player): void {
+export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>): void {
+    const isDeveloper = manager.value.type === "Developer";
+    const diff = player.value.potential - player.value.overall;
+    const age = player.value.age;
+    const goals = player.value.leagueGoals;
+    const assists = player.value.leagueAssists;
+    const contributions = goals + assists;
+    const cleanSheets = player.value.cleanSheets;
 
+    // Under 20: rapid growth, high ceiling, big reward for good seasons
+    if (age < 20) {
+        if (diff >= 20) {
+            player.value.overall += 4;
+        } else if (diff >= 10) {
+            player.value.overall += 3;
+        } else if (diff >= 5) {
+            player.value.overall += 2;
+        } else if (diff > 0) {
+            player.value.overall += 1;
+        }
+
+        if (goals >= 5) player.value.overall += 1;
+        if (assists >= 5) player.value.overall += 1;
+        if (cleanSheets >= 5) player.value.overall += 1;
+        if (contributions >= 15) {
+            player.value.overall += 1;
+            player.value.potential += 2;
+        }
+        if (isDeveloper) player.value.overall += 1;
+    }
+    // 20-24: progressing quickly toward peak
+    else if (age < 25) {
+        if (diff >= 15) {
+            player.value.overall += 3;
+        } else if (diff >= 8) {
+            player.value.overall += 2;
+        } else if (diff > 0) {
+            player.value.overall += 1;
+        }
+
+        if (goals >= 10) player.value.overall += 1;
+        if (assists >= 10) player.value.overall += 1;
+        if (cleanSheets >= 10) player.value.overall += 1;
+        if (contributions >= 20) {
+            player.value.overall += 1;
+            player.value.potential += 1;
+        }
+        if (isDeveloper) player.value.overall += 1;
+    }
+    // 25-29: hitting their potential, marginal gains only
+    else if (age < 30) {
+        if (diff >= 10) {
+            player.value.overall += 2;
+        } else if (diff > 0) {
+            player.value.overall += 1;
+        }
+
+        if (goals >= 15) player.value.overall += 1;
+        if (assists >= 15) player.value.overall += 1;
+        if (cleanSheets >= 15) player.value.overall += 1;
+        if (isDeveloper) player.value.overall += 1;
+    }
+    // 30+: decline unless having a great season
+    else {
+        if (diff > 0 && contributions >= 15) {
+            player.value.overall += 1;
+        } else if (diff <= 0) {
+            player.value.overall -= 1;
+        }
+
+        if (age >= 33) {
+            player.value.overall -= 1;
+        }
+        if (age >= 36) {
+            player.value.overall -= 1;
+        }
+
+        if (goals >= 15) player.value.overall += 1;
+        if (cleanSheets >= 15) player.value.overall += 1;
+        if (isDeveloper && diff > 0) player.value.overall += 1;
+
+        player.value.potential -= 1;
+    }
+
+    if (player.value.overall > player.value.potential) {
+        player.value.overall = player.value.potential;
+    }
+    if (player.value.overall >= 99) player.value.overall = 99;
+    if (player.value.potential >= 99) player.value.potential = 99;
+    if (player.value.overall < 1) player.value.overall = 1;
+    if (player.value.potential < 1) player.value.potential = 1;
 }
