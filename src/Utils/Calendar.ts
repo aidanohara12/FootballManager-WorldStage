@@ -1,5 +1,5 @@
 import { type Signal } from "@preact/signals-react";
-import type { Achievements, currentYear, League, Manager, ManagerHistory, Match, Player, Team } from "../Models/WorldStage";
+import type { Achievements, currentYear, League, Manager, ManagerHistory, Match, NationalTeam, Player, PlayerAwards, Team } from "../Models/WorldStage";
 import { createSchedule, finishSeason } from "./CreateSchedule";
 
 export const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -40,7 +40,7 @@ export function getNextDay(currentDay: string): string {
     }
 }
 
-export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Record<string, boolean>, leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, manager: Signal<Manager>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>) {
+export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Record<string, boolean>, leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, manager: Signal<Manager>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>, isFirstSeason: Signal<boolean>, currentPage: Signal<string>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>) {
     const cur = currentYear.value;
     const nextDayOfWeek = getNextDay(cur.currentDayOfWeek);
     const maxDays = daysOfTheMonth[cur.currentMonth];
@@ -49,7 +49,9 @@ export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Rec
     let nextYear = cur.year;
     if (currentYear.value.currentDayOfWeek === "Monday") {
         if (currentYear.value.leagueWeek === 38) {
-            finishSeason(leagues, manager, currentYear, teamsMap, playerMap, managerHistory, achievements, nationalTeams);
+            finishSeason(leagues, manager, currentYear, teamsMap, playerMap, managerHistory, achievements, nationalTeams, retiredPlayers, playerAwards);
+            isFirstSeason.value = false;
+            currentPage.value = "SeasonSummary";
             currentYear.value.leagueWeek = 0;
         } else if (currentYear.value.leagueWeek > 0) {
             currentYear.value.leagueWeek++;
@@ -69,6 +71,7 @@ export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Rec
     if (nextMonth === "August" && nextDay === 1) {
         currentYear.value.leagueWeek = 1;
         leagues.value.forEach((league: League) => {
+            retiredPlayers.value = [];
             const fullSchedule = createSchedule(league, currentYear);
             league.teams.forEach((teamName: string) => {
                 const team = teamsMap.value.get(teamName);

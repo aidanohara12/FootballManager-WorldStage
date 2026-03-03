@@ -158,6 +158,12 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         awayTeam.losses++;
         homeTeam.manager.careerWins++;
         awayTeam.manager.careerLosses++;
+        if (homeTeam.name === manager.value.team) {
+            manager.value.careerWins++;
+        }
+        if (awayTeam.name === manager.value.team) {
+            manager.value.careerLosses++;
+        }
         if (homeTeam.form.length >= 5) homeTeam.form.shift();
         homeTeam.form.push("W");
         if (awayTeam.form.length >= 5) awayTeam.form.shift();
@@ -177,6 +183,12 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
     } else if (awayWiner) {
         homeTeam.losses++;
         awayTeam.wins++;
+        if (homeTeam.name === manager.value.team) {
+            manager.value.careerLosses++;
+        }
+        if (awayTeam.name === manager.value.team) {
+            manager.value.careerWins++;
+        }
         if (homeTeam.form.length >= 5) homeTeam.form.shift();
         homeTeam.form.push("L");
         if (awayTeam.form.length >= 5) awayTeam.form.shift();
@@ -200,6 +212,12 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         awayTeam.draws++;
         homeTeam.manager.careerDraws++;
         awayTeam.manager.careerDraws++;
+        if (homeTeam.name === manager.value.team) {
+            manager.value.careerDraws++;
+        }
+        if (awayTeam.name === manager.value.team) {
+            manager.value.careerDraws++;
+        }
         if (homeTeam.form.length >= 5) homeTeam.form.shift();
         homeTeam.form.push("D");
         if (awayTeam.form.length >= 5) awayTeam.form.shift();

@@ -223,7 +223,7 @@ export function createRandomPlayer(position: string, team: string, countryName?:
     potential = Math.min(99, potential);
 
     // Calculate value using exponential growth: best players ~25M, <80 overall very cheap
-    const calculatedValue = Math.pow((overall - 50) / 10, 3) * 0.22;
+    const calculatedValue = Math.pow((overall - 50) / 10, 3) * 0.35;
     const playerValue = Math.max(0.1, calculatedValue);
 
     const player: Player = {
@@ -273,18 +273,24 @@ export function updateClubTeams(teamsMap: Signal<Map<string, Team>>, playersMap:
     teamsMap.value.forEach((team) => {
         const curTeam = teamsMap.value.get(team.name);
         if (!curTeam) return;
-        if (allCountries.includes(curTeam.name)) {
+        if (!allCountries.includes(curTeam.name)) {
             const players = getTeamPlayersClub(curTeam, playersMap);
             const newPositions: string[] = ["Forward", "Forward", "Midfielder", "Midfielder", "Defender", "Defender", "Goalkeeper"];
             for (const pos of newPositions) {
                 const newPlayer = createUniquePlayer(pos, team.name, playersMap.value);
+                if (curTeam.manager.type === "Scout") {
+                    newPlayer.overall += 2;
+                    newPlayer.potential += 3;
+                    if (newPlayer.overall > 99) newPlayer.overall = 99;
+                    if (newPlayer.potential > 99) newPlayer.potential = 99;
+                }
                 playersMap.value.set(newPlayer.name, newPlayer);
                 players.push(newPlayer);
             }
-            const allForwards = players.filter((p) => p.position === "Forward").sort((a, b) => b.overall - a.overall).slice(0, 3);
-            const allMidfielders = players.filter((p) => p.position === "Midfielder").sort((a, b) => b.overall - a.overall).slice(0, 3);
-            const allDefenders = players.filter((p) => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 4);
-            const allGoalkeepers = players.filter((p) => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 1);
+            const allForwards = players.filter((p) => p.position === "Forward").sort((a, b) => b.overall - a.overall).slice(0, 5);
+            const allMidfielders = players.filter((p) => p.position === "Midfielder").sort((a, b) => b.overall - a.overall).slice(0, 5);
+            const allDefenders = players.filter((p) => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 6);
+            const allGoalkeepers = players.filter((p) => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 2);
             const newTeam: Player[] = [...allForwards, ...allMidfielders, ...allDefenders, ...allGoalkeepers];
             const bootedNames = new Set(curTeam.players.filter((name) => !newTeam.some((p) => p.name === name)));
             bootedNames.forEach((name) => playersMap.value.delete(name));
@@ -315,10 +321,10 @@ export function getNationalAllTeamPlayers(nationalTeams: Signal<NationalTeam[]>,
             }
         }
 
-        const forwards = countryPlayers.filter((p) => p.position === "Forward").sort((a, b) => b.overall - a.overall).slice(0, 3);
-        const midfielders = countryPlayers.filter((p) => p.position === "Midfielder").sort((a, b) => b.overall - a.overall).slice(0, 3);
-        const defenders = countryPlayers.filter((p) => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 4);
-        const goalkeepers = countryPlayers.filter((p) => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 1);
+        const forwards = countryPlayers.filter((p) => p.position === "Forward").sort((a, b) => b.overall - a.overall).slice(0, 5);
+        const midfielders = countryPlayers.filter((p) => p.position === "Midfielder").sort((a, b) => b.overall - a.overall).slice(0, 5);
+        const defenders = countryPlayers.filter((p) => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 6);
+        const goalkeepers = countryPlayers.filter((p) => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 2);
 
         nt.team.players = [...forwards, ...midfielders, ...defenders, ...goalkeepers].map((p) => p.name);
     });
@@ -326,4 +332,12 @@ export function getNationalAllTeamPlayers(nationalTeams: Signal<NationalTeam[]>,
     playersMap.value = new Map(playersMap.value);
     nationalTeams.value = [...nationalTeams.value];
     setNationalTeamStartingPlayers(nationalTeams, playersMap);
+}
+
+export function updatePlayerContract(player: Player) {
+    const calculatedValue = Math.pow((player.overall - 50) / 10, 3) * 0.35;
+    const playerValue = Math.max(0.1, calculatedValue);
+
+    player.contractAmount = playerValue;
+    player.contractYrs = 4;
 }

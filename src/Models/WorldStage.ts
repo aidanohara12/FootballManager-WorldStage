@@ -95,6 +95,26 @@ export interface Match {
     isInternationalMatch: boolean;
 }
 
+export interface PlayerAwards {
+    ballonDorWinners: string[];
+    goldenBootWinners: string[];
+    bestKeeper: string[];
+    premBestPlayer: string[];
+    premGoldenBoot: string[];
+    laLigaBestPlayer: string[];
+    laLigaGoldenBoot: string[];
+    serieABestPlayer: string[];
+    serieAGoldenBoot: string[];
+    bundesligaBestPlayer: string[];
+    bundesligaGoldenBoot: string[];
+    ligue1BestPlayer: string[];
+    ligue1GoldenBoot: string[];
+    eredivisieBestPlayer: string[];
+    eredivisieGoldenBoot: string[];
+    primeraDivisionBestPlayer: string[];
+    primeraDivisionGoldenBoot: string[];
+}
+
 export interface League {
     name: string;
     teams: string[];

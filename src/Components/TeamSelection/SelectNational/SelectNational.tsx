@@ -12,13 +12,14 @@ interface SelectNationalProps {
     playersMap: Signal<Map<string, Player>>;
     manager: Signal<Manager>;
     currentPage: Signal<string>;
+    isFirstSeason: Signal<boolean>;
 }
 
 const selectedPlayers = signal<string[]>([]);
 const allSelectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 
-export function SelectNational({ nationalTeams, playersMap, manager, currentPage }: SelectNationalProps) {
+export function SelectNational({ nationalTeams, playersMap, manager, currentPage, isFirstSeason }: SelectNationalProps) {
     useSignals();
 
     const positions = [
@@ -77,7 +78,9 @@ export function SelectNational({ nationalTeams, playersMap, manager, currentPage
         currentPositionIndex.value = 0;
         selectedPlayers.value = [];
         allSelectedPlayers.value = [];
-        setNationalTeamStartingPlayers(nationalTeams, playersMap);
+        if (isFirstSeason.value) {
+            setNationalTeamStartingPlayers(nationalTeams, playersMap);
+        }
     }, []);
 
     const managerNT = nationalTeams.value.find((nt) => nt.country === manager.value.country);
@@ -85,7 +88,7 @@ export function SelectNational({ nationalTeams, playersMap, manager, currentPage
 
     return (
         <div className={styles.selectNationalContainer}>
-            <h3>Select Your National Team Starters!</h3>
+            <h3>Select Your National Team Starters for this Season!</h3>
             <h4>Select {currentPosition.name}s ({selectedPlayers.value.length}/{currentPosition.max})</h4>
 
             {/* Progress indicator */}

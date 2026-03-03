@@ -36,7 +36,8 @@
 
 .teamCard h4 {
     color: var(--secondary-color, #1A1A1A);
-    margin-bottom: 1.0rem;
+    margin-bottom: 1rem;
+    margin-top: .5rem;
     font-size: 1.8rem;
 }
 
@@ -48,7 +49,8 @@
     color: var(--primary-color, #00A86B);
     font-size: 1.4rem;
     font-weight: 700;
-    margin-bottom: 1rem;
+    margin-bottom: .5rem;
+    margin-top: .5rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -217,7 +219,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
 }
 
 .playerName {
@@ -228,26 +230,25 @@
 
 .playerStats {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.3rem;
     flex-wrap: wrap;
 }
 
 .statBadge {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.75rem;
+    padding: 0.15rem 0.45rem;
     background: white;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
     border: 1px solid #e0e0e0;
 }
 
-
 .statLabel {
-    font-size: 0.8rem !important;
-    font-weight: 700;
+    font-size: 0.65rem !important;
+    font-weight: 600;
     color: var(--primary-color, #00A86B);
+    margin: 0;
 }
 
 
@@ -259,4 +260,18 @@
 .statBadge:nth-child(3) .statLabel {
     color: #3498db;
     /* Blue for Potential */
+}
+
+.budgetBar {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: white;
+    border-radius: 10px;
+    border: 2px solid var(--primary-color, #00A86B);
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--secondary-color, #1A1A1A);
 }

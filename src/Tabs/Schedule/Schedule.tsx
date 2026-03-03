@@ -2,10 +2,11 @@ import logo from '../../assets/Images/logo.png';
 import styles from './Schedule.module.css';
 import WeekSchedule from "../../Components/WeekSchedule/WeekSchedule";
 import { signal, type Signal } from '@preact/signals-react';
-import type { Team, Manager, League, Tournament, InternationalTournament, currentYear, Match, Player, Achievements, ManagerHistory, NationalTeam } from '../../Models/WorldStage';
+import type { Team, Manager, League, Tournament, InternationalTournament, currentYear, Match, Player, Achievements, ManagerHistory, NationalTeam, PlayerAwards } from '../../Models/WorldStage';
 import MiniTable from "../../Components/Table/Table";
 import { useSignals } from '@preact/signals-react/runtime';
-import { moveToNextDay } from "../../Utils/Calendar";
+import { moveToNextDay, daysOfTheMonth, months } from "../../Utils/Calendar";
+import getCurrentWeek from "../../Components/WeekSchedule/GetCurrentWeek";
 import { simulateGame } from "../../Utils/SimulateGame";
 import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
 import LeagueWeekMatches from '../../Components/LeagueWeekMatches/LeagueWeekMatches';
@@ -20,6 +21,10 @@ interface ScheduleProps {
     managerHistory: Signal<ManagerHistory>;
     achievements: Signal<Achievements>;
     nationalTeams: Signal<NationalTeam[]>;
+    isFirstSeason: Signal<boolean>;
+    currentPage: Signal<string>;
+    retiredPlayers: Signal<Player[]>;
+    playerAwards: Signal<PlayerAwards>;
 }
 
 const monthToNumber: Record<string, number> = {
@@ -41,24 +46,50 @@ const matches = signal<Match[]>([]);
 const isSimulated: Record<string, boolean> = {};
 const matchClicked = signal<Match | undefined>(undefined);
 
-export function Schedule({ teamsMap, playersMap, manager, leagues, tournaments, internationalTournaments, currentYear, managerHistory, achievements, nationalTeams }: ScheduleProps) {
+export function Schedule({ teamsMap, playersMap, manager, leagues, currentYear, managerHistory, achievements, nationalTeams, isFirstSeason, currentPage, retiredPlayers, playerAwards }: ScheduleProps) {
     const managerTeam = teamsMap.value.get(manager.value.team);
     const leagueTeamNames = leagues.value.find((l) => l.name === managerTeam?.league)?.teams;
     const leageTeams = leagueTeamNames?.map((name) => teamsMap.value.get(name)).filter((t): t is Team => !!t);
     const date = `${String(monthToNumber[currentYear.value.currentMonth]).padStart(2, "0")}/${String(currentYear.value.currentDay).padStart(2, "0")}/${currentYear.value.year}`;
     const foundMatch = managerTeam?.Schedule.find(m => m.date === date);
     const todayMatch = foundMatch ? signal<Match>(foundMatch) : undefined;
+    // Compute dates for all days of the current week
+    const currentWeekDays = getCurrentWeek(currentYear.value.currentMonth, currentYear.value.currentDay, currentYear.value.currentDayOfWeek);
+    const weekDates: string[] = [];
+    for (const [, dayNumber] of Object.entries(currentWeekDays.weekDays) as [string, number][]) {
+        const curDay = currentYear.value.currentDay;
+        const curMonth = currentYear.value.currentMonth;
+        const curYear = currentYear.value.year;
+        const monthIndex = months.indexOf(curMonth);
+        const maxDays = daysOfTheMonth[curMonth];
+
+        let m = monthIndex;
+        let y = curYear;
+        if (dayNumber > maxDays) {
+            // Wrapped to next month
+            m = (monthIndex + 1) % 12;
+            if (m === 0) y++;
+        } else if (dayNumber > curDay + 6 || (dayNumber < curDay - 6 && dayNumber < curDay)) {
+            // Wrapped to previous month
+            m = (monthIndex - 1 + 12) % 12;
+            if (m === 11 && monthIndex === 0) y--;
+        }
+        weekDates.push(`${String(m + 1).padStart(2, "0")}/${String(dayNumber).padStart(2, "0")}/${y}`);
+    }
+
     const allMatchesForWeek: Match[] = [];
     const seenMatchKeys = new Set<string>();
     leagueTeamNames?.forEach((teamName) => {
         const team = teamsMap.value.get(teamName);
         if (!team) return;
-        const match = team.Schedule.find(m => m.date === date);
-        if (match) {
-            const key = `${match.homeTeamName}-${match.awayTeamName}`;
-            if (!seenMatchKeys.has(key)) {
-                seenMatchKeys.add(key);
-                allMatchesForWeek.push(match);
+        for (const weekDate of weekDates) {
+            const match = team.Schedule.find(m => m.date === weekDate);
+            if (match) {
+                const key = `${match.homeTeamName}-${match.awayTeamName}`;
+                if (!seenMatchKeys.has(key)) {
+                    seenMatchKeys.add(key);
+                    allMatchesForWeek.push(match);
+                }
             }
         }
     });
@@ -132,7 +163,7 @@ export function Schedule({ teamsMap, playersMap, manager, leagues, tournaments, 
                         )}
                         <button
                             disabled={!!todayMatch && !isSimulated[date]}
-                            onClick={() => moveToNextDay(currentYear, isSimulated, leagues, teamsMap, playersMap, manager, managerHistory, achievements, nationalTeams)}
+                            onClick={() => moveToNextDay(currentYear, isSimulated, leagues, teamsMap, playersMap, manager, managerHistory, achievements, nationalTeams, isFirstSeason, currentPage, retiredPlayers, playerAwards)}
                         >
                             Simulate to next day
                         </button>

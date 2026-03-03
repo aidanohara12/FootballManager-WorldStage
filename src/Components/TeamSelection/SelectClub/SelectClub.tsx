@@ -13,11 +13,13 @@ interface SelectClubProps {
     leagues: Signal<import("../../../Models/WorldStage.ts").League[]>;
     manager: Signal<Manager>;
     currentPage: Signal<string>;
+    isFirstSeason: Signal<boolean>;
 }
 const selectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
+const committedSalary = signal<number>(0);
 
-export function SelectClub({ teamsMap, playersMap, manager, currentPage }: SelectClubProps) {
+export function SelectClub({ teamsMap, playersMap, manager, currentPage, isFirstSeason }: SelectClubProps) {
     useSignals();
     const positions = [
         { name: "Forward", max: 3 },
@@ -27,11 +29,27 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
     ];
 
     const currentPosition = positions[currentPositionIndex.value];
+    const managerTeam = teamsMap.value.get(manager.value.team);
+    const budget = managerTeam?.moneyToSpend ?? 0;
+
+    // Calculate salary of currently selected players in this step
+    const currentStepSalary = selectedPlayers.value.reduce((sum, name) => {
+        const p = playersMap.value.get(name);
+        return sum + (p?.contractAmount ?? 0);
+    }, 0);
+    const totalSpent = committedSalary.value + currentStepSalary;
+    const remaining = budget - totalSpent;
 
     function handlePlayerToggle(playerName: string) {
         if (selectedPlayers.value.includes(playerName)) {
             selectedPlayers.value = selectedPlayers.value.filter((p) => p !== playerName);
         } else if (selectedPlayers.value.length < currentPosition.max) {
+            const player = playersMap.value.get(playerName);
+            const playerSalary = player?.contractAmount ?? 0;
+            if (playerSalary > remaining) {
+                alert(`Not enough budget! Need $${playerSalary.toFixed(1)}M but only $${remaining.toFixed(1)}M remaining.`);
+                return;
+            }
             selectedPlayers.value = [...selectedPlayers.value, playerName];
         } else {
             alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
@@ -56,6 +74,7 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
         }
 
         if (currentPositionIndex.value < positions.length - 1) {
+            committedSalary.value += currentStepSalary;
             currentPositionIndex.value = currentPositionIndex.value + 1;
             selectedPlayers.value = [];
         } else {
@@ -65,6 +84,15 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
 
     function handleBack() {
         if (currentPositionIndex.value > 0) {
+            // Recalculate committed salary by removing the previous step's starters
+            const team = teamsMap.value.get(manager.value.team);
+            if (team) {
+                const prevPosition = positions[currentPositionIndex.value - 1];
+                const players = getTeamPlayersClub(team, playersMap);
+                const prevStarters = players.filter((p) => p.position === prevPosition.name && p.startingTeam);
+                const prevSalary = prevStarters.reduce((sum, p) => sum + p.contractAmount, 0);
+                committedSalary.value = Math.max(0, committedSalary.value - prevSalary);
+            }
             currentPositionIndex.value = currentPositionIndex.value - 1;
             selectedPlayers.value = [];
         }
@@ -73,16 +101,23 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
     useEffect(() => {
         currentPositionIndex.value = 0;
         selectedPlayers.value = [];
-        setTeamStartingPlayers(teamsMap, playersMap);
+        committedSalary.value = 0;
+        if (isFirstSeason.value) {
+            setTeamStartingPlayers(teamsMap, playersMap);
+        }
     }, []);
 
-    const managerTeam = teamsMap.value.get(manager.value.team);
     const managerTeamPlayers = managerTeam ? getTeamPlayersClub(managerTeam, playersMap) : [];
 
     return (
         <div className={styles.selectNationalContainer}>
-            <h3>Select Your Club Team Starters!</h3>
+            <h3>Select Your Club Team Starters for this Season!</h3>
             <h4>Select {currentPosition.name}s ({selectedPlayers.value.length}/{currentPosition.max})</h4>
+            <div className={styles.budgetBar}>
+                <span>Budget: ${budget.toFixed(1)}M</span>
+                <span>Spent: ${totalSpent.toFixed(1)}M</span>
+                <span>Remaining: ${remaining.toFixed(1)}M</span>
+            </div>
 
             {/* Progress indicator */}
             <div className={styles.progressIndicator}>
@@ -129,6 +164,9 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage }: Selec
                                                 </span>
                                                 <span className={styles.statBadge}>
                                                     <h5 className={styles.statLabel}>Country: {p.country} {Top50Countries.find((c) => c.country === p.country)?.flag}</h5>
+                                                </span>
+                                                <span className={styles.statBadge}>
+                                                    <h5 className={styles.statLabel}>Contract: {p.contractYrs}yr/${p.contractAmount.toFixed(1)}M</h5>
                                                 </span>
                                             </div>
                                         </div>

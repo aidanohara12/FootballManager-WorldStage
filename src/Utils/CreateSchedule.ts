@@ -1,6 +1,6 @@
 import { type currentYear } from './../Models/WorldStage';
-import type { Achievements, League, Manager, ManagerHistory, Match, NationalTeam, Player, Team, yearPlayerStats } from "../Models/WorldStage";
-import { updateClubTeams, getNationalAllTeamPlayers } from "../Utils/TeamPlayers";
+import type { Achievements, League, Manager, ManagerHistory, Match, NationalTeam, Player, PlayerAwards, Team, yearPlayerStats } from "../Models/WorldStage";
+import { updateClubTeams, getNationalAllTeamPlayers, updatePlayerContract } from "../Utils/TeamPlayers";
 import type { Signal } from '@preact/signals-react';
 
 export function createSchedule(league: League, currentYear: Signal<currentYear>): Match[] {
@@ -108,13 +108,76 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
     return schedule;
 }
 
-export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>, currentYear: Signal<currentYear>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>): void {
+export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, playerAwards: Signal<PlayerAwards>): void {
+    const leagueAwardKeys: Record<string, { bestPlayer: keyof PlayerAwards; goldenBoot: keyof PlayerAwards }> = {
+        "Premier League": { bestPlayer: "premBestPlayer", goldenBoot: "premGoldenBoot" },
+        "La Liga": { bestPlayer: "laLigaBestPlayer", goldenBoot: "laLigaGoldenBoot" },
+        "Serie A": { bestPlayer: "serieABestPlayer", goldenBoot: "serieAGoldenBoot" },
+        "Bundesliga": { bestPlayer: "bundesligaBestPlayer", goldenBoot: "bundesligaGoldenBoot" },
+        "Ligue 1": { bestPlayer: "ligue1BestPlayer", goldenBoot: "ligue1GoldenBoot" },
+        "Eredivisie": { bestPlayer: "eredivisieBestPlayer", goldenBoot: "eredivisieGoldenBoot" },
+        "Primeira Liga": { bestPlayer: "primeraDivisionBestPlayer", goldenBoot: "primeraDivisionGoldenBoot" },
+    };
+
+    // Collect all players across all leagues
+    const allPlayers: Player[] = [];
+
+    leagues.value.forEach(league => {
+        const leaguePlayers: Player[] = [];
+        league.teams.forEach(teamName => {
+            const team = teamsMap.value.get(teamName);
+            if (!team) return;
+            team.players.forEach(playerId => {
+                const player = playerMap.value.get(playerId);
+                if (player) {
+                    leaguePlayers.push(player);
+                    allPlayers.push(player);
+                }
+            });
+        });
+
+        // Per-league awards
+        const keys = leagueAwardKeys[league.name];
+        if (keys && leaguePlayers.length > 0) {
+            const bestPlayer = [...leaguePlayers].sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists))[0];
+            const goldenBoot = [...leaguePlayers].sort((a, b) => b.leagueGoals - a.leagueGoals)[0];
+            playerAwards.value[keys.bestPlayer].push(bestPlayer.name);
+            playerAwards.value[keys.goldenBoot].push(goldenBoot.name);
+            bestPlayer.awards++;
+            goldenBoot.awards++;
+        }
+    });
+
+    if (allPlayers.length === 0) return;
+
+    // Ballon d'Or: most G/A across all leagues
+    const ballonDor = [...allPlayers].sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists))[0];
+    playerAwards.value.ballonDorWinners.push(ballonDor.name);
+    ballonDor.awards++;
+
+    // Golden Boot: most goals across all leagues
+    const goldenBoot = [...allPlayers].sort((a, b) => b.leagueGoals - a.leagueGoals)[0];
+    playerAwards.value.goldenBootWinners.push(goldenBoot.name);
+    goldenBoot.awards++;
+
+    // Best Keeper: most clean sheets across all leagues
+    const keepers = allPlayers.filter(p => p.position === "GK");
+    if (keepers.length > 0) {
+        const bestKeeper = [...keepers].sort((a, b) => b.cleanSheets - a.cleanSheets)[0];
+        playerAwards.value.bestKeeper.push(bestKeeper.name);
+        bestKeeper.awards++;
+    }
+}
+
+export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>, currentYear: Signal<currentYear>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>): void {
     // Increment yearsCompleted before checking achievements so season-count checks work
     currentYear.value = {
         ...currentYear.value,
         yearsCompleted: currentYear.value.yearsCompleted + 1,
     };
     manager.value.age++;
+    // Calculate awards before stats are reset
+    calculateAwards(leagues, teamsMap, playerMap, playerAwards);
     leagues.value.forEach(league => {
         const leagueTeams = league.teams;
         const allLeagueTeams: Team[] = [];
@@ -195,6 +258,13 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                         curPlayer.totalAssists = 0;
                         curPlayer.cleanSheets = 0;
                         curPlayer.contractYrs--;
+                        if (curPlayer.contractYrs === 0) {
+                            updatePlayerContract(curPlayer);
+                        }
+                        if (curPlayer.age > 36) {
+                            retiredPlayers.value.push(curPlayer);
+                            playerMap.value.delete(curPlayer.name);
+                        }
                     }
                 });
 

@@ -11,7 +11,6 @@
 .logoContainer img {
     width: 20rem;
     height: auto;
-    filter: drop-shadow(0 0 0.75rem black);
 }
 
 .scheduleContainer {

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { signal, useSignal, type Signal } from "@preact/signals-react";
-import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, Match, NationalTeam, Player, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
+import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, Match, NationalTeam, Player, PlayerAwards, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
 import { createSchedule } from "../../Utils/CreateSchedule.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
@@ -11,6 +11,7 @@ import { TeamView } from "../../Tabs/Team/TeamView.tsx";
 import { History } from "../../Tabs/History/History.tsx";
 import { Table } from "../../Tabs/Table/Table.tsx";
 import { useSignals } from "@preact/signals-react/runtime";
+import SeasonSummary from "../SeasonSummary/SeasonSummary.tsx";
 
 interface MainPageProps {
     allPlayers: Signal<Player[]>;
@@ -30,6 +31,28 @@ interface MainPageProps {
 const currentPage = signal<string>("SelectNational");
 const activeTab = signal<string>("Schedule");
 const scheduleCreated = signal<boolean>(false);
+const isFirstSeason = signal<boolean>(true);
+const playerAwards = signal<PlayerAwards>({
+    ballonDorWinners: [],
+    goldenBootWinners: [],
+    bestKeeper: [],
+    premBestPlayer: [],
+    premGoldenBoot: [],
+    laLigaBestPlayer: [],
+    laLigaGoldenBoot: [],
+    serieABestPlayer: [],
+    serieAGoldenBoot: [],
+    bundesligaBestPlayer: [],
+    bundesligaGoldenBoot: [],
+    ligue1BestPlayer: [],
+    ligue1GoldenBoot: [],
+    eredivisieBestPlayer: [],
+    eredivisieGoldenBoot: [],
+    primeraDivisionBestPlayer: [],
+    primeraDivisionGoldenBoot: []
+});
+
+const retiredPlayers = signal<Player[]>([]);
 
 export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, userManager, leagues, tournaments, internationalTournaments, worldCup, currentYear, achievements, managerHistory }: MainPageProps) {
     useSignals();
@@ -67,6 +90,7 @@ export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, user
                     playersMap={playersMap}
                     manager={userManager}
                     currentPage={currentPage}
+                    isFirstSeason={isFirstSeason}
                 />
             )}
             {currentPage.value === "SelectClub" && (
@@ -76,6 +100,19 @@ export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, user
                     leagues={leagues}
                     manager={userManager}
                     currentPage={currentPage}
+                    isFirstSeason={isFirstSeason}
+                />
+            )}
+            {currentPage.value === "SeasonSummary" && (
+                <SeasonSummary
+                    leagues={leagues}
+                    currentPage={currentPage}
+                    retiredPlayers={retiredPlayers}
+                    teamsMap={teamsMap}
+                    playersMap={playersMap}
+                    manager={userManager}
+                    currentYear={currentYear}
+                    playerAwards={playerAwards}
                 />
             )}
             {currentPage.value === "MainPage" && (
@@ -91,6 +128,10 @@ export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, user
                         achievements={achievements}
                         managerHistory={managerHistory}
                         nationalTeams={nationalTeams}
+                        isFirstSeason={isFirstSeason}
+                        currentPage={currentPage}
+                        retiredPlayers={retiredPlayers}
+                        playerAwards={playerAwards}
                     />}
                     {activeTab.value === "Stats" && <Stats
                         allPlayers={allPlayers.value}
