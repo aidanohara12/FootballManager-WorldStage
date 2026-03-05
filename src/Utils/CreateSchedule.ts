@@ -3,6 +3,24 @@ import type { Achievements, League, Manager, ManagerHistory, Match, NationalTeam
 import { updateClubTeams, getNationalAllTeamPlayers, updatePlayerContract } from "../Utils/TeamPlayers";
 import type { Signal } from '@preact/signals-react';
 
+const leagueMapping: Record<string, string> = {
+    "Premier League": "Championship",
+    "La Liga": "La Liga 2",
+    "Serie A": "Serie B",
+    "Bundesliga": "2. Bundesliga",
+    "Ligue 1": "Ligue 2",
+    "Eredivisie": "Eerste Divisie",
+    "Primeira Liga": "Segunda Liga",
+    "Championship": "League One",
+    "La Liga 2": "Primera Federación",
+    "Serie B": "Serie C",
+    "2. Bundesliga": "3. Liga",
+    "Ligue 2": "National",
+    "Eerste Divisie": "Tweede Divisie",
+    "Segunda Liga": "Liga 3",
+    "League One": "League Two"
+};
+
 export function createSchedule(league: League, currentYear: Signal<currentYear>): Match[] {
     const schedule: Match[] = [];
     const teams = league.teams;
@@ -67,12 +85,10 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
     const aug1 = new Date(year, 7, 1);
     const dayOfWeek = aug1.getDay(); // 0=Sun, 6=Sat
     const firstSaturday = dayOfWeek === 6 ? 1 : 1 + ((6 - dayOfWeek + 7) % 7);
-    const seasonStart = new Date(year, 7, firstSaturday);
-    let current = new Date(seasonStart);
+    const startDay = firstSaturday;
 
-    while (weekendDates.length < rounds.length) {
-        weekendDates.push(new Date(current));
-        current.setDate(current.getDate() + 7); // skip to next Saturday
+    for (let i = 0; i < rounds.length; i++) {
+        weekendDates.push(new Date(year, 7, startDay + i * 7));
     }
 
     const formatDate = (d: Date): string => {
@@ -109,7 +125,7 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
 }
 
 export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, playerAwards: Signal<PlayerAwards>): void {
-    const leagueAwardKeys: Record<string, { bestPlayer: keyof PlayerAwards; goldenBoot: keyof PlayerAwards }> = {
+    const leagueAwardKeys: Record<string, { bestPlayer: keyof PlayerAwards; goldenBoot: keyof PlayerAwards; }> = {
         "Premier League": { bestPlayer: "premBestPlayer", goldenBoot: "premGoldenBoot" },
         "La Liga": { bestPlayer: "laLigaBestPlayer", goldenBoot: "laLigaGoldenBoot" },
         "Serie A": { bestPlayer: "serieABestPlayer", goldenBoot: "serieAGoldenBoot" },
@@ -161,7 +177,7 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
     goldenBoot.awards++;
 
     // Best Keeper: most clean sheets across all leagues
-    const keepers = allPlayers.filter(p => p.position === "GK");
+    const keepers = allPlayers.filter(p => p.position === "Goalkeeper");
     if (keepers.length > 0) {
         const bestKeeper = [...keepers].sort((a, b) => b.cleanSheets - a.cleanSheets)[0];
         playerAwards.value.bestKeeper.push(bestKeeper.name);
@@ -196,9 +212,12 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                 playerTeam.trophies++;
             }
         });
-        league.topFour = [];
-        const topFour = allLeagueTeams.sort((a, b) => b.points - a.points).slice(0, 4);
-        league.topFour = topFour.map((t) => t.name);
+        league.topThree = [];
+        const topThree = allLeagueTeams.sort((a, b) => b.points - a.points).slice(0, 3);
+        league.topThree = topThree.map((t) => t.name);
+        league.bottomThree = [];
+        const bottomThree = allLeagueTeams.sort((a, b) => a.points - b.points).slice(0, 3);
+        league.bottomThree = bottomThree.map((t) => t.name);
         league.teams.forEach(team => {
             const curTeam = teamsMap.value.get(team);
             if (curTeam) {
@@ -250,14 +269,8 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                     if (curPlayer) {
                         improvePlayer({ value: curPlayer } as Signal<Player>, manager);
                         curPlayer.age += 1;
-                        curPlayer.leagueGoals = 0;
-                        curPlayer.leagueAssists = 0;
-                        curPlayer.countryGoals = 0;
-                        curPlayer.countryAssists = 0;
-                        curPlayer.totalGoals = 0;
-                        curPlayer.totalAssists = 0;
-                        curPlayer.cleanSheets = 0;
                         curPlayer.contractYrs--;
+                        curPlayer.newPlayer = false;
                         if (curPlayer.contractYrs === 0) {
                             updatePlayerContract(curPlayer);
                         }
@@ -279,6 +292,32 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                 curTeam.Schedule = [];
             }
         });
+        const secondDivName = leagueMapping[league.name];
+        if (secondDivName) {
+            const secondDiv = leagues.value.find(l => l.name === secondDivName);
+            if (secondDiv) {
+                const promoted = secondDiv.topThree;
+                const relegated = league.bottomThree;
+
+                // Remove relegated teams from top league, add promoted teams
+                league.teams = league.teams.filter(t => !relegated.includes(t));
+                league.teams.push(...promoted);
+
+                // Remove promoted teams from second div, add relegated teams
+                secondDiv.teams = secondDiv.teams.filter(t => !promoted.includes(t));
+                secondDiv.teams.push(...relegated);
+
+                // Update each team's league reference
+                promoted.forEach(teamName => {
+                    const t = teamsMap.value.get(teamName);
+                    if (t) t.leagueName = league.name;
+                });
+                relegated.forEach(teamName => {
+                    const t = teamsMap.value.get(teamName);
+                    if (t) t.leagueName = secondDivName;
+                });
+            }
+        }
     });
     updateClubTeams(teamsMap, playerMap);
     getNationalAllTeamPlayers(nationalTeams, playerMap);

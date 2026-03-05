@@ -31,7 +31,25 @@ export function Table({ teamsMap, manager, leagues, tournaments, internationalTo
         ? [managerInternationalTournaments, ...internationalTournaments.filter((tournament) => tournament !== managerInternationalTournaments)]
         : internationalTournaments;
 
+    const divisionMap: Record<string, string[]> = {
+        "First": ["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1", "Eredivisie", "Primeira Liga"],
+        "Second": ["Championship", "La Liga 2", "Serie B", "2. Bundesliga", "Ligue 2", "Eerste Divisie", "Segunda Liga"],
+        "Third": ["League One", "Primera Federación", "Serie C", "3. Liga", "National", "Tweede Divisie", "Liga 3"],
+        "Fourth": ["League Two"]
+    };
+
+    function getManagerDivision(): string {
+        if (!managerLeague) return "First";
+        for (const [div, names] of Object.entries(divisionMap)) {
+            if (names.includes(managerLeague.name)) return div;
+        }
+        return "First";
+    }
+
     const [selectedOption, setSelectedOption] = useState<string>("Leagues");
+    const [selectedDivision, setSelectedDivision] = useState<string>(getManagerDivision());
+
+    const filteredLeagues = sortedLeagues.filter(l => (divisionMap[selectedDivision] ?? []).includes(l.name));
 
     const [selectedLeague, setSelectedLeague] = useState<League | null>(managerLeague ?? null);
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(managerTournament ?? null);
@@ -90,11 +108,23 @@ export function Table({ teamsMap, manager, leagues, tournaments, internationalTo
                     <div>
                         <div className={styles.selectContainer}>
                             <h3 className={styles.subTitle}>Leagues</h3>
+                            <select value={selectedDivision} onChange={(e) => {
+                                setSelectedDivision(e.target.value);
+                                const newFiltered = sortedLeagues.filter(l => (divisionMap[e.target.value] ?? []).includes(l.name));
+                                if (newFiltered.length > 0) {
+                                    setSelectedLeague(newFiltered[0]);
+                                }
+                            }}>
+                                <option value="First">First Division</option>
+                                <option value="Second">Second Division</option>
+                                <option value="Third">Third Division</option>
+                                <option value="Fourth">Fourth Division</option>
+                            </select>
                             <select value={selectedLeague?.name ?? ''} onChange={(e) => {
-                                const league = sortedLeagues.find(l => l.name === e.target.value);
+                                const league = filteredLeagues.find(l => l.name === e.target.value);
                                 setSelectedLeague(league ?? null);
                             }}>
-                                {sortedLeagues.map(league => (
+                                {filteredLeagues.map(league => (
                                     <option key={league.name} value={league.name}>{league.name}</option>
                                 ))}
                             </select>

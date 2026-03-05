@@ -2,6 +2,7 @@ import { signal, type Signal } from '@preact/signals-react';
 import type { League, Player, Team, Manager, currentYear, PlayerAwards } from '../../Models/WorldStage';
 import styles from './SeasonSummary.module.css'
 import PlayerAttributesView from '../../Components/Formation/PlayerAttributesView';
+import { useEffect } from 'react';
 
 interface SeasonSummaryProps {
     leagues: Signal<League[]>;
@@ -38,6 +39,12 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
     const primeraDivisionBestPlayer = playersMap.value.get(playerAwards.value.primeraDivisionBestPlayer[playerAwards.value.primeraDivisionBestPlayer.length - 1]);
     const primeraDivisionGoldenBoot = playersMap.value.get(playerAwards.value.primeraDivisionGoldenBoot[playerAwards.value.primeraDivisionGoldenBoot.length - 1]);
 
+    useEffect(() => {
+        showBallonDorWinner.value = false;
+        showGoldenBootWinner.value = false;
+        showBestKeeper.value = false;
+    }, []);
+
     function handlePageChange() {
         selectedPlayer.value = null;
         currentPage.value = "SelectNational";
@@ -68,7 +75,11 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <button onClick={() => showBallonDorWinner.value = true}>Reveal Winner</button>
                         )}
                         {showBallonDorWinner.value && (
-                            <div className={styles.playerName}>{ballonDorWinner?.name} - {ballonDorWinner?.team}</div>
+                            <div>
+                                <div className={styles.playerName}>{ballonDorWinner?.name} - {ballonDorWinner?.team}</div>
+                                <div className={styles.playerName}>Goals: {ballonDorWinner?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {ballonDorWinner?.leagueAssists}</div>
+                            </div>
                         )}
                     </div>
 
@@ -79,7 +90,10 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <button onClick={() => showGoldenBootWinner.value = true}>Reveal Winner</button>
                         )}
                         {showGoldenBootWinner.value && (
-                            <div className={styles.playerName}>{goldenBootWinner?.name} - {goldenBootWinner?.team}</div>
+                            <div>
+                                <div className={styles.playerName}>{goldenBootWinner?.name} - {goldenBootWinner?.team}</div>
+                                <div className={styles.playerName}>Goals: {goldenBootWinner?.leagueGoals}</div>
+                            </div>
                         )}
                     </div>
 
@@ -90,7 +104,10 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <button onClick={() => showBestKeeper.value = true}>Reveal Winner</button>
                         )}
                         {showBestKeeper.value && (
-                            <div className={styles.playerName}>{bestKeeper?.name} - {bestKeeper?.team}</div>
+                            <div>
+                                <div className={styles.playerName}>{bestKeeper?.name} - {bestKeeper?.team}</div>
+                                <div className={styles.playerName}>Clean Sheets: {bestKeeper?.cleanSheets}</div>
+                            </div>
                         )}
                     </div>
 
@@ -100,10 +117,13 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{premBestPlayer?.name} - {premBestPlayer?.team}</div>
+                                <div className={styles.playerName}>Goals: {premBestPlayer?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {premBestPlayer?.leagueAssists}</div>
                             </div>
                             <div className={styles.award}>
                                 <h4>Golden Boot</h4>
                                 <div className={styles.playerName}>{premGoldenBoot?.name} - {premGoldenBoot?.team}</div>
+                                <div className={styles.playerName}>Goals: {premGoldenBoot?.leagueGoals}</div>
                             </div>
                         </div>
                         {/* La Liga */}
@@ -112,10 +132,13 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{laLigaBestPlayer?.name} - {laLigaBestPlayer?.team}</div>
+                                <div className={styles.playerName}>Goals: {laLigaBestPlayer?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {laLigaBestPlayer?.leagueAssists}</div>
                             </div>
                             <div className={styles.award}>
                                 <h4>Golden Boot</h4>
                                 <div className={styles.playerName}>{laLigaGoldenBoot?.name} - {laLigaGoldenBoot?.team}</div>
+                                <div className={styles.playerName}>Goals: {laLigaGoldenBoot?.leagueGoals}</div>
                             </div>
                         </div>
                         {/* Serie A */}
@@ -124,10 +147,13 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{serieABestPlayer?.name} - {serieABestPlayer?.team}</div>
+                                <div className={styles.playerName}>Goals: {serieABestPlayer?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {serieABestPlayer?.leagueAssists}</div>
                             </div>
                             <div className={styles.award}>
                                 <h4>Golden Boot</h4>
                                 <div className={styles.playerName}>{serieAGoldenBoot?.name} - {serieAGoldenBoot?.team}</div>
+                                <div className={styles.playerName}>Goals: {serieAGoldenBoot?.leagueGoals}</div>
                             </div>
                         </div>
 
@@ -136,10 +162,13 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{bundesligaBestPlayer?.name} - {bundesligaBestPlayer?.team}</div>
+                                <div className={styles.playerName}>Goals: {bundesligaBestPlayer?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {bundesligaBestPlayer?.leagueAssists}</div>
                             </div>
                             <div className={styles.award}>
                                 <h4>Golden Boot</h4>
                                 <div className={styles.playerName}>{bundesligaGoldenBoot?.name} - {bundesligaGoldenBoot?.team}</div>
+                                <div className={styles.playerName}>Goals: {bundesligaGoldenBoot?.leagueGoals}</div>
                             </div>
                         </div>
 
@@ -148,10 +177,13 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{ligue1BestPlayer?.name} - {ligue1BestPlayer?.team}</div>
+                                <div className={styles.playerName}>Goals: {ligue1BestPlayer?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {ligue1BestPlayer?.leagueAssists}</div>
                             </div>
                             <div className={styles.award}>
                                 <h4>Golden Boot</h4>
                                 <div className={styles.playerName}>{ligue1GoldenBoot?.name} - {ligue1GoldenBoot?.team}</div>
+                                <div className={styles.playerName}>Goals: {ligue1GoldenBoot?.leagueGoals}</div>
                             </div>
                         </div>
 
@@ -160,10 +192,13 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{eredivisieBestPlayer?.name} - {eredivisieBestPlayer?.team}</div>
+                                <div className={styles.playerName}>Goals: {eredivisieBestPlayer?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {eredivisieBestPlayer?.leagueAssists}</div>
                             </div>
                             <div className={styles.award}>
                                 <h4>Golden Boot</h4>
                                 <div className={styles.playerName}>{eredivisieGoldenBoot?.name} - {eredivisieGoldenBoot?.team}</div>
+                                <div className={styles.playerName}>Goals: {eredivisieGoldenBoot?.leagueGoals}</div>
                             </div>
                         </div>
                         <div className={styles.leagueAwardsList}>
@@ -171,10 +206,13 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{primeraDivisionBestPlayer?.name} - {primeraDivisionBestPlayer?.team}</div>
+                                <div className={styles.playerName}>Goals: {primeraDivisionBestPlayer?.leagueGoals}</div>
+                                <div className={styles.playerName}>Assists: {primeraDivisionBestPlayer?.leagueAssists}</div>
                             </div>
                             <div className={styles.award}>
                                 <h4>Golden Boot</h4>
                                 <div className={styles.playerName}>{primeraDivisionGoldenBoot?.name} - {primeraDivisionGoldenBoot?.team}</div>
+                                <div className={styles.playerName}>Goals: {primeraDivisionGoldenBoot?.leagueGoals}</div>
                             </div>
                         </div>
                     </div>

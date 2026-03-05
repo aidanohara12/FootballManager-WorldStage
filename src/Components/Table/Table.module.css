@@ -60,6 +60,16 @@
     border-bottom: 1px solid #f0f0f0;
 }
 
+.tableRow:nth-child(1),
+.tableRow:nth-child(2),
+.tableRow:nth-child(3) {
+    background: linear-gradient(90deg, rgba(0, 180, 0, 0.15), rgba(0, 180, 0, 0.05)) !important;
+}
+
+.tableRow:nth-last-child(-n+3) {
+    background: linear-gradient(90deg, rgba(220, 0, 0, 0.15), rgba(220, 0, 0, 0.05)) !important;
+}
+
 .tableRow:last-child {
     border-bottom: none;
 }

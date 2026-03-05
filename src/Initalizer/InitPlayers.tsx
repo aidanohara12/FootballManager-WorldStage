@@ -95,7 +95,8 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Map<string, Team>, P
             name: leagueName,
             teams: [],
             matches: [],
-            topFour: [],
+            topThree: [],
+            bottomThree: [],
             pastChampions: []
         };
 

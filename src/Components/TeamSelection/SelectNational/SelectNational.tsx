@@ -137,6 +137,11 @@ export function SelectNational({ nationalTeams, playersMap, manager, currentPage
                                                 <span className={styles.statBadge}>
                                                     <h5 className={styles.statLabel}>Team: {p.team}</h5>
                                                 </span>
+                                                {p.newPlayer && (
+                                                    <span className={styles.newSigning}>
+                                                        <h5 className={styles.newSigningLabel}>New Call Up!</h5>
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

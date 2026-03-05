@@ -258,3 +258,26 @@
     color: #3498db;
     /* Blue for Potential */
 }
+
+.newSigning {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    border: 1px solid #e74c3c;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.newSigningLabel {
+    font-size: 0.8rem !important;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}

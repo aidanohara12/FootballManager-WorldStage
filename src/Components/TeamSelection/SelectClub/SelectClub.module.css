@@ -262,6 +262,29 @@
     /* Blue for Potential */
 }
 
+.newSigning {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border-radius: 12px;
+    font-size: 0.7rem;
+    border: 1px solid #e74c3c;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.newSigningLabel {
+    font-size: 0.65rem !important;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
 .budgetBar {
     display: flex;
     justify-content: center;

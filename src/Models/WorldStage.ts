@@ -40,6 +40,7 @@ export interface Player {
     cleanSheets: number;
     awards: number;
     trophies: number;
+    newPlayer: boolean;
 }
 
 export interface Manager {
@@ -118,7 +119,8 @@ export interface PlayerAwards {
 export interface League {
     name: string;
     teams: string[];
-    topFour: string[];
+    topThree: string[];
+    bottomThree: string[];
     matches: Match[];
     pastChampions: string[];
 }

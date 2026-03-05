@@ -19,7 +19,7 @@ const league = signal<string>("Premier League");
 const team = signal<string>("");
 const age = signal<number>(25);
 const type = signal<string>("scout");
-
+const division = signal<string>("First");
 export function CreateManager({ teamsMap, nationalTeams, userManager, currentPage }: CreateManagerProps) {
     useSignals();
 
@@ -138,23 +138,49 @@ export function CreateManager({ teamsMap, nationalTeams, userManager, currentPag
                 <div className="form-group">
                     <label htmlFor="league">League</label>
                     <h4>Select the league you want to manage</h4>
-                    <select
-                        className="form-control"
-                        id="league"
-                        value={league.value}
-                        onChange={(e) => {
-                            league.value = e.target.value;
-                            team.value = AllTeams.find((t: any) => t.league === e.target.value)?.name || "";
-                        }}
-                    >
-                        <option value="Premier League">Premier League</option>
-                        <option value="La Liga">La Liga</option>
-                        <option value="Serie A">Serie A</option>
-                        <option value="Bundesliga">Bundesliga</option>
-                        <option value="Ligue 1">Ligue 1</option>
-                        <option value="Eredivisie">Eredivisie</option>
-                        <option value="Primeira Liga">Primeira Liga</option>
-                    </select>
+                    <div className={styles.leagueRow}>
+                        <select
+                            id="division"
+                            value={division.value}
+                            onChange={(e) => {
+                                division.value = e.target.value;
+                            }}
+                        >
+                            <option value="First">First Division</option>
+                            <option value="Second">Second Division</option>
+                            <option value="Third">Third Division</option>
+                        </select>
+                        <select
+                            id="league"
+                            value={league.value}
+                            onChange={(e) => {
+                                league.value = e.target.value;
+                                team.value = AllTeams.find((t: any) => t.league === e.target.value)?.name || "";
+                            }}
+                        >
+                            {division.value === "First" && <option value="Premier League">Premier League</option>}
+                            {division.value === "First" && <option value="La Liga">La Liga</option>}
+                            {division.value === "First" && <option value="Serie A">Serie A</option>}
+                            {division.value === "First" && <option value="Bundesliga">Bundesliga</option>}
+                            {division.value === "First" && <option value="Ligue 1">Ligue 1</option>}
+                            {division.value === "First" && <option value="Eredivisie">Eredivisie</option>}
+                            {division.value === "First" && <option value="Primeira Liga">Primeira Liga</option>}
+                            {division.value === "Second" && <option value="Championship">Championship</option>}
+                            {division.value === "Second" && <option value="La Liga 2">La Liga 2</option>}
+                            {division.value === "Second" && <option value="Serie B">Serie B</option>}
+                            {division.value === "Second" && <option value="2. Bundesliga">2. Bundesliga</option>}
+                            {division.value === "Second" && <option value="Ligue 2">Ligue 2</option>}
+                            {division.value === "Second" && <option value="Eerste Divisie">Eerste Divisie</option>}
+                            {division.value === "Second" && <option value="Segunda Liga">Segunda Liga</option>}
+                            {division.value === "Third" && <option value="League One">League One</option>}
+                            {division.value === "Third" && <option value="Primera Federación">Primera Federación</option>}
+                            {division.value === "Third" && <option value="Serie C">Serie C</option>}
+                            {division.value === "Third" && <option value="3. Liga">3. Liga</option>}
+                            {division.value === "Third" && <option value="National">National</option>}
+                            {division.value === "Third" && <option value="Tweede Divisie">Tweede Divisie</option>}
+                            {division.value === "Third" && <option value="Liga 3">Liga 3</option>}
+                        </select>
+                    </div>
                 </div>
                 <div className="form-group">
                     <label htmlFor="club">Club</label>

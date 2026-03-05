@@ -78,6 +78,19 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage, isFirst
             currentPositionIndex.value = currentPositionIndex.value + 1;
             selectedPlayers.value = [];
         } else {
+            teamsMap.value.forEach((team) => {
+                team.players.forEach((player) => {
+                    const curPlayer = playersMap.value.get(player);
+                    if (!curPlayer) return;
+                    curPlayer.leagueGoals = 0;
+                    curPlayer.leagueAssists = 0;
+                    curPlayer.countryGoals = 0;
+                    curPlayer.countryAssists = 0;
+                    curPlayer.totalGoals = 0;
+                    curPlayer.totalAssists = 0;
+                    curPlayer.cleanSheets = 0;
+                });
+            });
             currentPage.value = "MainPage";
         }
     }
@@ -168,6 +181,11 @@ export function SelectClub({ teamsMap, playersMap, manager, currentPage, isFirst
                                                 <span className={styles.statBadge}>
                                                     <h5 className={styles.statLabel}>Contract: {p.contractYrs}yr/${p.contractAmount.toFixed(1)}M</h5>
                                                 </span>
+                                                {p.newPlayer && (
+                                                    <span className={styles.newSigning}>
+                                                        <h5 className={styles.newSigningLabel}>New Signing!</h5>
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
