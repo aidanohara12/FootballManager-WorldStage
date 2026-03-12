@@ -82,7 +82,6 @@ export function LayoutPage() {
 
     const handleInit = () => {
         const players: Player[] = [];
-        const teamsMapTemp = new Map<string, Team>();
         const playersMapTemp = new Map<string, Player>();
         const nations: NationalTeam[] = [];
         const leaguesTemp: League[] = [];
@@ -97,10 +96,9 @@ export function LayoutPage() {
         };
 
 
-        InitPlayers(players, teamsMapTemp, playersMapTemp, nations, leaguesTemp, tournamentsTemp, internationalTournamentsTemp, worldCupTemp);
+        InitPlayers(players, teamsMap, playersMapTemp, nations, leaguesTemp, tournamentsTemp, internationalTournamentsTemp, worldCupTemp);
 
         allPlayers.value = players;
-        teamsMap.value = teamsMapTemp;
         playersMap.value = playersMapTemp;
         nationalTeams.value = nations;
         leagues.value = leaguesTemp;

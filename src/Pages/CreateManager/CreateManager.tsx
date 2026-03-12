@@ -24,6 +24,10 @@ export function CreateManager({ teamsMap, nationalTeams, userManager, currentPag
     useSignals();
 
     useEffect(() => {
+        team.value = Array.from(teamsMap.value.values()).find((t) => t.league === league.value)?.name || "";
+    }, [league.value, division.value]);
+
+    useEffect(() => {
         if (!team.value) {
             // Find first team in the selected league
             const firstTeamInLeague = Array.from(teamsMap.value.values()).find((t) => t.league === league.value);
@@ -144,6 +148,7 @@ export function CreateManager({ teamsMap, nationalTeams, userManager, currentPag
                             value={division.value}
                             onChange={(e) => {
                                 division.value = e.target.value;
+                                league.value = division.value === "First" ? "Premier League" : division.value === "Second" ? "Championship" : "League One";
                             }}
                         >
                             <option value="First">First Division</option>

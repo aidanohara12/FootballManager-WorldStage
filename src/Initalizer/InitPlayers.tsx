@@ -4,32 +4,33 @@ import { firstNames } from "../Models/Names/FirstNames";
 import { lastNames } from "../Models/Names/LastNames";
 import { type Player, type Team, type NationalTeam, type League, type Tournament, type InternationalTournament, type WorldCup } from "../Models/WorldStage";
 import { addPlayer, createUniquePlayer, getRandomPlayerName } from "../Utils/TeamPlayers";
+import type { Signal } from "@preact/signals-react";
 
-function createPlayersForTeam(team: Team, AllPlayers: Player[], PlayersMap: Map<string, Player>) {
+function createPlayersForTeam(team: Team, AllPlayers: Player[], PlayersMap: Map<string, Player>, teamMap: Signal<Map<string, Team>>) {
     const players: Player[] = [];
 
     //create forwards
     for (let i = 0; i < 5; i++) {
-        addPlayer("Forward", team.name, players, AllPlayers, PlayersMap);
+        addPlayer("Forward", team.name, players, AllPlayers, PlayersMap, teamMap);
     }
     //create midfielders
     for (let i = 0; i < 5; i++) {
-        addPlayer("Midfielder", team.name, players, AllPlayers, PlayersMap);
+        addPlayer("Midfielder", team.name, players, AllPlayers, PlayersMap, teamMap);
     }
     //create defenders
     for (let i = 0; i < 6; i++) {
-        addPlayer("Defender", team.name, players, AllPlayers, PlayersMap);
+        addPlayer("Defender", team.name, players, AllPlayers, PlayersMap, teamMap);
     }
     //create goalkeepers
     for (let i = 0; i < 2; i++) {
-        addPlayer("Goalkeeper", team.name, players, AllPlayers, PlayersMap);
+        addPlayer("Goalkeeper", team.name, players, AllPlayers, PlayersMap, teamMap);
     }
 
     // Assign player names to team
     team.players = players.map((p) => p.name);
 }
 
-function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap: Map<string, Player>): string[] {
+function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap: Map<string, Player>, teamMap: Signal<Map<string, Team>>): string[] {
     const nationalTeamPlayers = AllPlayers.filter((player: Player) => player.country === nation);
 
     let forwardCount = 0;
@@ -52,7 +53,7 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap
 
     // Fill in missing positions
     while (forwardCount < 5) {
-        const player = createUniquePlayer("Forward", "Free Agent", PlayersMap, nation);
+        const player = createUniquePlayer("Forward", "Free Agent", PlayersMap, teamMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
         PlayersMap.set(player.name, player);
@@ -60,7 +61,7 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap
     }
 
     while (midfielderCount < 5) {
-        const player = createUniquePlayer("Midfielder", "Free Agent", PlayersMap, nation);
+        const player = createUniquePlayer("Midfielder", "Free Agent", PlayersMap, teamMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
         PlayersMap.set(player.name, player);
@@ -68,7 +69,7 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap
     }
 
     while (defenderCount < 6) {
-        const player = createUniquePlayer("Defender", "Free Agent", PlayersMap, nation);
+        const player = createUniquePlayer("Defender", "Free Agent", PlayersMap, teamMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
         PlayersMap.set(player.name, player);
@@ -76,7 +77,7 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap
     }
 
     while (goalkeeperCount < 2) {
-        const player = createUniquePlayer("Goalkeeper", "Free Agent", PlayersMap, nation);
+        const player = createUniquePlayer("Goalkeeper", "Free Agent", PlayersMap, teamMap, nation);
         nationalTeamPlayers.push(player);
         AllPlayers.push(player);
         PlayersMap.set(player.name, player);
@@ -86,7 +87,7 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap
     return nationalTeamPlayers.map((p) => p.name);
 }
 
-export function InitPlayers(AllPlayers: Player[], TeamsMap: Map<string, Team>, PlayersMap: Map<string, Player>, NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[], WorldCup: WorldCup) {
+export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, Team>>, PlayersMap: Map<string, Player>, NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[], WorldCup: WorldCup) {
     // Initialize leagues - get unique league names and create league objects
     const uniqueLeagues = [...new Set(AllTeams.map((t) => t.league))];
 
@@ -166,7 +167,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Map<string, Team>, P
         };
 
         // Add to TeamsMap
-        TeamsMap.set(newTeam.name, newTeam);
+        TeamsMap.value.set(newTeam.name, newTeam);
 
         // Add team name to Leagues array
         Leagues.forEach((league: League) => {
@@ -187,7 +188,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Map<string, Team>, P
         });
 
         // Create players for this team (will update newTeam.players)
-        createPlayersForTeam(newTeam, AllPlayers, PlayersMap);
+        createPlayersForTeam(newTeam, AllPlayers, PlayersMap, TeamsMap);
     });
 
     // Initialize National Teams
@@ -227,12 +228,11 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Map<string, Team>, P
         };
 
         // Get players for this national team
-        const playerNames = getNationalTeamPlayers(countryData.country, AllPlayers, PlayersMap);
+        const playerNames = getNationalTeamPlayers(countryData.country, AllPlayers, PlayersMap, TeamsMap);
         nationalTeam.team.players = playerNames;
 
         // Add national team to TeamsMap
-        TeamsMap.set(nationalTeam.team.name, nationalTeam.team);
-
+        TeamsMap.value.set(nationalTeam.team.name, nationalTeam.team);
         // Add to International Tournaments array
         InternationalTournaments.forEach((tournament: InternationalTournament) => {
             if (countryData.tournaments.includes(tournament.name)) {

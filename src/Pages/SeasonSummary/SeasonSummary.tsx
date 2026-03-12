@@ -225,7 +225,7 @@ export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, 
                         const winner = league.pastChampions[league.pastChampions.length - 1];
                         return (
                             <div key={league.name}>
-                                <div className={styles.playerName}>{currentYear.value.year}: {league.name} - {winner}</div>
+                                <div className={styles.playerName}>{league.name} - {winner}</div>
                             </div>
                         );
                     })}

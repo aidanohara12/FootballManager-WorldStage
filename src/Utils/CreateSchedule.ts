@@ -17,8 +17,7 @@ const leagueMapping: Record<string, string> = {
     "2. Bundesliga": "3. Liga",
     "Ligue 2": "National",
     "Eerste Divisie": "Tweede Divisie",
-    "Segunda Liga": "Liga 3",
-    "League One": "League Two"
+    "Segunda Liga": "Liga 3"
 };
 
 export function createSchedule(league: League, currentYear: Signal<currentYear>): Match[] {
@@ -194,6 +193,7 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
     manager.value.age++;
     // Calculate awards before stats are reset
     calculateAwards(leagues, teamsMap, playerMap, playerAwards);
+    // First pass: compute standings, awards, stats, and reset for all leagues
     leagues.value.forEach(league => {
         const leagueTeams = league.teams;
         const allLeagueTeams: Team[] = [];
@@ -292,35 +292,45 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                 curTeam.Schedule = [];
             }
         });
+    });
+
+    // Second pass: collect all promotion/relegation swaps first, then apply them
+    const swaps: { upperLeague: League; lowerLeague: League; promoted: string[]; relegated: string[]; lowerName: string }[] = [];
+    leagues.value.forEach(league => {
         const secondDivName = leagueMapping[league.name];
         if (secondDivName) {
             const secondDiv = leagues.value.find(l => l.name === secondDivName);
             if (secondDiv) {
-                const promoted = secondDiv.topThree;
-                const relegated = league.bottomThree;
-
-                // Remove relegated teams from top league, add promoted teams
-                league.teams = league.teams.filter(t => !relegated.includes(t));
-                league.teams.push(...promoted);
-
-                // Remove promoted teams from second div, add relegated teams
-                secondDiv.teams = secondDiv.teams.filter(t => !promoted.includes(t));
-                secondDiv.teams.push(...relegated);
-
-                // Update each team's league reference
-                promoted.forEach(teamName => {
-                    const t = teamsMap.value.get(teamName);
-                    if (t) t.leagueName = league.name;
-                });
-                relegated.forEach(teamName => {
-                    const t = teamsMap.value.get(teamName);
-                    if (t) t.leagueName = secondDivName;
+                swaps.push({
+                    upperLeague: league,
+                    lowerLeague: secondDiv,
+                    promoted: [...secondDiv.topThree],
+                    relegated: [...league.bottomThree],
+                    lowerName: secondDivName
                 });
             }
         }
     });
+
+    // Apply all swaps at once so no swap interferes with another
+    swaps.forEach(({ upperLeague, lowerLeague, promoted, relegated, lowerName }) => {
+        upperLeague.teams = upperLeague.teams.filter(t => !relegated.includes(t));
+        upperLeague.teams.push(...promoted);
+
+        lowerLeague.teams = lowerLeague.teams.filter(t => !promoted.includes(t));
+        lowerLeague.teams.push(...relegated);
+
+        promoted.forEach(teamName => {
+            const t = teamsMap.value.get(teamName);
+            if (t) t.leagueName = upperLeague.name;
+        });
+        relegated.forEach(teamName => {
+            const t = teamsMap.value.get(teamName);
+            if (t) t.leagueName = lowerName;
+        });
+    });
     updateClubTeams(teamsMap, playerMap);
-    getNationalAllTeamPlayers(nationalTeams, playerMap);
+    getNationalAllTeamPlayers(nationalTeams, playerMap, teamsMap);
 }
 
 export function checkAchievements(manager: Signal<Manager>, currentYear: Signal<currentYear>, achievements: Signal<Achievements>, teamMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>): void {
