@@ -1,17 +1,13 @@
 import { signal, type Signal } from '@preact/signals-react';
-import type { League, Player, Team, Manager, currentYear, PlayerAwards } from '../../Models/WorldStage';
+import type { Player, PlayerAwards } from '../../Models/WorldStage';
 import styles from './SeasonSummary.module.css'
 import PlayerAttributesView from '../../Components/Formation/PlayerAttributesView';
 import { useEffect } from 'react';
+import { useGameContext } from '../../Context/GameContext';
 
 interface SeasonSummaryProps {
-    leagues: Signal<League[]>;
     currentPage: Signal<string>;
     retiredPlayers: Signal<Player[]>;
-    teamsMap: Signal<Map<string, Team>>;
-    playersMap: Signal<Map<string, Player>>;
-    manager: Signal<Manager>;
-    currentYear: Signal<currentYear>;
     playerAwards: Signal<PlayerAwards>;
 }
 
@@ -20,7 +16,8 @@ const showBallonDorWinner = signal<boolean>(false);
 const showGoldenBootWinner = signal<boolean>(false);
 const showBestKeeper = signal<boolean>(false);
 
-export function SeasonSummary({ leagues, currentPage, retiredPlayers, teamsMap, playersMap, manager, currentYear, playerAwards }: SeasonSummaryProps) {
+export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: SeasonSummaryProps) {
+    const { leagues, teamsMap, playersMap, userManager: manager, currentYear } = useGameContext();
     const ballonDorWinner = playersMap.value.get(playerAwards.value.ballonDorWinners[playerAwards.value.ballonDorWinners.length - 1]);
     const goldenBootWinner = playersMap.value.get(playerAwards.value.goldenBootWinners[playerAwards.value.goldenBootWinners.length - 1]);
     const bestKeeper = playersMap.value.get(playerAwards.value.bestKeeper[playerAwards.value.bestKeeper.length - 1]);

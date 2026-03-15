@@ -2,7 +2,7 @@ import logo from '../../assets/Images/logo.png';
 import styles from './Schedule.module.css';
 import WeekSchedule from "../../Components/WeekSchedule/WeekSchedule";
 import { signal, type Signal } from '@preact/signals-react';
-import type { Team, Manager, League, Tournament, InternationalTournament, currentYear, Match, Player, Achievements, ManagerHistory, NationalTeam, PlayerAwards } from '../../Models/WorldStage';
+import type { Match, Player, PlayerAwards, Team } from '../../Models/WorldStage';
 import MiniTable from "../../Components/Table/Table";
 import { useSignals } from '@preact/signals-react/runtime';
 import { moveToNextDay, daysOfTheMonth, months } from "../../Utils/Calendar";
@@ -10,17 +10,8 @@ import getCurrentWeek from "../../Components/WeekSchedule/GetCurrentWeek";
 import { simulateGame } from "../../Utils/SimulateGame";
 import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
 import LeagueWeekMatches from '../../Components/LeagueWeekMatches/LeagueWeekMatches';
+import { useGameContext } from '../../Context/GameContext';
 interface ScheduleProps {
-    teamsMap: Signal<Map<string, Team>>;
-    playersMap: Signal<Map<string, Player>>;
-    manager: Signal<Manager>;
-    leagues: Signal<League[]>;
-    tournaments: Signal<Tournament[]>;
-    internationalTournaments: Signal<InternationalTournament[]>;
-    currentYear: Signal<currentYear>;
-    managerHistory: Signal<ManagerHistory>;
-    achievements: Signal<Achievements>;
-    nationalTeams: Signal<NationalTeam[]>;
     isFirstSeason: Signal<boolean>;
     currentPage: Signal<string>;
     retiredPlayers: Signal<Player[]>;
@@ -46,7 +37,8 @@ const matches = signal<Match[]>([]);
 const isSimulated: Record<string, boolean> = {};
 const matchClicked = signal<Match | undefined>(undefined);
 
-export function Schedule({ teamsMap, playersMap, manager, leagues, currentYear, managerHistory, achievements, nationalTeams, isFirstSeason, currentPage, retiredPlayers, playerAwards }: ScheduleProps) {
+export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwards }: ScheduleProps) {
+    const { teamsMap, playersMap, userManager: manager, leagues, currentYear, managerHistory, achievements, nationalTeams } = useGameContext();
     const managerTeam = teamsMap.value.get(manager.value.team);
     const leagueTeamNames = leagues.value.find((l) => l.name === managerTeam?.league)?.teams;
     const leageTeams = leagueTeamNames?.map((name) => teamsMap.value.get(name)).filter((t): t is Team => !!t);

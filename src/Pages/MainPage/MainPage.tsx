@@ -1,6 +1,5 @@
-import { useEffect } from "react";
-import { signal, useSignal, type Signal } from "@preact/signals-react";
-import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, Match, NationalTeam, Player, PlayerAwards, Team, Tournament, WorldCup } from "../../Models/WorldStage.ts";
+import { signal } from "@preact/signals-react";
+import type { League, Match, PlayerAwards, Player } from "../../Models/WorldStage.ts";
 import { createSchedule } from "../../Utils/CreateSchedule.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
@@ -12,21 +11,7 @@ import { History } from "../../Tabs/History/History.tsx";
 import { Table } from "../../Tabs/Table/Table.tsx";
 import { useSignals } from "@preact/signals-react/runtime";
 import SeasonSummary from "../SeasonSummary/SeasonSummary.tsx";
-
-interface MainPageProps {
-    allPlayers: Signal<Player[]>;
-    teamsMap: Signal<Map<string, Team>>;
-    playersMap: Signal<Map<string, Player>>;
-    nationalTeams: Signal<NationalTeam[]>;
-    userManager: Signal<Manager>;
-    leagues: Signal<League[]>;
-    tournaments: Signal<Tournament[]>;
-    internationalTournaments: Signal<InternationalTournament[]>;
-    worldCup: Signal<WorldCup>;
-    currentYear: Signal<currentYear>;
-    achievements: Signal<Achievements>;
-    managerHistory: Signal<ManagerHistory>;
-}
+import { useGameContext } from "../../Context/GameContext.tsx";
 
 const currentPage = signal<string>("SelectNational");
 const activeTab = signal<string>("Schedule");
@@ -54,8 +39,9 @@ const playerAwards = signal<PlayerAwards>({
 
 const retiredPlayers = signal<Player[]>([]);
 
-export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, userManager, leagues, tournaments, internationalTournaments, worldCup, currentYear, achievements, managerHistory }: MainPageProps) {
+export function MainPage() {
     useSignals();
+    const { teamsMap, leagues, currentYear } = useGameContext();
 
     if (currentPage.value === "MainPage" && !scheduleCreated.value) {
         leagues.value.forEach((league: League) => {
@@ -86,81 +72,35 @@ export function MainPage({ allPlayers, teamsMap, playersMap, nationalTeams, user
         <div className={styles.mainPageContainer}>
             {currentPage.value === "SelectNational" && (
                 <SelectNational
-                    nationalTeams={nationalTeams}
-                    playersMap={playersMap}
-                    manager={userManager}
                     currentPage={currentPage}
                     isFirstSeason={isFirstSeason}
                 />
             )}
             {currentPage.value === "SelectClub" && (
                 <SelectClub
-                    teamsMap={teamsMap}
-                    playersMap={playersMap}
-                    leagues={leagues}
-                    manager={userManager}
                     currentPage={currentPage}
                     isFirstSeason={isFirstSeason}
                 />
             )}
             {currentPage.value === "SeasonSummary" && (
                 <SeasonSummary
-                    leagues={leagues}
                     currentPage={currentPage}
                     retiredPlayers={retiredPlayers}
-                    teamsMap={teamsMap}
-                    playersMap={playersMap}
-                    manager={userManager}
-                    currentYear={currentYear}
                     playerAwards={playerAwards}
                 />
             )}
             {currentPage.value === "MainPage" && (
                 <div className={styles.tabs}>
                     {activeTab.value === "Schedule" && <Schedule
-                        teamsMap={teamsMap}
-                        playersMap={playersMap}
-                        manager={userManager}
-                        leagues={leagues}
-                        tournaments={tournaments}
-                        internationalTournaments={internationalTournaments}
-                        currentYear={currentYear}
-                        achievements={achievements}
-                        managerHistory={managerHistory}
-                        nationalTeams={nationalTeams}
                         isFirstSeason={isFirstSeason}
                         currentPage={currentPage}
                         retiredPlayers={retiredPlayers}
                         playerAwards={playerAwards}
                     />}
-                    {activeTab.value === "Stats" && <Stats
-                        allPlayers={allPlayers.value}
-                        teamsMap={teamsMap.value}
-                        playersMap={playersMap.value}
-                        manager={userManager.value}
-                        leagues={leagues.value}
-                        tournaments={tournaments.value}
-                        internationalTournaments={internationalTournaments.value}
-                    />}
-                    {activeTab.value === "Team" && <TeamView
-                        teamsMap={teamsMap}
-                        playersMap={playersMap}
-                        nationalTeams={nationalTeams}
-                        userManager={userManager}
-                    />}
-                    {activeTab.value === "History" && <History
-                        manager={userManager.value}
-                        achievements={achievements.value}
-                        managerHistory={managerHistory.value}
-                        currentYear={currentYear.value}
-                    />}
-                    {activeTab.value === "Table" && <Table
-                        teamsMap={teamsMap.value}
-                        manager={userManager.value}
-                        leagues={leagues.value}
-                        tournaments={tournaments.value}
-                        internationalTournaments={internationalTournaments.value}
-                    />}
+                    {activeTab.value === "Stats" && <Stats />}
+                    {activeTab.value === "Team" && <TeamView />}
+                    {activeTab.value === "History" && <History />}
+                    {activeTab.value === "Table" && <Table />}
                     <div className={styles.tabButtons}>
                         <button className={activeTab.value === "Schedule" ? styles.activeTab : ""} onClick={() => activeTab.value = "Schedule"}>Schedule</button>
                         <button className={activeTab.value === "Team" ? styles.activeTab : ""} onClick={() => activeTab.value = "Team"}>Team</button>

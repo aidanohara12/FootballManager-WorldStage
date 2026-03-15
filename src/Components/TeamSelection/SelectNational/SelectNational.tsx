@@ -1,16 +1,12 @@
 import { useEffect } from "react";
 import { signal, type Signal } from "@preact/signals-react";
-import type { NationalTeam, Player } from "../../../Models/WorldStage.ts";
 import Top50Countries from "../../../Models/Countries.ts";
-import type { Manager } from "../../../Models/WorldStage.ts";
 import styles from "./SelectNational.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
 import { setNationalTeamStartingPlayers, getTeamPlayers } from "../../../Utils/TeamPlayers";
+import { useGameContext } from "../../../Context/GameContext.tsx";
 
 interface SelectNationalProps {
-    nationalTeams: Signal<NationalTeam[]>;
-    playersMap: Signal<Map<string, Player>>;
-    manager: Signal<Manager>;
     currentPage: Signal<string>;
     isFirstSeason: Signal<boolean>;
 }
@@ -19,8 +15,9 @@ const selectedPlayers = signal<string[]>([]);
 const allSelectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 
-export function SelectNational({ nationalTeams, playersMap, manager, currentPage, isFirstSeason }: SelectNationalProps) {
+export function SelectNational({ currentPage, isFirstSeason }: SelectNationalProps) {
     useSignals();
+    const { nationalTeams, playersMap, userManager: manager } = useGameContext();
 
     const positions = [
         { name: "Forward", max: 3 },

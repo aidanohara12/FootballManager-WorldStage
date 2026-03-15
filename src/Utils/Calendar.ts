@@ -47,8 +47,9 @@ export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Rec
     let nextDay = cur.currentDay + 1;
     let nextMonth = cur.currentMonth;
     let nextYear = cur.year;
+    const managerLeague = leagues.value.find(league => league.name === manager.value.team);
     if (currentYear.value.currentDayOfWeek === "Monday") {
-        if (currentYear.value.leagueWeek === 38) {
+        if (currentYear.value.leagueWeek === (managerLeague?.teams.length ?? 38 * 2) - 2) {
             finishSeason(leagues, manager, currentYear, teamsMap, playerMap, managerHistory, achievements, nationalTeams, retiredPlayers, playerAwards);
             isFirstSeason.value = false;
             currentPage.value = "SeasonSummary";

@@ -1,15 +1,13 @@
-import type { Achievements, currentYear, InternationalTournament, League, Manager, ManagerHistory, Player, Team, Tournament } from "../../Models/WorldStage";
 import styles from "./History.module.css";
 import ManagerStats from "../../Components/ManagerStats/ManagerStats";
+import { useGameContext } from "../../Context/GameContext";
 
-export interface HistoryProps {
-    manager: Manager;
-    achievements: Achievements;
-    managerHistory: ManagerHistory;
-    currentYear: currentYear;
-}
-
-export function History({ manager, achievements, managerHistory, currentYear }: HistoryProps) {
+export function History() {
+    const ctx = useGameContext();
+    const manager = ctx.userManager.value;
+    const achievements = ctx.achievements.value;
+    const managerHistory = ctx.managerHistory.value;
+    const currentYear = ctx.currentYear.value;
 
     return (
         <div className={styles.historyContainer}>

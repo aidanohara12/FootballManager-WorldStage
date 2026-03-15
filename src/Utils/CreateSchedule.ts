@@ -136,9 +136,11 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
 
     // Collect all players across all leagues
     const allPlayers: Player[] = [];
+    const topLeaguePlayers: Player[] = [];
 
     leagues.value.forEach(league => {
         const leaguePlayers: Player[] = [];
+        const isTopLeague = league.name in leagueAwardKeys;
         league.teams.forEach(teamName => {
             const team = teamsMap.value.get(teamName);
             if (!team) return;
@@ -147,6 +149,7 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
                 if (player) {
                     leaguePlayers.push(player);
                     allPlayers.push(player);
+                    if (isTopLeague) topLeaguePlayers.push(player);
                 }
             });
         });
@@ -165,18 +168,18 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
 
     if (allPlayers.length === 0) return;
 
-    // Ballon d'Or: most G/A across all leagues
-    const ballonDor = [...allPlayers].sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists))[0];
+    // Ballon d'Or: most G/A across top leagues
+    const ballonDor = [...topLeaguePlayers].sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists))[0];
     playerAwards.value.ballonDorWinners.push(ballonDor.name);
     ballonDor.awards++;
 
-    // Golden Boot: most goals across all leagues
-    const goldenBoot = [...allPlayers].sort((a, b) => b.leagueGoals - a.leagueGoals)[0];
+    // Golden Boot: most goals across top leagues
+    const goldenBoot = [...topLeaguePlayers].sort((a, b) => b.leagueGoals - a.leagueGoals)[0];
     playerAwards.value.goldenBootWinners.push(goldenBoot.name);
     goldenBoot.awards++;
 
-    // Best Keeper: most clean sheets across all leagues
-    const keepers = allPlayers.filter(p => p.position === "Goalkeeper");
+    // Best Keeper: most clean sheets across top leagues
+    const keepers = topLeaguePlayers.filter(p => p.position === "Goalkeeper");
     if (keepers.length > 0) {
         const bestKeeper = [...keepers].sort((a, b) => b.cleanSheets - a.cleanSheets)[0];
         playerAwards.value.bestKeeper.push(bestKeeper.name);

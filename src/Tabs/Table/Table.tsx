@@ -1,19 +1,18 @@
 import { useState } from "react";
-import type { InternationalTournament, League, Manager, Team, Tournament } from "../../Models/WorldStage";
+import type { InternationalTournament, League, Team, Tournament } from "../../Models/WorldStage";
 import { ShowLeagueTable } from "../../Components/Table/ShowTables/ShowLeagueTable";
 import ShowTournamentTable from "../../Components/Table/ShowTables/ShowTournamentTable";
 import { ShowInternationalTournamentTable } from "../../Components/Table/ShowTables/ShowIntTournamentTable";
 import styles from "./Table.module.css";
+import { useGameContext } from "../../Context/GameContext";
 
-interface TableProps {
-    teamsMap: Map<string, Team>;
-    manager: Manager;
-    leagues: League[];
-    tournaments: Tournament[];
-    internationalTournaments: InternationalTournament[];
-}
-
-export function Table({ teamsMap, manager, leagues, tournaments, internationalTournaments }: TableProps) {
+export function Table() {
+    const ctx = useGameContext();
+    const teamsMap = ctx.teamsMap.value;
+    const manager = ctx.userManager.value;
+    const leagues = ctx.leagues.value;
+    const tournaments = ctx.tournaments.value;
+    const internationalTournaments = ctx.internationalTournaments.value;
     const managerLeague = leagues.find((league) => league.teams?.includes(manager.team));
     const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.team));
     const managerInternationalTournaments = internationalTournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.country));

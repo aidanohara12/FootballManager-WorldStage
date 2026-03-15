@@ -1,17 +1,10 @@
 import { useEffect } from "react";
-import { signal, type Signal } from "@preact/signals-react";
+import { signal } from "@preact/signals-react";
 import { Top50Countries } from "../../Models/Countries.ts";
 import { AllTeams } from "../../Models/Teams.ts";
 import styles from "./CreateManager.module.css";
-import type { Manager, NationalTeam, Team } from "../../Models/WorldStage.ts";
 import { useSignals } from "@preact/signals-react/runtime";
-
-interface CreateManagerProps {
-    teamsMap: Signal<Map<string, Team>>;
-    nationalTeams: Signal<NationalTeam[]>;
-    userManager: Signal<Manager>;
-    currentPage: Signal<string>;
-}
+import { useGameContext } from "../../Context/GameContext.tsx";
 
 const name = signal<string>("");
 const country = signal<string>("Spain");
@@ -20,8 +13,9 @@ const team = signal<string>("");
 const age = signal<number>(25);
 const type = signal<string>("scout");
 const division = signal<string>("First");
-export function CreateManager({ teamsMap, nationalTeams, userManager, currentPage }: CreateManagerProps) {
+export function CreateManager() {
     useSignals();
+    const { teamsMap, nationalTeams, userManager, currentPage } = useGameContext();
 
     useEffect(() => {
         team.value = Array.from(teamsMap.value.values()).find((t) => t.league === league.value)?.name || "";

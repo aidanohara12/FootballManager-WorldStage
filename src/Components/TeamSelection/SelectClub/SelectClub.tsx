@@ -1,17 +1,12 @@
 import { useEffect } from "react";
 import { signal, type Signal } from "@preact/signals-react";
-import type { Team, Player } from "../../../Models/WorldStage.ts";
-import type { Manager } from "../../../Models/WorldStage.ts";
 import styles from "./SelectClub.module.css";
 import { Top50Countries } from "../../../Models/Countries.ts";
 import { useSignals } from "@preact/signals-react/runtime";
 import { setTeamStartingPlayers, getTeamPlayersClub } from "../../../Utils/TeamPlayers";
+import { useGameContext } from "../../../Context/GameContext.tsx";
 
 interface SelectClubProps {
-    teamsMap: Signal<Map<string, Team>>;
-    playersMap: Signal<Map<string, Player>>;
-    leagues: Signal<import("../../../Models/WorldStage.ts").League[]>;
-    manager: Signal<Manager>;
     currentPage: Signal<string>;
     isFirstSeason: Signal<boolean>;
 }
@@ -19,8 +14,9 @@ const selectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 const committedSalary = signal<number>(0);
 
-export function SelectClub({ teamsMap, playersMap, manager, currentPage, isFirstSeason }: SelectClubProps) {
+export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
     useSignals();
+    const { teamsMap, playersMap, userManager: manager } = useGameContext();
     const positions = [
         { name: "Forward", max: 3 },
         { name: "Midfielder", max: 3 },

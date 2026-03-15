@@ -1,19 +1,17 @@
 import { useState } from "react";
-import type { InternationalTournament, League, Manager, Player, Team, Tournament } from "../../Models/WorldStage";
+import type { InternationalTournament, League, Player, Tournament } from "../../Models/WorldStage";
 import styles from "./Stats.module.css";
 import { StatsTable } from "../../Components/StatsTable/StatsTable";
+import { useGameContext } from "../../Context/GameContext";
 
-interface StatsProps {
-    allPlayers: any;
-    teamsMap: Map<string, Team>;
-    playersMap: Map<string, Player>;
-    manager: Manager;
-    leagues: League[];
-    tournaments: Tournament[];
-    internationalTournaments: InternationalTournament[];
-}
-
-export function Stats({ teamsMap, playersMap, manager, leagues, tournaments, internationalTournaments }: StatsProps) {
+export function Stats() {
+    const ctx = useGameContext();
+    const teamsMap = ctx.teamsMap.value;
+    const playersMap = ctx.playersMap.value;
+    const manager = ctx.userManager.value;
+    const leagues = ctx.leagues.value;
+    const tournaments = ctx.tournaments.value;
+    const internationalTournaments = ctx.internationalTournaments.value;
     const managerTeam = teamsMap.get(manager.team);
     const managerLeague = leagues.find((league) => league.teams?.includes(manager.team));
     const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.team));

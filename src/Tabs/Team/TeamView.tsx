@@ -1,25 +1,20 @@
 import { useEffect } from "react";
-import type { Manager, NationalTeam, Player, Team } from "../../Models/WorldStage";
-import { signal, type Signal } from "@preact/signals-react";
+import type { Player, Team } from "../../Models/WorldStage";
+import { signal } from "@preact/signals-react";
 import { Formation } from "../../Components/Formation/Formation";
 import styles from "./TeamView.module.css";
 import { PlayerAttributesView } from "../../Components/Formation/PlayerAttributesView";
 import { useSignals } from "@preact/signals-react/runtime";
-
-interface TeamViewProps {
-    teamsMap: Signal<Map<string, Team>>;
-    playersMap: Signal<Map<string, Player>>;
-    nationalTeams: Signal<NationalTeam[]>;
-    userManager: Signal<Manager>;
-}
+import { useGameContext } from "../../Context/GameContext";
 
 const clubTeam = signal<Team | null>(null);
 const nationalTeam = signal<Team | null>(null);
 const selectedPlayer = signal<Player | null>(null);
 const currentTeam = signal<string>("Club");
 
-export function TeamView({ teamsMap, playersMap, nationalTeams, userManager }: TeamViewProps) {
+export function TeamView() {
     useSignals();
+    const { teamsMap, playersMap, nationalTeams, userManager } = useGameContext();
 
     useEffect(() => {
         clubTeam.value = teamsMap.value.get(userManager.value.team) ?? null;

@@ -1,13 +1,10 @@
 import React from 'react';
 import logo from '../../assets/Images/logo.png';
 import styles from "./StartingPage.module.css";
-import type { Signal } from '@preact/signals-react';
+import { useGameContext } from '../../Context/GameContext';
 
-interface StartingPageProps {
-    currentPage: Signal<string>;
-}
-
-export function StartingPage({ currentPage }: StartingPageProps) {
+export function StartingPage() {
+    const { currentPage } = useGameContext();
 
     return (
         <div className={styles.startingPageContainer}>
