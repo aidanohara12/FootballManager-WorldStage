@@ -153,9 +153,17 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
     let homeTeamScore = 0;
     let awayTeamScore = 0;
 
+    const isLeague = match.value.isLeagueMatch;
+
     if (homeWiner) {
-        homeTeam.wins++;
-        awayTeam.losses++;
+        if (isLeague) {
+            homeTeam.wins++;
+            awayTeam.losses++;
+            if (homeTeam.form.length >= 5) homeTeam.form.shift();
+            homeTeam.form.push("W");
+            if (awayTeam.form.length >= 5) awayTeam.form.shift();
+            awayTeam.form.push("L");
+        }
         homeTeam.manager.careerWins++;
         awayTeam.manager.careerLosses++;
         if (homeTeam.name === manager.value.team) {
@@ -164,10 +172,6 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         if (awayTeam.name === manager.value.team) {
             manager.value.careerLosses++;
         }
-        if (homeTeam.form.length >= 5) homeTeam.form.shift();
-        homeTeam.form.push("W");
-        if (awayTeam.form.length >= 5) awayTeam.form.shift();
-        awayTeam.form.push("L");
         let homeTeamMax = 1;
         if (homeTotalPoints >= 10) {
             homeTeamMax = 5;
@@ -181,18 +185,20 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         homeTeamScore = Math.floor(Math.random() * (homeTeamMax + 1)) + 1;
         awayTeamScore = Math.floor(Math.random() * homeTeamScore);
     } else if (awayWiner) {
-        homeTeam.losses++;
-        awayTeam.wins++;
+        if (isLeague) {
+            homeTeam.losses++;
+            awayTeam.wins++;
+            if (homeTeam.form.length >= 5) homeTeam.form.shift();
+            homeTeam.form.push("L");
+            if (awayTeam.form.length >= 5) awayTeam.form.shift();
+            awayTeam.form.push("W");
+        }
         if (homeTeam.name === manager.value.team) {
             manager.value.careerLosses++;
         }
         if (awayTeam.name === manager.value.team) {
             manager.value.careerWins++;
         }
-        if (homeTeam.form.length >= 5) homeTeam.form.shift();
-        homeTeam.form.push("L");
-        if (awayTeam.form.length >= 5) awayTeam.form.shift();
-        awayTeam.form.push("W");
         awayTeam.manager.careerWins++;
         homeTeam.manager.careerLosses++;
         let awayTeamMax = 1;
@@ -208,8 +214,14 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         awayTeamScore = Math.floor(Math.random() * (awayTeamMax + 1)) + 1;
         homeTeamScore = Math.floor(Math.random() * awayTeamScore);
     } else if (draw) {
-        homeTeam.draws++;
-        awayTeam.draws++;
+        if (isLeague) {
+            homeTeam.draws++;
+            awayTeam.draws++;
+            if (homeTeam.form.length >= 5) homeTeam.form.shift();
+            homeTeam.form.push("D");
+            if (awayTeam.form.length >= 5) awayTeam.form.shift();
+            awayTeam.form.push("D");
+        }
         homeTeam.manager.careerDraws++;
         awayTeam.manager.careerDraws++;
         if (homeTeam.name === manager.value.team) {
@@ -218,41 +230,42 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         if (awayTeam.name === manager.value.team) {
             manager.value.careerDraws++;
         }
-        if (homeTeam.form.length >= 5) homeTeam.form.shift();
-        homeTeam.form.push("D");
-        if (awayTeam.form.length >= 5) awayTeam.form.shift();
-        awayTeam.form.push("D");
         homeTeamScore = Math.floor(Math.random() * 6);
         awayTeamScore = homeTeamScore;
     }
 
-    const isLeague = match.value.isLeagueMatch;
     const scorers = calculateScorers(homePlayers, awayPlayers, homeTeamScore, awayTeamScore, isLeague);
 
-    // Update team goals for/against
-    homeTeam.goalsFor += homeTeamScore;
-    homeTeam.goalsAgainst += awayTeamScore;
-    awayTeam.goalsFor += awayTeamScore;
-    awayTeam.goalsAgainst += homeTeamScore;
-
-    // Update team points
-    if (homeWiner) {
-        homeTeam.points += 3;
-    } else if (awayWiner) {
-        awayTeam.points += 3;
-    } else if (draw) {
-        homeTeam.points += 1;
-        awayTeam.points += 1;
+    // Update team goals for/against (league only)
+    if (isLeague) {
+        homeTeam.goalsFor += homeTeamScore;
+        homeTeam.goalsAgainst += awayTeamScore;
+        awayTeam.goalsFor += awayTeamScore;
+        awayTeam.goalsAgainst += homeTeamScore;
     }
 
-    // Update goalkeeper clean sheets
-    if (awayTeamScore === 0) {
-        const homeGK = homePlayers.find((p: Player) => p.startingTeam && p.position === "Goalkeeper");
-        if (homeGK) homeGK.cleanSheets++;
+    // Update team points (league only)
+    if (isLeague) {
+        if (homeWiner) {
+            homeTeam.points += 3;
+        } else if (awayWiner) {
+            awayTeam.points += 3;
+        } else if (draw) {
+            homeTeam.points += 1;
+            awayTeam.points += 1;
+        }
     }
-    if (homeTeamScore === 0) {
-        const awayGK = awayPlayers.find((p: Player) => p.startingTeam && p.position === "Goalkeeper");
-        if (awayGK) awayGK.cleanSheets++;
+
+    // Update goalkeeper clean sheets (league only)
+    if (isLeague) {
+        if (awayTeamScore === 0) {
+            const homeGK = homePlayers.find((p: Player) => p.startingTeam && p.position === "Goalkeeper");
+            if (homeGK) homeGK.cleanSheets++;
+        }
+        if (homeTeamScore === 0) {
+            const awayGK = awayPlayers.find((p: Player) => p.startingTeam && p.position === "Goalkeeper");
+            if (awayGK) awayGK.cleanSheets++;
+        }
     }
 
     // Mutate the original match object in-place so Schedule arrays stay in sync

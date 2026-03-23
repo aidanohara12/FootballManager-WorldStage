@@ -225,3 +225,117 @@
     color: #3b82f6 !important;
     font-weight: 600;
 }
+
+.penaltyTag {
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #e67e22;
+    padding: 0.15rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #eee;
+}
+
+.matchupClickable {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.matchupClickable:hover {
+    transform: scale(1.03);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Two-legged tie container */
+.tieContainer {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    min-width: 260px;
+    gap: 0;
+}
+
+.tieTeams {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.tieTeamName {
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.tieVs {
+    font-size: 0.7rem;
+    color: #999;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.tieWinner {
+    color: #2e7d32;
+    font-weight: 700;
+}
+
+.tieLegs {
+    display: flex;
+    flex-direction: column;
+}
+
+.tieLeg {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tieLegLabel {
+    font-weight: 600;
+    color: #888;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    min-width: 3rem;
+}
+
+.tieLegScore {
+    color: #555;
+    font-size: 0.8rem;
+}
+
+.tieAgg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    background: #f0f4f8;
+    font-size: 0.8rem;
+    font-weight: 600;
+    gap: 0.2rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.tieAggScore {
+    color: #555;
+}
+
+.tieAggDash {
+    color: #999;
+}
+
+/* Manager team highlight for tournament matchups */
+.managerTie {
+    border: 2px solid #3b82f6;
+    box-shadow: 0 1px 6px rgba(59, 130, 246, 0.25);
+}

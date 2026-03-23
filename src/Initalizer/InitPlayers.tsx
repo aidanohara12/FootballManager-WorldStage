@@ -118,6 +118,21 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
         Tournaments.push(tournament);
     });
 
+    // Initialize secondary (league cup) tournaments
+    const uniqueSecondaryTournaments = [...new Set(AllTeams.map((t) => t.tournament2))];
+
+    uniqueSecondaryTournaments.forEach((tournamentName: string) => {
+        const tournament: Tournament = {
+            name: tournamentName,
+            currentRound: "First Round",
+            teams: [],
+            matches: [],
+            pastChampions: []
+        };
+
+        Tournaments.push(tournament);
+    });
+
     // Initialize International Tournaments - flatten the tournament arrays and get unique values
     const uniqueInternationalTournaments = [...new Set(Top50Countries.flatMap((t) => t.tournaments))];
 
@@ -178,7 +193,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
 
         // Add to Tournaments array as TournamentTeam
         Tournaments.forEach((tournament: Tournament) => {
-            if (tournament.name === teamData.tournament) {
+            if (tournament.name === teamData.tournament || tournament.name === teamData.tournament2) {
                 tournament?.teams?.push({
                     teamName: newTeam.name,
                     tournamentName: tournament.name,

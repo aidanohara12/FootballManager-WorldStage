@@ -1,14 +1,19 @@
 import { useState } from "react";
-import type { InternationalTournament, League, Team, Tournament } from "../../Models/WorldStage";
+import { signal } from "@preact/signals-react";
+import type { InternationalTournament, League, Match, Team, Tournament } from "../../Models/WorldStage";
 import { ShowLeagueTable } from "../../Components/Table/ShowTables/ShowLeagueTable";
 import ShowTournamentTable from "../../Components/Table/ShowTables/ShowTournamentTable";
 import { ShowInternationalTournamentTable } from "../../Components/Table/ShowTables/ShowIntTournamentTable";
+import { MatchOverview } from "../../Components/MatchOverview/MatchOverview";
 import styles from "./Table.module.css";
 import { useGameContext } from "../../Context/GameContext";
+
+const matchClicked = signal<Match | undefined>(undefined);
 
 export function Table() {
     const ctx = useGameContext();
     const teamsMap = ctx.teamsMap.value;
+    const playersMap = ctx.playersMap.value;
     const manager = ctx.userManager.value;
     const leagues = ctx.leagues.value;
     const tournaments = ctx.tournaments.value;
@@ -144,7 +149,7 @@ export function Table() {
                                 ))}
                             </select>
                         </div>
-                        <ShowTournamentTable tournamentTitle={getLeague()} tournamentTeams={tournamentTeams} tournamentMatches={tournamentMatches} />
+                        <ShowTournamentTable tournamentTitle={getLeague()} tournamentTeams={tournamentTeams} tournamentMatches={tournamentMatches} onMatchClick={(m) => matchClicked.value = m} />
                     </div>
                 )}
 
@@ -162,10 +167,17 @@ export function Table() {
                                 ))}
                             </select>
                         </div>
-                        <ShowInternationalTournamentTable tournamentTitle={getLeague()} tournamentTeams={internationalTournamentTeams} tournamentMatches={internationalTournamentMatches} />
+                        <ShowInternationalTournamentTable tournamentTitle={getLeague()} tournamentTeams={internationalTournamentTeams} tournamentMatches={internationalTournamentMatches} onMatchClick={(m) => matchClicked.value = m} />
                     </div>
                 )}
             </div>
+            {matchClicked.value && (
+                <div className={styles.overlay} onClick={() => matchClicked.value = undefined}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <MatchOverview match={matchClicked} playersMap={playersMap} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

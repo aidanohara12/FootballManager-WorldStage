@@ -1,6 +1,7 @@
 import { signal } from "@preact/signals-react";
-import type { League, Match, PlayerAwards, Player } from "../../Models/WorldStage.ts";
+import type { League, Match, PlayerAwards, Player, Tournament } from "../../Models/WorldStage.ts";
 import { createSchedule } from "../../Utils/CreateSchedule.ts";
+import { createTournamentSchedule } from "../../Utils/TournamentSchedule.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
 import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
@@ -12,6 +13,7 @@ import { Table } from "../../Tabs/Table/Table.tsx";
 import { useSignals } from "@preact/signals-react/runtime";
 import SeasonSummary from "../SeasonSummary/SeasonSummary.tsx";
 import { useGameContext } from "../../Context/GameContext.tsx";
+import Tournaments from "../../Tabs/Tournaments/Tournaments.tsx";
 
 const currentPage = signal<string>("SelectNational");
 const activeTab = signal<string>("Schedule");
@@ -41,9 +43,44 @@ const retiredPlayers = signal<Player[]>([]);
 
 export function MainPage() {
     useSignals();
-    const { teamsMap, leagues, currentYear } = useGameContext();
+    const { teamsMap, playersMap, leagues, currentYear, tournaments } = useGameContext();
+
+    if (currentPage.value !== "MainPage") {
+        scheduleCreated.value = false;
+    }
 
     if (currentPage.value === "MainPage" && !scheduleCreated.value) {
+        currentYear.value.yearMatches = [];
+        // Reset player seasonal stats now (after awards page was shown)
+        playersMap.value.forEach((player) => {
+            player.leagueGoals = 0;
+            player.leagueAssists = 0;
+            player.countryGoals = 0;
+            player.countryAssists = 0;
+            player.totalGoals = 0;
+            player.totalAssists = 0;
+            player.cleanSheets = 0;
+            player.otherTrophiesThisSeason = 0;
+            player.importantTrophiesThisSeason = 0;
+        });
+        // Clear all team schedules and reset stats before creating new ones (ensures promoted/relegated teams start clean)
+        teamsMap.value.forEach((team) => {
+            team.Schedule = [];
+            team.points = 0;
+            team.wins = 0;
+            team.losses = 0;
+            team.draws = 0;
+            team.goalsFor = 0;
+            team.goalsAgainst = 0;
+            team.form = [];
+        });
+        // Ensure each team is only in the league matching its leagueName (safety against promotion/relegation bugs)
+        leagues.value.forEach((league: League) => {
+            league.teams = [...new Set(league.teams)].filter((teamName: string) => {
+                const team = teamsMap.value.get(teamName);
+                return team && team.leagueName === league.name;
+            });
+        });
         leagues.value.forEach((league: League) => {
             const fullSchedule = createSchedule(league, currentYear);
             league.teams.forEach((teamName: string) => {
@@ -56,6 +93,14 @@ export function MainPage() {
             });
         });
 
+        // Reset and create tournament schedules
+        tournaments.value.forEach((tournament: Tournament) => {
+            tournament.matches = [];
+            tournament.teams.forEach(t => { t.nextRound = true; });
+            createTournamentSchedule(tournament, currentYear, teamsMap);
+        });
+
+        // Collect all matches into yearMatches
         leagues.value.forEach((league: League) => {
             league.teams.forEach((teamName: string) => {
                 const team = teamsMap.value.get(teamName);
@@ -101,10 +146,12 @@ export function MainPage() {
                     {activeTab.value === "Team" && <TeamView />}
                     {activeTab.value === "History" && <History />}
                     {activeTab.value === "Table" && <Table />}
+                    {activeTab.value === "Tournaments" && <Tournaments />}
                     <div className={styles.tabButtons}>
                         <button className={activeTab.value === "Schedule" ? styles.activeTab : ""} onClick={() => activeTab.value = "Schedule"}>Schedule</button>
                         <button className={activeTab.value === "Team" ? styles.activeTab : ""} onClick={() => activeTab.value = "Team"}>Team</button>
                         <button className={activeTab.value === "Table" ? styles.activeTab : ""} onClick={() => activeTab.value = "Table"}>Table</button>
+                        <button className={activeTab.value === "Tournaments" ? styles.activeTab : ""} onClick={() => activeTab.value = "Tournaments"}>Tournaments</button>
                         <button className={activeTab.value === "Stats" ? styles.activeTab : ""} onClick={() => activeTab.value = "Stats"}>Stats</button>
                         <button className={activeTab.value === "History" ? styles.activeTab : ""} onClick={() => activeTab.value = "History"}>History</button>
                     </div>

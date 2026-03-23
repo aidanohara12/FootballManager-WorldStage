@@ -5,6 +5,7 @@ interface ShowInternationalTournamentTableProps {
     tournamentTitle: string | undefined;
     tournamentTeams: InternationalTournamentTeam[] | undefined;
     tournamentMatches: Match[] | undefined;
+    onMatchClick?: (match: Match) => void;
 }
 
 interface Matchup {
@@ -100,6 +101,7 @@ function buildBracket(teams: InternationalTournamentTeam[], matches: Match[]): M
 export function ShowInternationalTournamentTable({
     tournamentTeams,
     tournamentMatches,
+    onMatchClick,
 }: ShowInternationalTournamentTableProps) {
     const teams = tournamentTeams ?? [];
     const matches = tournamentMatches ?? [];
@@ -127,9 +129,17 @@ export function ShowInternationalTournamentTable({
                                     matchup.homeScore !== null &&
                                     matchup.awayScore !== null &&
                                     matchup.awayScore > matchup.homeScore;
+                                const played = matchup.homeScore !== null && matchup.awayScore !== null && (matchup.homeScore > 0 || matchup.awayScore > 0);
+                                const originalMatch = played ? matches.find(m =>
+                                    m.homeTeamName === matchup.home && m.awayTeamName === matchup.away
+                                ) : undefined;
 
                                 return (
-                                    <div key={matchIndex} className={styles.matchup}>
+                                    <div
+                                        key={matchIndex}
+                                        className={`${styles.matchup} ${originalMatch && onMatchClick ? styles.matchupClickable : ""}`}
+                                        onClick={() => originalMatch && onMatchClick?.(originalMatch)}
+                                    >
                                         <div className={`${styles.matchupTeam} ${homeWon ? styles.winner : ""}`}>
                                             <span className={`${styles.matchupTeamName} ${matchup.home === "TBD" ? styles.tbd : ""}`}>
                                                 {matchup.home}

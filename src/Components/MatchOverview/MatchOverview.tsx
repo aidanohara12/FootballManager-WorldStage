@@ -43,6 +43,9 @@ export function MatchOverview(props: MatchOverviewProps) {
                     <div className={styles.teamName}>{m.awayTeamName}</div>
                 </div>
             </div>
+            {m.penaltyWin && (
+                <div className={styles.penaltyLabel}>Won on Penalties</div>
+            )}
 
             <div className={styles.details}>
                 <div className={styles.detailColumn}>

@@ -1,205 +1,229 @@
 import type { TournamentTeam, Match } from "../../../Models/WorldStage";
+import { isEuropeanTournament } from "../../../Utils/TournamentSchedule";
 import styles from "./Show.module.css";
 
 interface ShowTournamentTableProps {
     tournamentTitle: string | undefined;
     tournamentTeams: TournamentTeam[] | undefined;
     tournamentMatches: Match[] | undefined;
+    onMatchClick?: (match: Match) => void;
+    managerTeam?: string;
 }
 
-interface Matchup {
-    home: string;
-    away: string;
-    homeScore: number | null;
-    awayScore: number | null;
+const roundOrder = [
+    "Play-In",
+    "Round of 128",
+    "Round of 64",
+    "Round of 32",
+    "Round of 16",
+    "Quarter-Finals",
+    "Semi-Finals",
+    "Final",
+];
+
+interface Tie {
+    teamA: string;
+    teamB: string;
+    leg1: Match | undefined;
+    leg2: Match | undefined;
+    teamAAgg: number;
+    teamBAgg: number;
+    winner: string | null;
+    penaltyWin: boolean;
 }
 
-function getRoundName(teamCount: number): string {
-    if (teamCount <= 2) return "Final";
-    if (teamCount <= 4) return "Semi-Finals";
-    if (teamCount <= 8) return "Quarter-Finals";
-    if (teamCount <= 16) return "Round of 16";
-    return `Round of ${teamCount}`;
-}
+function groupTies(roundMatches: Match[]): Tie[] {
+    const leg1Matches = roundMatches.filter(m => m.leg === 1);
+    const leg2Matches = roundMatches.filter(m => m.leg === 2);
+    const ties: Tie[] = [];
 
-function getWinner(matchup: Matchup): string {
-    if (matchup.homeScore === null || matchup.awayScore === null) return "TBD";
-    if (matchup.homeScore > matchup.awayScore) return matchup.home;
-    if (matchup.awayScore > matchup.homeScore) return matchup.away;
-    return "TBD";
-}
+    for (const leg1 of leg1Matches) {
+        const teamA = leg1.homeTeamName;
+        const teamB = leg1.awayTeamName;
+        const leg2 = leg2Matches.find(
+            m => m.homeTeamName === teamB && m.awayTeamName === teamA
+        );
 
-function findMatch(matches: Match[], home: string, away: string): Matchup {
-    const match = matches.find(
-        m =>
-            (m.homeTeamName === home && m.awayTeamName === away) ||
-            (m.homeTeamName === away && m.awayTeamName === home)
-    );
-    if (match) {
-        return {
-            home: match.homeTeamName,
-            away: match.awayTeamName,
-            homeScore: match.homeScore,
-            awayScore: match.awayScore,
-        };
-    }
-    return { home, away, homeScore: null, awayScore: null };
-}
+        const leg1Played = !!leg1.played;
+        const leg2Played = !!(leg2?.played);
 
-function nextPowerOf2(n: number): number {
-    let p = 1;
-    while (p < n) p *= 2;
-    return p;
-}
+        let teamAAgg = 0;
+        let teamBAgg = 0;
+        let winner: string | null = null;
+        let penaltyWin = false;
 
-function buildBracket(teams: TournamentTeam[], matches: Match[]): Matchup[][] {
-    const rounds: Matchup[][] = [];
-    const teamNames = teams.map(t => t.teamName);
-    const totalTeams = teamNames.length;
-
-    if (totalTeams < 2) return rounds;
-
-    const bracketSize = nextPowerOf2(totalTeams);
-    const numByes = bracketSize - totalTeams;
-    // Number of play-in matches (teams that must play to get into the main bracket)
-    const numPlayInMatches = totalTeams - bracketSize / 2;
-
-    // Top seeds get byes, lower seeds play in the preliminary round
-    // Bye teams: seeds 1 through numByes (indices 0..numByes-1)
-    // Play-in teams: the remaining seeds pair up (best remaining vs worst remaining)
-    if (numPlayInMatches > 0) {
-        const playInRound: Matchup[] = [];
-        const playInTeams = teamNames.slice(numByes); // lower-seeded teams that must play in
-        for (let i = 0; i < playInTeams.length / 2; i++) {
-            const home = playInTeams[i];
-            const away = playInTeams[playInTeams.length - 1 - i];
-            playInRound.push(findMatch(matches, home, away));
+        if (leg1Played) {
+            teamAAgg += leg1.homeScore;
+            teamBAgg += leg1.awayScore;
         }
-        rounds.push(playInRound);
-    }
-
-    // Build the main bracket round (bracketSize / 2 matchups)
-    // Slots are filled by: bye teams in seeded order + winners of play-in matches
-    const mainRoundSlots: string[] = [];
-    // Interleave bye teams and play-in winners by seed position
-    const playInRound = numPlayInMatches > 0 ? rounds[0] : null;
-
-    // Build a seeded list: for each slot in the full bracket, determine if it's a bye team or a play-in winner
-    // Seeds 1..numByes are byes, seeds (numByes+1)..totalTeams played in
-    // We pair seed 1 vs seed bracketSize, seed 2 vs seed bracketSize-1, etc.
-    // But since some seeds played in, we replace those with their play-in result
-    for (let i = 0; i < bracketSize / 2; i++) {
-        const topSeed = i; // 0-indexed seed
-        // Determine top team for this matchup
-        let topTeam: string;
-        if (topSeed < numByes) {
-            topTeam = teamNames[topSeed]; // bye team
-        } else {
-            // play-in winner
-            const playInIdx = topSeed - numByes;
-            topTeam = playInRound ? getWinner(playInRound[playInIdx]) : "TBD";
+        if (leg2 && leg2Played) {
+            teamAAgg += leg2.awayScore;
+            teamBAgg += leg2.homeScore;
         }
 
-        // Determine bottom team for this matchup
-        let bottomTeam: string;
-        // bottomSeed maps to a team index: but bracket slots beyond totalTeams don't exist
-        // The bottom seed in terms of actual team index
-        const bottomTeamIndex = bracketSize - 1 - i;
-        if (bottomTeamIndex < numByes) {
-            bottomTeam = teamNames[bottomTeamIndex];
-        } else if (bottomTeamIndex < totalTeams) {
-            // This team played in the play-in round - find which play-in match they were in
-            const playInTeams = teamNames.slice(numByes);
-            const playInIdx = playInTeams.length - 1 - (bottomTeamIndex - numByes);
-            if (playInIdx >= 0 && playInIdx < (playInRound?.length ?? 0)) {
-                bottomTeam = playInRound ? getWinner(playInRound[playInIdx]) : "TBD";
+        if (leg1Played && leg2Played) {
+            if (teamAAgg > teamBAgg) {
+                winner = teamA;
+            } else if (teamBAgg > teamAAgg) {
+                winner = teamB;
             } else {
-                bottomTeam = "TBD";
+                penaltyWin = !!(leg2?.penaltyWin);
+                if (penaltyWin && leg2) {
+                    winner = leg2.homeScore > leg2.awayScore ? teamB : teamA;
+                }
             }
-        } else {
-            bottomTeam = "TBD"; // empty bracket slot
         }
 
-        mainRoundSlots.push(topTeam);
-        mainRoundSlots.push(bottomTeam);
+        ties.push({ teamA, teamB, leg1, leg2, teamAAgg, teamBAgg, winner, penaltyWin });
     }
 
-    // Now pair up the main round slots
-    const mainRound: Matchup[] = [];
-    for (let i = 0; i < mainRoundSlots.length; i += 2) {
-        const home = mainRoundSlots[i];
-        const away = mainRoundSlots[i + 1];
-        mainRound.push(findMatch(matches, home, away));
-    }
-    rounds.push(mainRound);
-
-    // Build subsequent rounds from winners
-    let prevRound = mainRound;
-    while (prevRound.length > 1) {
-        const nextRound: Matchup[] = [];
-        for (let i = 0; i < prevRound.length; i += 2) {
-            const winner1 = getWinner(prevRound[i]);
-            const winner2 = i + 1 < prevRound.length ? getWinner(prevRound[i + 1]) : "TBD";
-            nextRound.push(findMatch(matches, winner1, winner2));
-        }
-        rounds.push(nextRound);
-        prevRound = nextRound;
-    }
-
-    return rounds;
+    return ties;
 }
 
 export function ShowTournamentTable({
     tournamentTeams,
     tournamentMatches,
+    onMatchClick,
+    managerTeam,
 }: ShowTournamentTableProps) {
     const teams = tournamentTeams ?? [];
     const matches = tournamentMatches ?? [];
-    const rounds = buildBracket(teams, matches);
-    const hasPlayIn = teams.length > 0 && nextPowerOf2(teams.length) !== teams.length;
+    const tournamentName = teams[0]?.tournamentName ?? "";
+    const european = isEuropeanTournament(tournamentName);
 
     if (teams.length === 0) {
         return <div className={styles.tableContainer}>No teams in this tournament.</div>;
     }
 
+    // Group matches by round
+    const roundMap = new Map<string, Match[]>();
+    for (const match of matches) {
+        const round = match.tournamentRound ?? "Unknown";
+        if (!roundMap.has(round)) {
+            roundMap.set(round, []);
+        }
+        roundMap.get(round)!.push(match);
+    }
+
+    // Sort rounds by the defined order
+    const sortedRounds = [...roundMap.entries()].sort((a, b) => {
+        const aIdx = roundOrder.indexOf(a[0]);
+        const bIdx = roundOrder.indexOf(b[0]);
+        return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
+    });
+
+    if (sortedRounds.length === 0) {
+        return <div className={styles.tableContainer}>No matches scheduled yet.</div>;
+    }
+
+    const isManagerTeam = (name: string) => managerTeam === name;
+
     return (
         <div className={styles.bracketContainer}>
             <div className={styles.bracket}>
-                {rounds.map((round, roundIndex) => {
-                    const isPlayIn = hasPlayIn && roundIndex === 0;
-                    const teamsInRound = round.length * 2;
-                    const roundName = isPlayIn ? "Play-In" : getRoundName(teamsInRound);
+                {sortedRounds.map(([roundName, roundMatches]) => {
+                    const isFinal = roundName === "Final";
+                    const showTwoLegged = european && !isFinal && roundMatches.some(m => m.leg);
+
+                    if (showTwoLegged) {
+                        const ties = groupTies(roundMatches);
+                        return (
+                            <div key={roundName} className={styles.roundColumn}>
+                                <div className={styles.roundTitle}>{roundName}</div>
+                                {ties.map((tie, i) => {
+                                    const leg1Played = !!(tie.leg1?.played);
+                                    const leg2Played = !!(tie.leg2?.played);
+                                    const hasManager = isManagerTeam(tie.teamA) || isManagerTeam(tie.teamB);
+
+                                    return (
+                                        <div key={i} className={`${styles.tieContainer} ${hasManager ? styles.managerTie : ""}`}>
+                                            <div className={styles.tieTeams}>
+                                                <span className={`${styles.tieTeamName} ${tie.winner === tie.teamA ? styles.tieWinner : ""} ${isManagerTeam(tie.teamA) ? styles.managerText : ""}`}>
+                                                    {tie.teamA}
+                                                </span>
+                                                <span className={styles.tieVs}>vs</span>
+                                                <span className={`${styles.tieTeamName} ${tie.winner === tie.teamB ? styles.tieWinner : ""} ${isManagerTeam(tie.teamB) ? styles.managerText : ""}`}>
+                                                    {tie.teamB}
+                                                </span>
+                                            </div>
+                                            <div className={styles.tieLegs}>
+                                                <div
+                                                    className={`${styles.tieLeg} ${leg1Played && onMatchClick ? styles.matchupClickable : ""}`}
+                                                    onClick={() => leg1Played && tie.leg1 && onMatchClick?.(tie.leg1)}
+                                                >
+                                                    <span className={styles.tieLegLabel}>Leg 1</span>
+                                                    <span className={styles.tieLegScore}>
+                                                        {leg1Played
+                                                            ? `${tie.leg1!.homeTeamName} ${tie.leg1!.homeScore} - ${tie.leg1!.awayScore} ${tie.leg1!.awayTeamName}`
+                                                            : "Not played"}
+                                                    </span>
+                                                </div>
+                                                <div
+                                                    className={`${styles.tieLeg} ${leg2Played && onMatchClick ? styles.matchupClickable : ""}`}
+                                                    onClick={() => leg2Played && tie.leg2 && onMatchClick?.(tie.leg2)}
+                                                >
+                                                    <span className={styles.tieLegLabel}>Leg 2</span>
+                                                    <span className={styles.tieLegScore}>
+                                                        {leg2Played
+                                                            ? `${tie.leg2!.homeTeamName} ${tie.leg2!.homeScore} - ${tie.leg2!.awayScore} ${tie.leg2!.awayTeamName}`
+                                                            : "Not played"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {(leg1Played || leg2Played) && (
+                                                <div className={styles.tieAgg}>
+                                                    <span className={`${styles.tieAggScore} ${tie.winner === tie.teamA ? styles.tieWinner : ""}`}>
+                                                        {tie.teamA} {tie.teamAAgg}
+                                                    </span>
+                                                    <span className={styles.tieAggDash}> - </span>
+                                                    <span className={`${styles.tieAggScore} ${tie.winner === tie.teamB ? styles.tieWinner : ""}`}>
+                                                        {tie.teamBAgg} {tie.teamB}
+                                                    </span>
+                                                    {tie.penaltyWin && <span className={styles.penaltyTag}> (Pens)</span>}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        );
+                    }
+
+                    // Single-match rounds (non-European, or Final)
                     return (
-                        <div key={roundIndex} className={styles.roundColumn}>
+                        <div key={roundName} className={styles.roundColumn}>
                             <div className={styles.roundTitle}>{roundName}</div>
-                            {round.map((matchup, matchIndex) => {
-                                const homeWon =
-                                    matchup.homeScore !== null &&
-                                    matchup.awayScore !== null &&
-                                    matchup.homeScore > matchup.awayScore;
-                                const awayWon =
-                                    matchup.homeScore !== null &&
-                                    matchup.awayScore !== null &&
-                                    matchup.awayScore > matchup.homeScore;
+                            {roundMatches.map((match, matchIndex) => {
+                                const played = !!match.played;
+                                const homeWon = played && match.homeScore > match.awayScore;
+                                const awayWon = played && match.awayScore > match.homeScore;
+                                const hasManager = isManagerTeam(match.homeTeamName) || isManagerTeam(match.awayTeamName);
 
                                 return (
-                                    <div key={matchIndex} className={styles.matchup}>
+                                    <div
+                                        key={matchIndex}
+                                        className={`${styles.matchup} ${played && onMatchClick ? styles.matchupClickable : ""} ${hasManager ? styles.managerTie : ""}`}
+                                        onClick={() => played && onMatchClick?.(match)}
+                                    >
                                         <div className={`${styles.matchupTeam} ${homeWon ? styles.winner : ""}`}>
-                                            <span className={`${styles.matchupTeamName} ${matchup.home === "TBD" ? styles.tbd : ""}`}>
-                                                {matchup.home}
+                                            <span className={`${styles.matchupTeamName} ${isManagerTeam(match.homeTeamName) ? styles.managerText : ""}`}>
+                                                {match.homeTeamName}
                                             </span>
                                             <span className={styles.matchupScore}>
-                                                {matchup.homeScore ?? "-"}
+                                                {played ? match.homeScore : "-"}
                                             </span>
                                         </div>
                                         <div className={`${styles.matchupTeam} ${awayWon ? styles.winner : ""}`}>
-                                            <span className={`${styles.matchupTeamName} ${matchup.away === "TBD" ? styles.tbd : ""}`}>
-                                                {matchup.away}
+                                            <span className={`${styles.matchupTeamName} ${isManagerTeam(match.awayTeamName) ? styles.managerText : ""}`}>
+                                                {match.awayTeamName}
                                             </span>
                                             <span className={styles.matchupScore}>
-                                                {matchup.awayScore ?? "-"}
+                                                {played ? match.awayScore : "-"}
                                             </span>
                                         </div>
+                                        {match.penaltyWin && (
+                                            <div className={styles.penaltyTag}>Pens</div>
+                                        )}
                                     </div>
                                 );
                             })}

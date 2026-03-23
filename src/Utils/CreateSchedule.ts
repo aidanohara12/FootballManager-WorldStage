@@ -1,7 +1,12 @@
 import { type currentYear } from './../Models/WorldStage';
-import type { Achievements, League, Manager, ManagerHistory, Match, NationalTeam, Player, PlayerAwards, Team, yearPlayerStats } from "../Models/WorldStage";
+import type { Achievements, League, Manager, ManagerHistory, Match, NationalTeam, Player, PlayerAwards, Team, Tournament, yearPlayerStats } from "../Models/WorldStage";
+import { resetTournaments } from "./TournamentSchedule";
 import { updateClubTeams, getNationalAllTeamPlayers, updatePlayerContract } from "../Utils/TeamPlayers";
 import type { Signal } from '@preact/signals-react';
+
+const importantLeagues = new Set([
+    "Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1", "Eredivisie", "Primeira Liga"
+]);
 
 const leagueMapping: Record<string, string> = {
     "Premier League": "Championship",
@@ -169,7 +174,7 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
     if (allPlayers.length === 0) return;
 
     // Ballon d'Or: most G/A across top leagues
-    const ballonDor = [...topLeaguePlayers].sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists))[0];
+    const ballonDor = [...topLeaguePlayers].sort((a, b) => (b.importantTrophiesThisSeason) - (a.importantTrophiesThisSeason)).sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists))[0];
     playerAwards.value.ballonDorWinners.push(ballonDor.name);
     ballonDor.awards++;
 
@@ -187,15 +192,13 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
     }
 }
 
-export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>, currentYear: Signal<currentYear>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>): void {
+export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>, currentYear: Signal<currentYear>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>, tournaments: Signal<Tournament[]>): void {
     // Increment yearsCompleted before checking achievements so season-count checks work
     currentYear.value = {
         ...currentYear.value,
         yearsCompleted: currentYear.value.yearsCompleted + 1,
     };
     manager.value.age++;
-    // Calculate awards before stats are reset
-    calculateAwards(leagues, teamsMap, playerMap, playerAwards);
     // First pass: compute standings, awards, stats, and reset for all leagues
     leagues.value.forEach(league => {
         const leagueTeams = league.teams;
@@ -203,24 +206,29 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
         leagueTeams.forEach(team => {
             allLeagueTeams.push(teamsMap.value.get(team) as Team);
         });
-        const winner = allLeagueTeams.sort((a, b) => b.points - a.points)[0];
+        const winner = allLeagueTeams.sort((a,b) =>  (b.goalsFor-b.goalsAgainst) - (a.goalsFor) - (a.goalsAgainst)).sort((a, b) => b.points - a.points)[0];
         league.pastChampions.push(winner.name);
         winner.manager.trophiesWon.push({
             trophy: league.name,
             trophyType: "League"
         });
+        winner.manager.leagueTrophies++;
         winner.players.forEach(player => {
             const playerTeam = playerMap.value.get(player);
             if (playerTeam) {
                 playerTeam.trophies++;
+                if (importantLeagues.has(league.name)) {
+                    playerTeam.importantTrophiesThisSeason++;
+                } else {
+                    playerTeam.otherTrophiesThisSeason++;
+                }
             }
         });
-        league.topThree = [];
-        const topThree = allLeagueTeams.sort((a, b) => b.points - a.points).slice(0, 3);
-        league.topThree = topThree.map((t) => t.name);
-        league.bottomThree = [];
-        const bottomThree = allLeagueTeams.sort((a, b) => a.points - b.points).slice(0, 3);
-        league.bottomThree = bottomThree.map((t) => t.name);
+        const sorted = [...allLeagueTeams].sort((a,b) =>  (b.goalsFor-b.goalsAgainst) - (a.goalsFor) - (a.goalsAgainst)).sort((a, b) => b.points - a.points);
+        league.topThree = sorted.slice(0, 3).map((t) => t.name);
+        league.topSix = sorted.slice(3, 6).map((t) => t.name);
+        league.topNine = sorted.slice(6, 9).map((t) => t.name);
+        league.bottomThree = sorted.slice(-3).reverse().map((t) => t.name);
         league.teams.forEach(team => {
             const curTeam = teamsMap.value.get(team);
             if (curTeam) {
@@ -280,6 +288,7 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                         if (curPlayer.age > 36) {
                             retiredPlayers.value.push(curPlayer);
                             playerMap.value.delete(curPlayer.name);
+                            curTeam.players = curTeam.players.filter(p => p !== curPlayer.name);
                         }
                     }
                 });
@@ -296,6 +305,9 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
             }
         });
     });
+
+    // Calculate awards (stats will be reset later when new season schedule is created)
+    calculateAwards(leagues, teamsMap, playerMap, playerAwards);
 
     // Second pass: collect all promotion/relegation swaps first, then apply them
     const swaps: { upperLeague: League; lowerLeague: League; promoted: string[]; relegated: string[]; lowerName: string }[] = [];
@@ -332,8 +344,17 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
             if (t) t.leagueName = lowerName;
         });
     });
+
+    // Ensure each team appears only in the league matching its leagueName
+    leagues.value.forEach(league => {
+        league.teams = [...new Set(league.teams)].filter(teamName => {
+            const team = teamsMap.value.get(teamName);
+            return team && team.leagueName === league.name;
+        });
+    });
     updateClubTeams(teamsMap, playerMap);
     getNationalAllTeamPlayers(nationalTeams, playerMap, teamsMap);
+    resetTournaments(tournaments);
 }
 
 export function checkAchievements(manager: Signal<Manager>, currentYear: Signal<currentYear>, achievements: Signal<Achievements>, teamMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>): void {
@@ -416,6 +437,7 @@ export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>):
     const assists = player.value.leagueAssists;
     const contributions = goals + assists;
     const cleanSheets = player.value.cleanSheets;
+    const isDefender = player.value.position === "Defender";
 
     // Under 20: rapid growth, high ceiling, big reward for good seasons
     if (age < 20) {
@@ -429,9 +451,10 @@ export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>):
             player.value.overall += 1;
         }
 
-        if (goals >= 5) player.value.overall += 1;
+        if (goals >= 5) player.value.overall += 2;
         if (assists >= 5) player.value.overall += 1;
-        if (cleanSheets >= 5) player.value.overall += 1;
+        if (isDefender) player.value.overall += 1;
+        if (cleanSheets >= 5) player.value.overall += 2;
         if (contributions >= 15) {
             player.value.overall += 1;
             player.value.potential += 2;
@@ -450,6 +473,7 @@ export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>):
 
         if (goals >= 10) player.value.overall += 1;
         if (assists >= 10) player.value.overall += 1;
+        if (isDefender) player.value.overall += 1;
         if (cleanSheets >= 10) player.value.overall += 1;
         if (contributions >= 20) {
             player.value.overall += 1;
@@ -467,6 +491,7 @@ export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>):
 
         if (goals >= 15) player.value.overall += 1;
         if (assists >= 15) player.value.overall += 1;
+        if (isDefender) player.value.overall += 1;
         if (cleanSheets >= 15) player.value.overall += 1;
         if (isDeveloper) player.value.overall += 1;
     }

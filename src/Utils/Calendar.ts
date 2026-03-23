@@ -1,6 +1,8 @@
 import { type Signal } from "@preact/signals-react";
-import type { Achievements, currentYear, League, Manager, ManagerHistory, Match, NationalTeam, Player, PlayerAwards, Team } from "../Models/WorldStage";
-import { createSchedule, finishSeason } from "./CreateSchedule";
+import type { Player, PlayerAwards, Team } from "../Models/WorldStage";
+import { finishSeason } from "./CreateSchedule";
+import type { GameContextType } from "../Context/GameContext";
+import { addTeamsToTournament, finalizeEuropeanTournament } from './TournamentSchedule';
 
 export const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const daysOfTheMonth: Record<string, number> = {
@@ -18,6 +20,19 @@ export const daysOfTheMonth: Record<string, number> = {
     "December": 31
 };
 export const months: string[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+const topLeagues = ["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1", "Eredivisie", "Primeira Liga"];
+
+export function isLeapYear(year: number): boolean {
+    return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+}
+
+export function getDaysInMonth(month: string, year: number): number {
+    if (month === "February") {
+        return isLeapYear(year) ? 29 : 28;
+    }
+    return daysOfTheMonth[month];
+}
 
 export function getNextDay(currentDay: string): string {
     switch (currentDay) {
@@ -40,18 +55,61 @@ export function getNextDay(currentDay: string): string {
     }
 }
 
-export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Record<string, boolean>, leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, manager: Signal<Manager>, managerHistory: Signal<ManagerHistory>, achievements: Signal<Achievements>, nationalTeams: Signal<NationalTeam[]>, isFirstSeason: Signal<boolean>, currentPage: Signal<string>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>) {
+export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, boolean>, isFirstSeason: Signal<boolean>, currentPage: Signal<string>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>) {
+    const { currentYear, leagues, teamsMap, playersMap, userManager: manager, managerHistory, achievements, nationalTeams, tournaments } = ctx;
     const cur = currentYear.value;
     const nextDayOfWeek = getNextDay(cur.currentDayOfWeek);
-    const maxDays = daysOfTheMonth[cur.currentMonth];
+    const maxDays = getDaysInMonth(cur.currentMonth, cur.year);
     let nextDay = cur.currentDay + 1;
     let nextMonth = cur.currentMonth;
     let nextYear = cur.year;
-    const managerLeague = leagues.value.find(league => league.name === manager.value.team);
+    const managerTeam = teamsMap.value.get(manager.value.team);
+    const managerLeague = leagues.value.find(league => league.name === managerTeam?.leagueName);
     if (currentYear.value.currentDayOfWeek === "Monday") {
-        if (currentYear.value.leagueWeek === (managerLeague?.teams.length ?? 38 * 2) - 2) {
-            finishSeason(leagues, manager, currentYear, teamsMap, playerMap, managerHistory, achievements, nationalTeams, retiredPlayers, playerAwards);
-            isFirstSeason.value = false;
+        if (currentYear.value.leagueWeek === ((managerLeague?.teams.length ?? 38) * 2) - 2) {
+            finishSeason(leagues, manager, currentYear, teamsMap, playersMap, managerHistory, achievements, nationalTeams, retiredPlayers, playerAwards, tournaments);
+            if (isFirstSeason.value) {
+                isFirstSeason.value = false;
+                tournaments.value.push({
+                    name: "Champions League",
+                    currentRound: "First Round",
+                    teams: [],
+                    matches: [],
+                    pastChampions: [],
+                });
+                tournaments.value.push({
+                    name: "Europa League",
+                    currentRound: "First Round",
+                    teams: [],
+                    matches: [],
+                    pastChampions: [],
+                });
+                tournaments.value.push({
+                    name: "Conference League",
+                    currentRound: "First Round",
+                    teams: [],
+                    matches: [],
+                    pastChampions: [],
+                });
+            }
+            // Clear European tournament teams before re-populating from all leagues
+            const cl = tournaments.value.find(t => t.name === "Champions League")!;
+            const el = tournaments.value.find(t => t.name === "Europa League")!;
+            const conf = tournaments.value.find(t => t.name === "Conference League")!;
+            cl.teams = [];
+            el.teams = [];
+            conf.teams = [];
+            leagues.value.forEach(league => {
+                if (topLeagues.includes(league.name)) {
+                    const resolve = (names: string[]) => names.map(n => teamsMap.value.get(n)).filter((t): t is Team => !!t);
+                    addTeamsToTournament(cl, resolve(league.topThree));
+                    addTeamsToTournament(el, resolve(league.topSix));
+                    addTeamsToTournament(conf, resolve(league.topNine));
+                }
+            });
+            finalizeEuropeanTournament(cl);
+            finalizeEuropeanTournament(el);
+            finalizeEuropeanTournament(conf);
             currentPage.value = "SeasonSummary";
             currentYear.value.leagueWeek = 0;
         } else if (currentYear.value.leagueWeek > 0) {
@@ -69,20 +127,8 @@ export function moveToNextDay(currentYear: Signal<currentYear>, isSimulated: Rec
         }
     }
 
-    if (nextMonth === "August" && nextDay === 1) {
+    if (nextMonth === "August" && nextDayOfWeek === "Saturday" && currentYear.value.leagueWeek === 0) {
         currentYear.value.leagueWeek = 1;
-        leagues.value.forEach((league: League) => {
-            retiredPlayers.value = [];
-            const fullSchedule = createSchedule(league, currentYear);
-            league.teams.forEach((teamName: string) => {
-                const team = teamsMap.value.get(teamName);
-                if (team) {
-                    team.Schedule = fullSchedule.filter(
-                        (m: Match) => m.homeTeamName === teamName || m.awayTeamName === teamName
-                    ).sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
-                }
-            });
-        });
     }
 
     currentYear.value = {

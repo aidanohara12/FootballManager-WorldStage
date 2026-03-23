@@ -17,7 +17,7 @@ const showGoldenBootWinner = signal<boolean>(false);
 const showBestKeeper = signal<boolean>(false);
 
 export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: SeasonSummaryProps) {
-    const { leagues, teamsMap, playersMap, userManager: manager, currentYear } = useGameContext();
+    const { leagues, teamsMap, playersMap, userManager: manager, currentYear, tournaments } = useGameContext();
     const ballonDorWinner = playersMap.value.get(playerAwards.value.ballonDorWinners[playerAwards.value.ballonDorWinners.length - 1]);
     const goldenBootWinner = playersMap.value.get(playerAwards.value.goldenBootWinners[playerAwards.value.goldenBootWinners.length - 1]);
     const bestKeeper = playersMap.value.get(playerAwards.value.bestKeeper[playerAwards.value.bestKeeper.length - 1]);
@@ -216,19 +216,36 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                 </div>
             </div>
             <div className={styles.leagueWinners}>
-                <h3>League Winners</h3>
-                <div className={styles.leagueWinnersList}>
-                    {leagues.value.map(league => {
-                        const winner = league.pastChampions[league.pastChampions.length - 1];
-                        return (
-                            <div key={league.name}>
-                                <div className={styles.playerName}>{league.name} - {winner}</div>
-                            </div>
-                        );
-                    })}
+                <div className={styles.winnerContainer}>
+                    <h3>League Winners</h3>
+                    <div className={styles.leagueWinnersList}>
+                        {leagues.value.map(league => {
+                            const winner = league.pastChampions[league.pastChampions.length - 1];
+                            return (
+                                <div key={league.name}>
+                                    <div className={styles.playerName}>{league.name} - {winner}</div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-
+                <div className={styles.winnerContainer}>
+                    <h3>Tournament Winners</h3>
+                    <div className={styles.leagueWinnersList}>
+                        {tournaments.value.map(tournament => {
+                            const winner = tournament.pastChampions[tournament.pastChampions.length - 1];
+                            return (
+                                <div key={tournament.name}>
+                                    <div className={styles.playerName}>
+                                        {tournament.name} - {winner ? winner.teamName : "In Progress"}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
+
             {selectedPlayer.value && (
                 <div className={styles.selectedPlayer} onClick={() => selectedPlayer.value = null}>
                     <PlayerAttributesView player={selectedPlayer.value} selectedPlayer={selectedPlayer} />

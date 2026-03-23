@@ -40,6 +40,8 @@ export interface Player {
     cleanSheets: number;
     awards: number;
     trophies: number;
+    otherTrophiesThisSeason: number;
+    importantTrophiesThisSeason: number;
     newPlayer: boolean;
 }
 
@@ -94,6 +96,11 @@ export interface Match {
     isLeagueMatch: boolean;
     isTournamentMatch: boolean;
     isInternationalMatch: boolean;
+    tournamentName?: string;
+    tournamentRound?: string;
+    penaltyWin?: boolean;
+    leg?: number;
+    played?: boolean;
 }
 
 export interface PlayerAwards {
@@ -120,6 +127,8 @@ export interface League {
     name: string;
     teams: string[];
     topThree: string[];
+    topSix: string[];
+    topNine: string[];
     bottomThree: string[];
     matches: Match[];
     pastChampions: string[];
