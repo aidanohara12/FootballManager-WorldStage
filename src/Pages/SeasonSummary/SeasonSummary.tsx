@@ -54,7 +54,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                 <h3>Retired Players</h3>
                 <div className={styles.retiredPlayersList}>
                     {Array.from(retiredPlayers.value).map(player => (
-                        <div key={player.name} onClick={() => selectedPlayer.value = player}>
+                        <div key={player.name} className={player.team === manager.value.team ? styles.winner : ''} onClick={() => selectedPlayer.value = player}>
                             <div className={styles.playerName}>{player.name} - {player.team}</div>
                         </div>
                     ))}
@@ -222,7 +222,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                         {leagues.value.map(league => {
                             const winner = league.pastChampions[league.pastChampions.length - 1];
                             return (
-                                <div key={league.name}>
+                                <div key={league.name} className={winner === manager.value.team ? styles.winner : ''}>
                                     <div className={styles.playerName}>{league.name} - {winner}</div>
                                 </div>
                             );
@@ -235,7 +235,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                         {tournaments.value.map(tournament => {
                             const winner = tournament.pastChampions[tournament.pastChampions.length - 1];
                             return (
-                                <div key={tournament.name}>
+                                <div key={tournament.name} className={winner?.teamName === manager.value.team ? styles.winner : ''}>
                                     <div className={styles.playerName}>
                                         {tournament.name} - {winner ? winner.teamName : "In Progress"}
                                     </div>

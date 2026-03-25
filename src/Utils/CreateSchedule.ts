@@ -174,7 +174,11 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
     if (allPlayers.length === 0) return;
 
     // Ballon d'Or: most G/A across top leagues
-    const ballonDor = [...topLeaguePlayers].sort((a, b) => (b.importantTrophiesThisSeason) - (a.importantTrophiesThisSeason)).sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists))[0];
+    const ballonDor = [...topLeaguePlayers].sort((a, b) => {
+        const trophyDiff = b.importantTrophiesThisSeason - a.importantTrophiesThisSeason;
+        if (trophyDiff !== 0) return trophyDiff;
+        return (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists);
+    })[0];
     playerAwards.value.ballonDorWinners.push(ballonDor.name);
     ballonDor.awards++;
 
@@ -199,6 +203,7 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
         yearsCompleted: currentYear.value.yearsCompleted + 1,
     };
     manager.value.age++;
+    retiredPlayers.value = [];
     // First pass: compute standings, awards, stats, and reset for all leagues
     leagues.value.forEach(league => {
         const leagueTeams = league.teams;
@@ -210,7 +215,8 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
         league.pastChampions.push(winner.name);
         winner.manager.trophiesWon.push({
             trophy: league.name,
-            trophyType: "League"
+            trophyType: "League",
+            trophyYear: currentYear.value.year
         });
         winner.manager.leagueTrophies++;
         winner.players.forEach(player => {
@@ -232,7 +238,7 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
         league.teams.forEach(team => {
             const curTeam = teamsMap.value.get(team);
             if (curTeam) {
-
+                curTeam.newlyPromoted = false;
                 if (curTeam.manager.name === manager.value.name) {
                     checkAchievements(manager, currentYear, achievements, teamsMap, playerMap);
                 }
@@ -285,7 +291,20 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                         if (curPlayer.contractYrs === 0) {
                             updatePlayerContract(curPlayer);
                         }
-                        if (curPlayer.age > 36) {
+                        // Retirement: older + worse overall = higher chance, with luck
+                        let retireChance = 0;
+                        if (curPlayer.age >= 33) {
+                            // Age factor: ramps up from 33 onward
+                            const ageFactor = (curPlayer.age - 32) * 0.13; // 0.13 at 33, 0.26 at 34, 0.39 at 35, ...0.91 at 39
+                            // Overall factor: lower overall = higher retirement chance
+                            const overallFactor = curPlayer.overall < 70 ? 0.25
+                                : curPlayer.overall < 75 ? 0.15
+                                : curPlayer.overall < 80 ? 0.08
+                                : 0;
+                            retireChance = Math.min(ageFactor + overallFactor, 0.95);
+                        }
+                        // Age 42+ always retire
+                        if (curPlayer.age >= 42 || Math.random() < retireChance) {
                             retiredPlayers.value.push(curPlayer);
                             playerMap.value.delete(curPlayer.name);
                             curTeam.players = curTeam.players.filter(p => p !== curPlayer.name);
@@ -337,11 +356,17 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
 
         promoted.forEach(teamName => {
             const t = teamsMap.value.get(teamName);
-            if (t) t.leagueName = upperLeague.name;
+            if (t) {
+                t.leagueName = upperLeague.name;
+                t.newlyPromoted = true;
+            }
         });
         relegated.forEach(teamName => {
             const t = teamsMap.value.get(teamName);
-            if (t) t.leagueName = lowerName;
+            if (t) {
+                t.leagueName = lowerName;
+                t.newlyPromoted = false;
+            }
         });
     });
 
@@ -352,7 +377,7 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
             return team && team.leagueName === league.name;
         });
     });
-    updateClubTeams(teamsMap, playerMap);
+    updateClubTeams(teamsMap, playerMap, manager.value.team);
     getNationalAllTeamPlayers(nationalTeams, playerMap, teamsMap);
     resetTournaments(tournaments);
 }
@@ -437,91 +462,103 @@ export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>):
     const assists = player.value.leagueAssists;
     const contributions = goals + assists;
     const cleanSheets = player.value.cleanSheets;
-    const isDefender = player.value.position === "Defender";
+    const isKeeper = player.value.position === "Goalkeeper";
 
-    // Under 20: rapid growth, high ceiling, big reward for good seasons
+    // Each player has a hidden "luck" factor per season: some bloom, some stagnate
+    const luck = Math.random(); // 0-1, determines if this player develops well this year
+
+    let change = 0;
+
+    // Under 20: growth varies a lot - some kids develop fast, others plateau
     if (age < 20) {
-        if (diff >= 20) {
-            player.value.overall += 4;
-        } else if (diff >= 10) {
-            player.value.overall += 3;
-        } else if (diff >= 5) {
-            player.value.overall += 2;
-        } else if (diff > 0) {
-            player.value.overall += 1;
+        if (diff >= 15 && luck > 0.3) {
+            change += luck > 0.7 ? 3 : 2;
+        } else if (diff >= 8 && luck > 0.4) {
+            change += luck > 0.75 ? 2 : 1;
+        } else if (diff > 0 && luck > 0.5) {
+            change += 1;
         }
 
-        if (goals >= 5) player.value.overall += 2;
-        if (assists >= 5) player.value.overall += 1;
-        if (isDefender) player.value.overall += 1;
-        if (cleanSheets >= 5) player.value.overall += 2;
-        if (contributions >= 15) {
-            player.value.overall += 1;
-            player.value.potential += 2;
+        // Performance bonuses (harder to earn)
+        if (goals >= 8 && luck > 0.4) change += 1;
+        if (assists >= 6 && luck > 0.5) change += 1;
+        if (isKeeper && cleanSheets >= 6 && luck > 0.4) change += 1;
+        if (contributions >= 18) {
+            change += 1;
+            player.value.potential += Math.random() > 0.5 ? 1 : 2;
         }
-        if (isDeveloper) player.value.overall += 1;
+        if (isDeveloper && Math.random() > 0.4) change += 1;
+
+        // Some young players just don't develop much (20% chance of no growth even with potential)
+        if (luck < 0.2 && change > 1) change = 1;
     }
-    // 20-24: progressing quickly toward peak
+    // 20-24: more consistent growth but still variable
     else if (age < 25) {
-        if (diff >= 15) {
-            player.value.overall += 3;
-        } else if (diff >= 8) {
-            player.value.overall += 2;
-        } else if (diff > 0) {
-            player.value.overall += 1;
+        if (diff >= 10 && luck > 0.35) {
+            change += luck > 0.7 ? 2 : 1;
+        } else if (diff >= 5 && luck > 0.45) {
+            change += 1;
+        } else if (diff > 0 && luck > 0.55) {
+            change += 1;
         }
 
-        if (goals >= 10) player.value.overall += 1;
-        if (assists >= 10) player.value.overall += 1;
-        if (isDefender) player.value.overall += 1;
-        if (cleanSheets >= 10) player.value.overall += 1;
-        if (contributions >= 20) {
-            player.value.overall += 1;
+        if (goals >= 12) change += 1;
+        if (assists >= 10 && luck > 0.5) change += 1;
+        if (isKeeper && cleanSheets >= 10) change += 1;
+        if (contributions >= 22) {
             player.value.potential += 1;
         }
-        if (isDeveloper) player.value.overall += 1;
+        if (isDeveloper && Math.random() > 0.5) change += 1;
+
+        // 15% chance of stagnating season
+        if (luck < 0.15 && change > 0) change = 0;
     }
-    // 25-29: hitting their potential, marginal gains only
+    // 25-29: peak years, small improvements only
     else if (age < 30) {
-        if (diff >= 10) {
-            player.value.overall += 2;
-        } else if (diff > 0) {
-            player.value.overall += 1;
+        if (diff >= 8 && luck > 0.5) {
+            change += 1;
+        } else if (diff >= 3 && luck > 0.6) {
+            change += 1;
         }
 
-        if (goals >= 15) player.value.overall += 1;
-        if (assists >= 15) player.value.overall += 1;
-        if (isDefender) player.value.overall += 1;
-        if (cleanSheets >= 15) player.value.overall += 1;
-        if (isDeveloper) player.value.overall += 1;
+        // Only exceptional seasons give boosts
+        if (goals >= 18) change += 1;
+        if (assists >= 15 && luck > 0.6) change += 1;
+        if (isKeeper && cleanSheets >= 15) change += 1;
+        if (isDeveloper && diff > 0 && Math.random() > 0.6) change += 1;
     }
-    // 30+: decline unless having a great season
+    // 30+: decline, but rate varies by player
     else {
-        if (diff > 0 && contributions >= 15) {
-            player.value.overall += 1;
-        } else if (diff <= 0) {
-            player.value.overall -= 1;
-        }
+        // Some 30+ players maintain, most decline
+        const declineChance = age >= 34 ? 0.85 : age >= 32 ? 0.7 : 0.5;
 
-        if (age >= 33) {
-            player.value.overall -= 1;
+        if (luck < declineChance) {
+            change -= 1;
+        }
+        if (age >= 31 && age < 33) {
+            change -= 2;
+        }
+        if (age >= 33 && Math.random() < 0.75 && age < 36) {
+            change -= 3;
         }
         if (age >= 36) {
-            player.value.overall -= 1;
+            change -= 5;
         }
 
-        if (goals >= 15) player.value.overall += 1;
-        if (cleanSheets >= 15) player.value.overall += 1;
-        if (isDeveloper && diff > 0) player.value.overall += 1;
-
-        player.value.potential -= 1;
+        // Great seasons can offset decline
+        if (contributions >= 25 && diff > 0) change += 1;
+        if (isKeeper && cleanSheets >= 15) change += 1;
+        if (isDeveloper && diff > 0 && Math.random() > 0.6) change += 1;
+        player.value.potential -= Math.random() > 0.5 ? 1 : 0;
     }
+
+    player.value.overall += change;
 
     if (player.value.overall > player.value.potential) {
         player.value.overall = player.value.potential;
     }
-    if (player.value.overall >= 99) player.value.overall = 99;
-    if (player.value.potential >= 99) player.value.potential = 99;
+    if (player.value.overall > 99) player.value.overall = 99;
+    if (player.value.potential > 99) player.value.potential = 99;
     if (player.value.overall < 1) player.value.overall = 1;
     if (player.value.potential < 1) player.value.potential = 1;
 }

@@ -67,9 +67,9 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
 
     //compare the two teams
     if (isTactitianAway) {
-        awayTotalPoints++;
+        awayTotalPoints += 3;
     } else if (isTactitianHome) {
-        homeTotalPoints++;
+        homeTotalPoints += 3;
     }
 
     if (homeOverallAvg > awayOverallAvg) {
@@ -230,7 +230,14 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         if (awayTeam.name === manager.value.team) {
             manager.value.careerDraws++;
         }
-        homeTeamScore = Math.floor(Math.random() * 6);
+        // Weighted draw scores: 0-0 and 1-1 most common, 4-4+ very rare
+        const drawRoll = Math.random();
+        if (drawRoll < 0.25) homeTeamScore = 0;
+        else if (drawRoll < 0.55) homeTeamScore = 1;
+        else if (drawRoll < 0.80) homeTeamScore = 2;
+        else if (drawRoll < 0.93) homeTeamScore = 3;
+        else if (drawRoll < 0.98) homeTeamScore = 4;
+        else homeTeamScore = 5;
         awayTeamScore = homeTeamScore;
     }
 
@@ -284,7 +291,7 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
 function generateMinute(usedMinutes: Set<number>): string {
     let minute = Math.floor(Math.random() * 90) + 1;
     // Avoid duplicate exact minutes
-    while (usedMinutes.has(minute)) minute++;
+    while (usedMinutes.has(minute)) minute += 3; // shift by 2 minutes to reduce chance of another conflict, ensures goals aren't within 1 minute of each other
     usedMinutes.add(minute);
 
     // Add stoppage time for goals at 45 or 90

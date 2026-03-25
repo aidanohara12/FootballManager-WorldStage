@@ -2,7 +2,7 @@ import { type Signal } from "@preact/signals-react";
 import type { Player, PlayerAwards, Team } from "../Models/WorldStage";
 import { finishSeason } from "./CreateSchedule";
 import type { GameContextType } from "../Context/GameContext";
-import { addTeamsToTournament, finalizeEuropeanTournament } from './TournamentSchedule';
+import { addTeamsToTournament } from './TournamentSchedule';
 
 export const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const daysOfTheMonth: Record<string, number> = {
@@ -96,20 +96,55 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
             const cl = tournaments.value.find(t => t.name === "Champions League")!;
             const el = tournaments.value.find(t => t.name === "Europa League")!;
             const conf = tournaments.value.find(t => t.name === "Conference League")!;
+
+            // Get last season's winners before clearing
+            const clWinner = cl.pastChampions[cl.pastChampions.length - 1]?.teamName;
+            const elWinner = el.pastChampions[el.pastChampions.length - 1]?.teamName;
+            const confWinner = conf.pastChampions[conf.pastChampions.length - 1]?.teamName;
+            // Track teams that are locked into a European tournament via winning
+            const lockedTeams = new Set<string>();
+
             cl.teams = [];
             el.teams = [];
             conf.teams = [];
+
+            // CL winner stays in CL, EL winner promoted to CL, Conf winner promoted to EL
+            if (clWinner) {
+                const team = teamsMap.value.get(clWinner);
+                if (team) { addTeamsToTournament(cl, [team]); lockedTeams.add(clWinner); }
+            }
+            if (elWinner) {
+                const team = teamsMap.value.get(elWinner);
+                if (team) { addTeamsToTournament(cl, [team]); lockedTeams.add(elWinner); }
+            }
+            if (confWinner) {
+                const team = teamsMap.value.get(confWinner);
+                if (team) { addTeamsToTournament(el, [team]); lockedTeams.add(confWinner); }
+            }
+
             leagues.value.forEach(league => {
                 if (topLeagues.includes(league.name)) {
-                    const resolve = (names: string[]) => names.map(n => teamsMap.value.get(n)).filter((t): t is Team => !!t);
+                    const resolve = (names: string[]) => names
+                        .filter(n => !lockedTeams.has(n))
+                        .map(n => teamsMap.value.get(n))
+                        .filter((t): t is Team => !!t);
                     addTeamsToTournament(cl, resolve(league.topThree));
                     addTeamsToTournament(el, resolve(league.topSix));
                     addTeamsToTournament(conf, resolve(league.topNine));
                 }
             });
-            finalizeEuropeanTournament(cl);
-            finalizeEuropeanTournament(el);
-            finalizeEuropeanTournament(conf);
+
+            // Adjust manager budget based on season performance
+            if (managerTeam) {
+                const finishedTopThree = leagues.value.some(league =>
+                    topLeagues.includes(league.name) && league.topThree.includes(managerTeam.name)
+                );
+                const wonTrophyThisSeason = leagues.value.some(l => l.pastChampions[l.pastChampions.length - 1] === managerTeam.name) ||
+                    tournaments.value.some(t => t.pastChampions[t.pastChampions.length - 1]?.teamName === managerTeam.name);
+
+                managerTeam.moneyToSpend = (finishedTopThree || wonTrophyThisSeason) ? 315 : 250;
+            }
+
             currentPage.value = "SeasonSummary";
             currentYear.value.leagueWeek = 0;
         } else if (currentYear.value.leagueWeek > 0) {

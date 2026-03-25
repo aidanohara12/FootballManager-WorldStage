@@ -1,7 +1,5 @@
 import { Top50Countries } from "../Models/Countries";
 import AllTeams from "../Models/Teams";
-import { firstNames } from "../Models/Names/FirstNames";
-import { lastNames } from "../Models/Names/LastNames";
 import { type Player, type Team, type NationalTeam, type League, type Tournament, type InternationalTournament, type WorldCup } from "../Models/WorldStage";
 import { addPlayer, createUniquePlayer, getRandomPlayerName } from "../Utils/TeamPlayers";
 import type { Signal } from "@preact/signals-react";
@@ -150,12 +148,13 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
     // Initialize Club Teams
     AllTeams.forEach((teamData: any) => {
         // Create the new team object
+        const managerCountry = Top50Countries[Math.floor(Math.random() * Top50Countries.length)].country;
         const newTeam: Team = {
             name: teamData.name,
             league: teamData.league,
             manager: {
-                name: getRandomPlayerName(),
-                country: Top50Countries[Math.floor(Math.random() * Top50Countries.length)].country,
+                name: getRandomPlayerName(managerCountry),
+                country: managerCountry,
                 team: teamData.name,
                 age: Math.floor(Math.random() * (60 - 25 + 1)) + 25,
                 type: "Club",
@@ -213,7 +212,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
                 name: countryData.country,
                 league: "National",
                 manager: {
-                    name: getRandomPlayerName(),
+                    name: getRandomPlayerName(countryData.country),
                     country: countryData.country,
                     team: countryData.country,
                     age: Math.floor(Math.random() * (60 - 25 + 1)) + 25,

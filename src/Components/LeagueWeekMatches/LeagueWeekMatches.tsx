@@ -8,9 +8,10 @@ interface LeagueWeekMatchesProps {
     matchClicked: Signal<Match | undefined>
     teamsMap: Signal<Map<string, Team>>
     playersMap: Signal<Map<string, Player>>
+    managerTeam: Team | undefined
 }
 
-export function LeagueWeekMatches({ allMatches, matchClicked, teamsMap }: LeagueWeekMatchesProps) {
+export function LeagueWeekMatches({ allMatches, matchClicked, teamsMap, managerTeam }: LeagueWeekMatchesProps) {
 
     return (
         <div className={styles.leagueWeekMatchesContainer}>
@@ -23,7 +24,7 @@ export function LeagueWeekMatches({ allMatches, matchClicked, teamsMap }: League
                     const homeTeamScore = match.homeScore
                     const awayTeamScore = match.awayScore
                     return (
-                        <div key={`${match.homeTeamName}-${match.awayTeamName}`} className={styles.matchRow} onClick={() => matchClicked.value = match}>
+                        <div key={`${match.homeTeamName}-${match.awayTeamName}`} className={`${styles.matchRow} ${(homeTeamName === managerTeam?.name) || (awayTeamName === managerTeam?.name) ? styles.managerTeam : ''}`} onClick={() => matchClicked.value = match}>
                             <div className={styles.homeTeam}>{homeTeamName}</div>
                             <div className={styles.scoreBox}>
                                 <div className={styles.score}>{homeTeamScore}</div>

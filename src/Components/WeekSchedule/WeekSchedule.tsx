@@ -13,16 +13,35 @@ export function WeekSchedule({ matches, currentYear, manager }: WeekScheduleProp
     const currentWeekDays: Week = getCurrentWeek(currentYear.value.currentMonth, currentYear.value.currentDay, currentYear.value.currentDayOfWeek, currentYear.value.year);
     const isToday = (day: string) => day === currentYear.value.currentDayOfWeek;
 
+    // Build a set of dates that have manager matches for quick lookup
+    const matchDateSet = new Set(matches.value.map(m => m.date));
+
+    // Build a map of date -> match for tooltip info
+    const matchByDate = new Map<string, Match>();
+    matches.value.forEach(m => { matchByDate.set(m.date, m); });
+
     return (
         <div className={styles.weekScheduleContainer}>
             <div className={styles.monthLabel}>{currentYear.value.currentMonth} {currentYear.value.year}</div>
             <div className={styles.weekGrid}>
-                {Object.entries(currentWeekDays.weekDays).map(([day, dayNumber]) => (
-                    <div key={day} className={`${styles.weekDay} ${isToday(day) ? styles.today : ''}`}>
-                        <div className={styles.dayName}>{day.slice(0, 3)}</div>
-                        <div className={styles.dayNumber}>{dayNumber}</div>
-                    </div>
-                ))}
+                {Object.entries(currentWeekDays.weekDays).map(([day, { dayNumber, dateStr }]) => {
+                    const hasMatch = matchDateSet.has(dateStr);
+                    const match = matchByDate.get(dateStr);
+
+                    return (
+                        <div key={day} className={`${styles.weekDay} ${isToday(day) ? styles.today : ''} ${hasMatch ? styles.matchDay : ''}`}>
+                            <div className={styles.dayName}>{day.slice(0, 3)}</div>
+                            <div className={styles.dayNumber}>{dayNumber}</div>
+                            {hasMatch && match && (
+                                <div className={styles.matchIndicator}>
+                                    {match.isTournamentMatch
+                                        ? match.tournamentName?.split(' ').map(w => w[0]).join('')
+                                        : 'League'}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

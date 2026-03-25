@@ -1,7 +1,7 @@
 .weekScheduleContainer {
     min-width: 500px;
-    margin: 0 auto;
-    padding: 1rem;
+    margin: -1 auto;
+    padding: .5rem;
 }
 
 .monthLabel {
@@ -67,4 +67,26 @@
 
 .today .dayNumber {
     color: white;
+}
+
+.matchDay {
+    position: relative;
+}
+
+.matchIndicator {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--primary-color, #00A86B);
+    background: rgba(0, 168, 107, 0.12);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+}
+
+.today .matchIndicator {
+    color: white;
+    background: rgba(255, 255, 255, 0.25);
 }

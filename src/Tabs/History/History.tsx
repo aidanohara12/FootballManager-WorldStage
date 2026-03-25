@@ -19,13 +19,14 @@ export function History() {
                             <div key={index} className={styles.trophy}>
                                 <h4>🏆</h4>
                                 <div className={styles.trophyName}>{trophie.trophy}</div>
+                                <div className={styles.trophyName}>{trophie.trophyYear}</div>
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
             <div className={styles.managerStats}>
-                <div className={styles.managerTitle}>Manager Stats</div>
+                <div className={styles.managerTitle}>{manager.name}'s Stats</div>
                 <div>
                     <ManagerStats manager={manager} managerHistory={managerHistory} currentYear={currentYear.year} />
                 </div>

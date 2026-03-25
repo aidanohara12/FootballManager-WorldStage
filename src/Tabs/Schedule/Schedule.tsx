@@ -6,7 +6,8 @@ import type { Match, Player, PlayerAwards, Team, Tournament } from '../../Models
 import { advanceTournamentRound, isEuropeanTournament } from '../../Utils/TournamentSchedule';
 import MiniTable from "../../Components/Table/Table";
 import { useSignals } from '@preact/signals-react/runtime';
-import { moveToNextDay, getDaysInMonth, months } from "../../Utils/Calendar";
+import { useEffect } from 'react';
+import { moveToNextDay } from "../../Utils/Calendar";
 import getCurrentWeek from "../../Components/WeekSchedule/GetCurrentWeek";
 import { simulateGame } from "../../Utils/SimulateGame";
 import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
@@ -49,27 +50,19 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
     const todayMatch = foundMatch ? signal<Match>(foundMatch) : undefined;
     // Compute dates for all days of the current week
     const currentWeekDays = getCurrentWeek(currentYear.value.currentMonth, currentYear.value.currentDay, currentYear.value.currentDayOfWeek, currentYear.value.year);
-    const weekDates: string[] = [];
-    for (const [, dayNumber] of Object.entries(currentWeekDays.weekDays) as [string, number][]) {
-        const curDay = currentYear.value.currentDay;
-        const curMonth = currentYear.value.currentMonth;
-        const curYear = currentYear.value.year;
-        const monthIndex = months.indexOf(curMonth);
-        const maxDays = getDaysInMonth(curMonth, curYear);
+    const weekDates: string[] = Object.values(currentWeekDays.weekDays).map(wd => wd.dateStr);
 
-        let m = monthIndex;
-        let y = curYear;
-        if (dayNumber > maxDays) {
-            // Wrapped to next month
-            m = (monthIndex + 1) % 12;
-            if (m === 0) y++;
-        } else if (dayNumber > curDay + 6 || (dayNumber < curDay - 6 && dayNumber < curDay)) {
-            // Wrapped to previous month
-            m = (monthIndex - 1 + 12) % 12;
-            if (m === 11 && monthIndex === 0) y--;
+    // Populate manager's matches for the current week (in useEffect to avoid setState during render)
+    useEffect(() => {
+        const managerWeekMatches: Match[] = [];
+        if (managerTeam) {
+            for (const weekDate of weekDates) {
+                const match = managerTeam.Schedule.find(m => m.date === weekDate);
+                if (match) managerWeekMatches.push(match);
+            }
         }
-        weekDates.push(`${String(m + 1).padStart(2, "0")}/${String(dayNumber).padStart(2, "0")}/${y}`);
-    }
+        matches.value = managerWeekMatches;
+    }, [date]);
 
     const allMatchesForWeek: Match[] = [];
     const seenMatchKeys = new Set<string>();
@@ -248,6 +241,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                             matchClicked={matchClicked}
                             teamsMap={teamsMap}
                             playersMap={playersMap}
+                            managerTeam={managerTeam}
                         />
                     </div>
                 </div>

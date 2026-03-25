@@ -45,26 +45,26 @@ export function isEuropeanTournament(name: string): boolean {
 }
 
 // Primary tournaments (FA Cup, Copa del Rey, etc.) play on Wednesdays
-// Start at league week 2, every 3 weeks
+// Start at league week 10 (~October), every 3 weeks so they finish in the next year
 function getTournamentWednesday(year: number, roundNumber: number): string {
     const aug1 = new Date(year, 7, 1);
     const dayOfWeek = aug1.getDay();
     const firstSaturday = dayOfWeek === 6 ? 1 : 1 + ((6 - dayOfWeek + 7) % 7);
-    // Wednesday of league week 2: 2nd Saturday = firstSaturday + 1*7, Wednesday = Saturday - 3
-    const firstTournamentWednesday = firstSaturday + (1 * 7) - 3;
+    // Wednesday of league week 10: Saturday - 3
+    const firstTournamentWednesday = firstSaturday + (9 * 7) - 3;
     const tournamentDay = firstTournamentWednesday + (roundNumber * 21);
     const date = new Date(year, 7, tournamentDay);
     return formatDate(date);
 }
 
 // Secondary tournaments (Carabao Cup, Supercopa, etc.) play on Tuesdays
-// Start at league week 3, every 3 weeks (offset so they never land on the same week as primary)
+// Start at league week 12 (~November), every 3 weeks, offset from primary
 function getTournamentTuesday(year: number, roundNumber: number): string {
     const aug1 = new Date(year, 7, 1);
     const dayOfWeek = aug1.getDay();
     const firstSaturday = dayOfWeek === 6 ? 1 : 1 + ((6 - dayOfWeek + 7) % 7);
-    // Tuesday of league week 3: 3rd Saturday = firstSaturday + 2*7, Tuesday = Saturday - 4
-    const firstTournamentTuesday = firstSaturday + (2 * 7) - 4;
+    // Tuesday of league week 12: Saturday - 4
+    const firstTournamentTuesday = firstSaturday + (11 * 7) - 4;
     const tournamentDay = firstTournamentTuesday + (roundNumber * 21);
     const date = new Date(year, 7, tournamentDay);
     return formatDate(date);
@@ -73,13 +73,13 @@ function getTournamentTuesday(year: number, roundNumber: number): string {
 // European tournaments play on Thursdays
 // Two legs per round: Leg 1 at weekOffset R*4, Leg 2 at R*4+1
 // This gives back-to-back Thursdays per round, 3-week gap between rounds
-// Start at league week 3
+// Start at league week 11 (~late October), offset from primary/secondary
 function getEuropeanThursday(year: number, weekOffset: number): string {
     const aug1 = new Date(year, 7, 1);
     const dayOfWeek = aug1.getDay();
     const firstSaturday = dayOfWeek === 6 ? 1 : 1 + ((6 - dayOfWeek + 7) % 7);
-    // Thursday of league week 3: 3rd Saturday = firstSaturday + 2*7, Thursday = Saturday - 2
-    const firstThursday = firstSaturday + (2 * 7) - 2;
+    // Thursday of league week 11: Saturday - 2
+    const firstThursday = firstSaturday + (10 * 7) - 2;
     const tournamentDay = firstThursday + (weekOffset * 7);
     const date = new Date(year, 7, tournamentDay);
     return formatDate(date);
@@ -198,6 +198,7 @@ export function createTournamentSchedule(
     const bracketSize = nextPowerOf2(totalTeams);
     const numPlayInMatches = totalTeams - bracketSize / 2;
     const year = currentYear.value.year;
+    tournament.seasonStartYear = year;
     const roundNumber = 0;
 
     if (numPlayInMatches > 0) {
@@ -284,7 +285,8 @@ export function advanceTournamentRound(
             if (winnerTeam) {
                 winnerTeam.manager.trophiesWon.push({
                     trophy: tournament.name,
-                    trophyType: "Tournament"
+                    trophyType: "Tournament",
+                    trophyYear: currentYear.value.year
                 });
                 winnerTeam.manager.tournamentTrophies++;
                 winnerTeam.players.forEach(playerName => {
@@ -308,10 +310,17 @@ export function advanceTournamentRound(
     const pastRounds = new Set(tournament.matches.map(m => m.tournamentRound));
     const roundNumber = pastRounds.size;
 
+    // Shuffle advancing teams so matchups are randomized each round
+    for (let i = advancingTeams.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [advancingTeams[i], advancingTeams[j]] = [advancingTeams[j], advancingTeams[i]];
+    }
+
     const roundName = getRoundName(advancingTeams.length);
     tournament.currentRound = roundName;
 
-    scheduleRoundMatches(advancingTeams, currentYear.value.year, roundNumber, roundName, tournament, teamsMap);
+    const year = tournament.seasonStartYear ?? currentYear.value.year;
+    scheduleRoundMatches(advancingTeams, year, roundNumber, roundName, tournament, teamsMap);
 }
 
 export function resetTournaments(tournaments: Signal<Tournament[]>): void {

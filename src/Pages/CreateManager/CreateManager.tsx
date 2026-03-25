@@ -92,7 +92,7 @@ export function CreateManager() {
                         <h4>Enter the name of your manager</h4>
                         <input
                             type="text"
-                            className="form-control"
+                            className={styles.formControl}
                             id="name"
                             value={name.value}
                             required={true}
@@ -104,7 +104,7 @@ export function CreateManager() {
                         <h4>Enter the age of your manager (20-70)</h4>
                         <input
                             type="number"
-                            className="form-control"
+                            className={styles.formControl}
                             id="age"
                             value={age.value}
                             min={20}
@@ -119,11 +119,11 @@ export function CreateManager() {
                         />
                     </div>
                 </div>
-                <div className="form-group">
+                <div className={styles.formGroup}>
                     <label htmlFor="country">National Team</label>
                     <h4>Select the national team you want to manage (Top 50 countries)</h4>
                     <select
-                        className="form-control"
+                        className={styles.formControl}
                         id="country"
                         value={country.value}
                         onChange={(e) => country.value = e.target.value}
@@ -133,7 +133,7 @@ export function CreateManager() {
                         ))}
                     </select>
                 </div>
-                <div className="form-group">
+                <div className={styles.formGroup}>
                     <label htmlFor="league">League</label>
                     <h4>Select the league you want to manage</h4>
                     <div className={styles.leagueRow}>
@@ -181,11 +181,11 @@ export function CreateManager() {
                         </select>
                     </div>
                 </div>
-                <div className="form-group">
+                <div className={styles.formGroup}>
                     <label htmlFor="club">Club</label>
                     <h4>Select the club you want to manage</h4>
                     <select
-                        className="form-control"
+                        className={styles.formControl}
                         id="club"
                         value={team.value}
                         onChange={(e) => team.value = e.target.value}
@@ -195,11 +195,11 @@ export function CreateManager() {
                         ))}
                     </select>
                 </div>
-                <div className="form-group">
+                <div className={styles.formGroup}>
                     <label htmlFor="type">Type</label>
                     <h4>Select the type of manager you want to be</h4>
                     <select
-                        className="form-control"
+                        className={styles.formControl}
                         id="type"
                         value={type.value}
                         onChange={(e) => type.value = e.target.value}
@@ -211,7 +211,6 @@ export function CreateManager() {
                 </div>
                 <button
                     type="button"
-                    className="btn btn-primary"
                     onClick={() => createManager()}
                 >
                     Create Manager

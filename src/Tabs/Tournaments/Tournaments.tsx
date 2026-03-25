@@ -9,20 +9,41 @@ import styles from "../Table/Table.module.css";
 
 const matchClicked = signal<Match | undefined>(undefined);
 
+const tournamentCountries: Record<string, string> = {
+    "FA Cup": "England",
+    "Carabao Cup": "England",
+    "Copa del Rey": "Spain",
+    "Supercopa de España": "Spain",
+    "Coppa Italia": "Italy",
+    "Supercoppa Italiana": "Italy",
+    "DFB-Pokal": "Germany",
+    "DFL-Supercup": "Germany",
+    "Coupe de France": "France",
+    "Coupe de la Ligue": "France",
+    "KNVB Cup": "Netherlands",
+    "Johan Cruyff Shield": "Netherlands",
+    "Taça de Portugal": "Portugal",
+    "Taça da Liga": "Portugal",
+}
+
 export function Tournaments() {
     const ctx = useGameContext();
     const playersMap = ctx.playersMap.value;
     const manager = ctx.userManager.value;
     const tournaments = ctx.tournaments.value;
     const internationalTournaments = ctx.internationalTournaments.value;
+    const currentYear = ctx.currentYear.value;
+
+    const europeanTournaments = ['Champions League', 'Europa League', 'Conference League'];
+    const countries = ['England', 'Spain', 'Italy', 'Germany', 'France', 'Netherlands', 'Portugal'];
 
     const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.team));
     const managerInternationalTournament = internationalTournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.country));
-
-    const sortedTournaments = managerTournament
-        ? [managerTournament, ...tournaments.filter((t) => t !== managerTournament)]
-        : tournaments;
-
+    const allTournamentsSorted = managerTournament ? [managerTournament, ...tournaments.filter((t) => t !== managerTournament)] : [...tournaments];
+    const managerCountry = managerTournament ? (tournamentCountries[managerTournament.name] || "") : countries[0];
+    const [sortedTournaments, setSortedTournaments] = useState<Tournament[]>(
+        allTournamentsSorted.filter(t => !europeanTournaments.includes(t.name) && tournamentCountries[t.name] === managerCountry)
+    );
     const sortedInternationalTournaments = managerInternationalTournament
         ? [managerInternationalTournament, ...internationalTournaments.filter((t) => t !== managerInternationalTournament)]
         : internationalTournaments;
@@ -30,6 +51,8 @@ export function Tournaments() {
     const [selectedOption, setSelectedOption] = useState<string>("Tournaments");
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(managerTournament ?? null);
     const [selectedInternationalTournament, setSelectedInternationalTournament] = useState<InternationalTournament | null>(managerInternationalTournament ?? null);
+    const [selectedTournamentType, setSelectedTournamentType] = useState<string>("National");
+    const [selectedTournamentCountry, setSelectedTournamentCountry] = useState<string>(managerCountry);
 
     function nextOption(): string {
         return selectedOption === "Tournaments" ? "International Tournaments" : "Tournaments";
@@ -62,6 +85,50 @@ export function Tournaments() {
                     <div>
                         <div className={styles.selectContainer}>
                             <h3>Tournaments</h3>
+                            <div className={styles.toggleGroup}>
+                                <button
+                                    className={`${styles.toggleButton} ${selectedTournamentType === "National" ? styles.toggleActive : ""}`}
+                                    onClick={() => {
+                                        setSelectedTournamentType("National");
+                                        const filtered = allTournamentsSorted.filter((t: Tournament) =>
+                                            !europeanTournaments.includes(t.name) && tournamentCountries[t.name] === selectedTournamentCountry
+                                        );
+                                        setSortedTournaments(filtered);
+                                        setSelectedTournament(filtered[0] ?? null);
+                                    }}
+                                >
+                                    National
+                                </button>
+                                <button
+                                    className={`${styles.toggleButton} ${selectedTournamentType === "European" ? styles.toggleActive : ""} ${styles.european}`}
+                                    onClick={() => {
+                                        setSelectedTournamentType("European");
+                                        const filtered = allTournamentsSorted.filter((t: Tournament) => europeanTournaments.includes(t.name));
+                                        setSortedTournaments(filtered);
+                                        setSelectedTournament(filtered[0] ?? null);
+                                    }}
+                                    disabled={currentYear.yearsCompleted < 1}
+                                    title={currentYear.yearsCompleted < 1 ? "European tournaments unlock after completing the first season" : ""}
+                                >
+                                    European
+                                </button>
+                            </div>
+                            <div className={styles.toggleGroup}>
+{selectedTournamentType === "National" && (
+                                <select value={selectedTournamentCountry} onChange={(e) => {
+                                    setSelectedTournamentCountry(e.target.value);
+                                    const filtered = allTournamentsSorted.filter((t: Tournament) =>
+                                        !europeanTournaments.includes(t.name) && tournamentCountries[t.name] === e.target.value
+                                    );
+                                    setSortedTournaments(filtered);
+                                    setSelectedTournament(filtered[0] ?? null);
+                                }}>
+                                    {countries.map(country => (
+                                        <option key={country} value={country}>{country}</option>
+                                    ))}
+                                </select>
+                            )}
+                            </div>
                             <select value={selectedTournament?.name ?? ''} onChange={(e) => {
                                 const tournament = sortedTournaments.find(t => t.name === e.target.value);
                                 setSelectedTournament(tournament ?? null);

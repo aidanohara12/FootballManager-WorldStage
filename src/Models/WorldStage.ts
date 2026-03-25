@@ -9,13 +9,19 @@ export interface currentYear {
     yearMatches: Match[];
 }
 
+export interface WeekDay {
+    dayNumber: number;
+    dateStr: string;
+}
+
 export interface Week {
-    weekDays: Record<string, number>;
+    weekDays: Record<string, WeekDay>;
 }
 
 export interface trophy {
     trophy: string;
     trophyType: string;
+    trophyYear: number;
 }
 
 export interface Player {
@@ -76,6 +82,7 @@ export interface Team {
     draws: number;
     goalsFor: number;
     goalsAgainst: number;
+    newlyPromoted: boolean;
 }
 
 export interface NationalTeam {
@@ -164,6 +171,7 @@ export interface Tournament {
     currentRound: string;
     matches: Match[];
     pastChampions: TournamentTeam[];
+    seasonStartYear?: number;
 }
 
 export interface WorldCupTeam {

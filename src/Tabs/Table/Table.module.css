@@ -69,6 +69,48 @@
     color: var(--secondary-color)
 }
 
+.toggleGroup {
+    display: flex;
+}
+
+.toggleButton {
+    padding: 0.4rem 1.2rem;
+    border: 2px solid var(--primary-color) !important;
+    background: transparent;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--secondary-color);
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.toggleButton:first-child {
+    border-radius: 200px 0 0 200px;
+}
+
+.toggleButton:last-child {
+    border-radius: 0 200px 200px 0;
+}
+
+.toggleActive {
+    background: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.european:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: gray;
+}
+
+.european:disabled:hover {
+    background-color: gray;
+    transform: none;
+}
+
 .overlay {
     position: fixed;
     top: 0;

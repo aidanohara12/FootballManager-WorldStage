@@ -140,6 +140,18 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+/* Highlight when manager's team is the winner */
+.winner {
+    background: #e8f5e9 !important;
+    border-left: 3px solid #00a86b;
+    box-shadow: 0 2px 8px rgba(0, 168, 107, 0.2) !important;
+}
+
+.winner .playerName {
+    color: #00a86b;
+    font-weight: 700;
+}
+
 /* Selected player overlay */
 .selectedPlayer {
     position: fixed;
