@@ -79,6 +79,10 @@ const managerHistory = signal<ManagerHistory>({
     topCleanSheetsByYear: {}
 });
 
+const currentTournament = signal<string | null>("");
+
+const currentInternationalTournament = signal<string | null>("");
+
 const gameContext = {
     currentPage,
     allPlayers,
@@ -93,7 +97,10 @@ const gameContext = {
     currentYear,
     achievements,
     managerHistory,
+    currentTournament,
+    currentInternationalTournament,
 };
+
 
 export type GameContextType = typeof gameContext;
 

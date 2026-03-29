@@ -158,11 +158,30 @@ export interface InternationalTournamentTeam {
     nextRound: boolean;
 }
 
+export interface InternationalGroupStanding {
+    teamName: string;
+    points: number;
+    wins: number;
+    draws: number;
+    losses: number;
+    goalsFor: number;
+    goalsAgainst: number;
+}
+
+export interface InternationalGroup {
+    name: string;
+    teams: string[];
+    standings: InternationalGroupStanding[];
+}
+
 export interface InternationalTournament {
     name: string;
     teams: InternationalTournamentTeam[];
     matches: Match[];
     pastChampions: InternationalTournamentTeam[];
+    groups?: InternationalGroup[];
+    currentPhase?: "not_started" | "qualifying" | "group" | "knockout" | "complete" | "friendly";
+    currentRound?: string;
 }
 
 export interface Tournament {

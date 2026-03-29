@@ -96,7 +96,9 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
             matches: [],
             topThree: [],
             bottomThree: [],
-            pastChampions: []
+            pastChampions: [],
+            topNine: [],
+            topSix: [],
         };
 
         Leagues.push(league);
@@ -178,6 +180,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
             draws: 0,
             goalsFor: 0,
             goalsAgainst: 0,
+            newlyPromoted: false,
         };
 
         // Add to TeamsMap
@@ -237,6 +240,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
                 draws: 0,
                 goalsFor: 0,
                 goalsAgainst: 0,
+                newlyPromoted: false,
             },
             country: countryData.country
         };

@@ -2,7 +2,7 @@ import { signal, type Signal } from '@preact/signals-react';
 import type { Player, PlayerAwards } from '../../Models/WorldStage';
 import styles from './SeasonSummary.module.css'
 import PlayerAttributesView from '../../Components/Formation/PlayerAttributesView';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameContext } from '../../Context/GameContext';
 
 interface SeasonSummaryProps {
@@ -15,6 +15,13 @@ const selectedPlayer = signal<Player | null>(null);
 const showBallonDorWinner = signal<boolean>(false);
 const showGoldenBootWinner = signal<boolean>(false);
 const showBestKeeper = signal<boolean>(false);
+
+const tournamentType: Record<string, string> = {
+    0: "World Cup",
+    1: "Friendly",
+    2: "Continental",
+    3: "Friendly",
+}
 
 export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: SeasonSummaryProps) {
     const { leagues, teamsMap, playersMap, userManager: manager, currentYear, tournaments } = useGameContext();
@@ -35,6 +42,10 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
     const eredivisieGoldenBoot = playersMap.value.get(playerAwards.value.eredivisieGoldenBoot[playerAwards.value.eredivisieGoldenBoot.length - 1]);
     const primeraDivisionBestPlayer = playersMap.value.get(playerAwards.value.primeraDivisionBestPlayer[playerAwards.value.primeraDivisionBestPlayer.length - 1]);
     const primeraDivisionGoldenBoot = playersMap.value.get(playerAwards.value.primeraDivisionGoldenBoot[playerAwards.value.primeraDivisionGoldenBoot.length - 1]);
+    const [tournamentTypeName, setTournamentTypeName] = useState<string>("");
+    useEffect(() => {
+        setTournamentTypeName(tournamentType[currentYear.value.yearsCompleted]);
+    }, [currentYear.value.yearsCompleted]);
 
     useEffect(() => {
         showBallonDorWinner.value = false;
@@ -50,17 +61,52 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
     return (
         <div className={styles.summaryContainer}>
             <h1>Season Summary</h1>
-            <div className={styles.retiredPlayers}>
-                <h3>Retired Players</h3>
-                <div className={styles.retiredPlayersList}>
-                    {Array.from(retiredPlayers.value).map(player => (
-                        <div key={player.name} className={player.team === manager.value.team ? styles.winner : ''} onClick={() => selectedPlayer.value = player}>
-                            <div className={styles.playerName}>{player.name} - {player.team}</div>
+            <div className={styles.leftSide}>
+                <div className={styles.tournamentType}>
+                    <h3>{tournamentTypeName} Winners</h3>
+                    {tournamentTypeName === "World Cup" && (
+                        <div>
+                            {tournaments.value.filter(t => t.name === tournamentTypeName).map(tournament => (
+                                <div key={tournament.name}>
+                                    <h4>{tournament.name}</h4>
+                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName}</p>
+                                </div>
+                            ))}
                         </div>
-                    ))}
-                    {retiredPlayers.value.length === 0 && (
-                        <div className={styles.noPlayers}>No retired players</div>
                     )}
+                    {tournamentTypeName === "Continental" && (
+                        <div>
+                            {tournaments.value.filter(t => t.name === "Euros" || t.name === "Copa America" || t.name === "AFCON" || t.name === "Asian Cup").map(tournament => (
+                                <div key={tournament.name}>
+                                    <h4>{tournament.name}</h4>
+                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    {tournamentTypeName === "Friendly" && (
+                        <div>
+                            {tournaments.value.filter(t => t.name === "Euros Friendly" || t.name === "American Friendly" || t.name === "Africa Friendly" || t.name === "Asian Friendly").map(tournament => (
+                                <div key={tournament.name}>
+                                    <h4>{tournament.name}</h4>
+                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className={styles.retiredPlayers}>
+                    <h3>Retired Players</h3>
+                    <div className={styles.retiredPlayersList}>
+                        {Array.from(retiredPlayers.value).sort((a, b) => b.trophies - a.trophies).map(player => (
+                            <div key={player.name} className={player.team === manager.value.team ? styles.winner : ''} onClick={() => selectedPlayer.value = player}>
+                                <div className={styles.playerName}>{player.name} - {player.team}</div>
+                            </div>
+                        ))}
+                        {retiredPlayers.value.length === 0 && (
+                            <div className={styles.noPlayers}>No retired players</div>
+                        )}
+                    </div>
                 </div>
             </div>
             <div className={styles.awards}>

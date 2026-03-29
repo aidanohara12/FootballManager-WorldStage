@@ -95,9 +95,8 @@ export function Table() {
     //get the teams for the selected tournament
     const tournamentTeams = tournaments.find((tournament) => tournament.name === selectedTournament?.name)?.teams;
     const tournamentMatches = tournaments.find((tournament) => tournament.name === selectedTournament?.name)?.matches;
-    //get the teams for the selected international tournament
-    const internationalTournamentTeams = internationalTournaments.find((tournament) => tournament.name === selectedInternationalTournament?.name)?.teams;
-    const internationalTournamentMatches = internationalTournaments.find((tournament) => tournament.name === selectedInternationalTournament?.name)?.matches;
+    //get the selected international tournament
+    const selectedIntTournament = internationalTournaments.find((tournament) => tournament.name === selectedInternationalTournament?.name);
     return (
         <div>
             <div className={styles.topContainer}>
@@ -167,7 +166,7 @@ export function Table() {
                                 ))}
                             </select>
                         </div>
-                        <ShowInternationalTournamentTable tournamentTitle={getLeague()} tournamentTeams={internationalTournamentTeams} tournamentMatches={internationalTournamentMatches} onMatchClick={(m) => matchClicked.value = m} />
+                        <ShowInternationalTournamentTable tournament={selectedIntTournament} onMatchClick={(m) => matchClicked.value = m} />
                     </div>
                 )}
             </div>

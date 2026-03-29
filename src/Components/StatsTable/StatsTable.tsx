@@ -48,19 +48,19 @@ export function StatsTable({ leaguePlayers, managerTeam, selectedLeague, teamsMa
         displayPlayers = leagues.flatMap((league) =>
             league.teams.flatMap((teamName) => {
                 const team = teamsMap.get(teamName);
-                return team?.players.map((name) => playersMap.get(name)!).filter(Boolean) ?? [];
+                return team?.players.map((name) => playersMap.get(name)).filter(Boolean) as Player[] ?? [];
             })
         );
     } else if (isAllTeams) {
         // All players in the selected league
         displayPlayers = selectedLeague?.teams.flatMap((teamName) => {
             const team = teamsMap.get(teamName);
-            return team?.players.map((name) => playersMap.get(name)!).filter(Boolean) ?? [];
+            return team?.players.map((name) => playersMap.get(name)).filter(Boolean) as Player[] ?? [];
         }) ?? [];
     } else {
         // Single team
         const team = teamsMap.get(selectedTeamFilter);
-        displayPlayers = team?.players.map((name) => playersMap.get(name)!).filter(Boolean) ?? [];
+        displayPlayers = team?.players.map((name) => playersMap.get(name)!) ?? [];
     }
 
     displayPlayers.sort((a, b) => (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists));
@@ -90,7 +90,7 @@ export function StatsTable({ leaguePlayers, managerTeam, selectedLeague, teamsMa
                             </div>
                         </div>
                         <div className={styles.tableBody}>
-                            {displayPlayers.map((player) => {
+                            {displayPlayers.sort((a, b) => (b.leagueGoals + b.countryAssists + b.leagueAssists + b.countryGoals) - (a.leagueGoals + a.countryAssists + a.leagueAssists + a.countryGoals)).map((player) => {
                                 const playerGoals = player.leagueGoals + player.countryGoals;
                                 const playerAssists = player.leagueAssists + player.countryAssists;
                                 const playerGoalsAssists = playerGoals + playerAssists;

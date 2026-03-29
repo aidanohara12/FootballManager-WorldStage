@@ -121,7 +121,7 @@ export function CreateManager() {
                 </div>
                 <div className={styles.formGroup}>
                     <label htmlFor="country">National Team</label>
-                    <h4>Select the national team you want to manage (Top 50 countries)</h4>
+                    <h4>Select the national team you want to manage</h4>
                     <select
                         className={styles.formControl}
                         id="country"

@@ -2,6 +2,7 @@ import { signal } from "@preact/signals-react";
 import type { League, Match, PlayerAwards, Player, Tournament } from "../../Models/WorldStage.ts";
 import { createSchedule } from "../../Utils/CreateSchedule.ts";
 import { createTournamentSchedule } from "../../Utils/TournamentSchedule.ts";
+import { scheduleAllInternationalTournaments } from "../../Utils/InternationalTournamentSchedule.ts";
 import SelectNational from "../../Components/TeamSelection/SelectNational/SelectNational.tsx";
 import styles from "./MainPage.module.css";
 import { SelectClub } from "../../Components/TeamSelection/SelectClub/SelectClub.tsx";
@@ -43,7 +44,7 @@ const retiredPlayers = signal<Player[]>([]);
 
 export function MainPage() {
     useSignals();
-    const { teamsMap, playersMap, leagues, currentYear, tournaments } = useGameContext();
+    const { teamsMap, playersMap, leagues, currentYear, tournaments, internationalTournaments, nationalTeams } = useGameContext();
 
     if (currentPage.value !== "MainPage") {
         scheduleCreated.value = false;
@@ -99,6 +100,9 @@ export function MainPage() {
             tournament.teams.forEach(t => { t.nextRound = true; });
             createTournamentSchedule(tournament, currentYear, teamsMap);
         });
+
+        // Schedule international tournaments for next calendar year (May-July of year+1, during this season)
+        scheduleAllInternationalTournaments(internationalTournaments, currentYear.value.year + 1, teamsMap, playersMap, nationalTeams.value);
 
         // Collect all matches into yearMatches
         leagues.value.forEach((league: League) => {

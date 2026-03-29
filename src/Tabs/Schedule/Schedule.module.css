@@ -39,8 +39,17 @@
 
 .miniTable {
     flex-shrink: 0;
-    margin-top: -8rem;
+    margin-top: -6rem;
     width: 25vw;
+    height: 75vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.miniTableTwo {
+    flex: 1;
+    overflow-y: hidden;
+    height: 25vh;
 }
 
 .weekScheduleContainer {
@@ -205,6 +214,59 @@
     margin-bottom: 0.5rem;
     text-align: center;
     color: var(--secondary-color);
+    margin-top: 0;
+}
+
+.miniGroupsScroll {
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.miniGroup {
+    margin-bottom: 0.5rem;
+    background: white;
+    border-radius: 8px;
+    padding: 0.4rem 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.miniGroupTitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.miniGroupTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.miniGroupTable th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #999;
+    text-align: center;
+    padding: 0.15rem 0.25rem;
+    border-bottom: 1px solid #eee;
+}
+
+.miniGroupTable td {
+    padding: 0.2rem 0.25rem;
+    text-align: center;
+    color: #333;
+}
+
+.miniGroupManager {
+    background: rgba(59, 130, 246, 0.12);
+    font-weight: 600;
+}
+
+.miniGroupManager td {
+    color: #3b82f6;
 }
 
 .overlay {
@@ -239,5 +301,8 @@
 }
 
 .matchTable {
-    margin-top: 0rem;
+    flex: 1;
+    min-height: 0;
+    overflow-y: hidden;
+    height: 35vh;
 }

@@ -5,6 +5,7 @@ import ShowTournamentTable from "../../Components/Table/ShowTables/ShowTournamen
 import { ShowInternationalTournamentTable } from "../../Components/Table/ShowTables/ShowIntTournamentTable";
 import { MatchOverview } from "../../Components/MatchOverview/MatchOverview";
 import { useGameContext } from "../../Context/GameContext";
+import { flagName } from "../../Models/Countries";
 import styles from "../Table/Table.module.css";
 
 const matchClicked = signal<Match | undefined>(undefined);
@@ -26,6 +27,8 @@ const tournamentCountries: Record<string, string> = {
     "Taça da Liga": "Portugal",
 }
 
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 export function Tournaments() {
     const ctx = useGameContext();
     const playersMap = ctx.playersMap.value;
@@ -33,6 +36,8 @@ export function Tournaments() {
     const tournaments = ctx.tournaments.value;
     const internationalTournaments = ctx.internationalTournaments.value;
     const currentYear = ctx.currentYear.value;
+    const currentInternationalTournament = ctx.currentInternationalTournament.value;
+    const currentTournament = ctx.currentTournament.value;
 
     const europeanTournaments = ['Champions League', 'Europa League', 'Conference League'];
     const countries = ['England', 'Spain', 'Italy', 'Germany', 'France', 'Netherlands', 'Portugal'];
@@ -48,9 +53,30 @@ export function Tournaments() {
         ? [managerInternationalTournament, ...internationalTournaments.filter((t) => t !== managerInternationalTournament)]
         : internationalTournaments;
 
-    const [selectedOption, setSelectedOption] = useState<string>("Tournaments");
+    // Auto-select the right tab based on whether any international tournament is active
+    let intStartTime = Infinity;
+    internationalTournaments.forEach(t => {
+        if (t.currentPhase === "not_started" || t.matches.length === 0) return;
+        const firstMatchTime = new Date(t.matches[0].date).getTime();
+        if (firstMatchTime < intStartTime) intStartTime = firstMatchTime;
+    });
+    const currentDateObj = new Date(currentYear.year, monthNames.indexOf(currentYear.currentMonth), currentYear.currentDay);
+    const isIntPeriod = intStartTime !== Infinity && currentDateObj.getTime() >= intStartTime;
+    const defaultOption = isIntPeriod ? "International Tournaments" : "Tournaments";
+
+    // Find the active international tournament based on currentInternationalTournament type
+    const activeIntTournament = (() => {
+        if (!currentInternationalTournament) return managerInternationalTournament ?? null;
+        if (currentInternationalTournament === "World Cup") {
+            return internationalTournaments.find(t => t.name === "World Cup") ?? null;
+        }
+        // "Continental" or "Friendly" — find the one the manager's country is in
+        return managerInternationalTournament ?? null;
+    })();
+
+    const [selectedOption, setSelectedOption] = useState<string>(defaultOption);
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(managerTournament ?? null);
-    const [selectedInternationalTournament, setSelectedInternationalTournament] = useState<InternationalTournament | null>(managerInternationalTournament ?? null);
+    const [selectedInternationalTournament, setSelectedInternationalTournament] = useState<InternationalTournament | null>(activeIntTournament);
     const [selectedTournamentType, setSelectedTournamentType] = useState<string>("National");
     const [selectedTournamentCountry, setSelectedTournamentCountry] = useState<string>(managerCountry);
 
@@ -71,8 +97,7 @@ export function Tournaments() {
 
     const tournamentTeams = tournaments.find((t) => t.name === selectedTournament?.name)?.teams;
     const tournamentMatches = tournaments.find((t) => t.name === selectedTournament?.name)?.matches;
-    const internationalTournamentTeams = internationalTournaments.find((t) => t.name === selectedInternationalTournament?.name)?.teams;
-    const internationalTournamentMatches = internationalTournaments.find((t) => t.name === selectedInternationalTournament?.name)?.matches;
+    const selectedIntTournament = internationalTournaments.find((t) => t.name === selectedInternationalTournament?.name);
 
     return (
         <div>
@@ -114,20 +139,20 @@ export function Tournaments() {
                                 </button>
                             </div>
                             <div className={styles.toggleGroup}>
-{selectedTournamentType === "National" && (
-                                <select value={selectedTournamentCountry} onChange={(e) => {
-                                    setSelectedTournamentCountry(e.target.value);
-                                    const filtered = allTournamentsSorted.filter((t: Tournament) =>
-                                        !europeanTournaments.includes(t.name) && tournamentCountries[t.name] === e.target.value
-                                    );
-                                    setSortedTournaments(filtered);
-                                    setSelectedTournament(filtered[0] ?? null);
-                                }}>
-                                    {countries.map(country => (
-                                        <option key={country} value={country}>{country}</option>
-                                    ))}
-                                </select>
-                            )}
+                                {selectedTournamentType === "National" && (
+                                    <select value={selectedTournamentCountry} onChange={(e) => {
+                                        setSelectedTournamentCountry(e.target.value);
+                                        const filtered = allTournamentsSorted.filter((t: Tournament) =>
+                                            !europeanTournaments.includes(t.name) && tournamentCountries[t.name] === e.target.value
+                                        );
+                                        setSortedTournaments(filtered);
+                                        setSelectedTournament(filtered[0] ?? null);
+                                    }}>
+                                        {countries.map(country => (
+                                            <option key={country} value={country}>{flagName(country)}</option>
+                                        ))}
+                                    </select>
+                                )}
                             </div>
                             <select value={selectedTournament?.name ?? ''} onChange={(e) => {
                                 const tournament = sortedTournaments.find(t => t.name === e.target.value);
@@ -150,12 +175,15 @@ export function Tournaments() {
                                 const tournament = sortedInternationalTournaments.find(t => t.name === e.target.value);
                                 setSelectedInternationalTournament(tournament ?? null);
                             }}>
-                                {sortedInternationalTournaments.map(tournament => (
-                                    <option key={tournament.name} value={tournament.name}>{tournament.name}</option>
-                                ))}
+                                {sortedInternationalTournaments.map(tournament => {
+                                    const label = tournament.name === "World Cup" ? "World Cup" : tournament.name;
+                                    return (
+                                        <option key={tournament.name} value={tournament.name}>{label}</option>
+                                    );
+                                })}
                             </select>
                         </div>
-                        <ShowInternationalTournamentTable tournamentTitle={getTitle()} tournamentTeams={internationalTournamentTeams} tournamentMatches={internationalTournamentMatches} onMatchClick={(m) => matchClicked.value = m} />
+                        <ShowInternationalTournamentTable tournament={selectedIntTournament} onMatchClick={(m) => matchClicked.value = m} manager={manager} />
                     </div>
                 )}
             </div>

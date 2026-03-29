@@ -67,7 +67,6 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
     const managerLeague = leagues.value.find(league => league.name === managerTeam?.leagueName);
     if (currentYear.value.currentDayOfWeek === "Monday") {
         if (currentYear.value.leagueWeek === ((managerLeague?.teams.length ?? 38) * 2) - 2) {
-            finishSeason(leagues, manager, currentYear, teamsMap, playersMap, managerHistory, achievements, nationalTeams, retiredPlayers, playerAwards, tournaments);
             if (isFirstSeason.value) {
                 isFirstSeason.value = false;
                 tournaments.value.push({
@@ -145,11 +144,14 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
                 managerTeam.moneyToSpend = (finishedTopThree || wonTrophyThisSeason) ? 315 : 250;
             }
 
-            currentPage.value = "SeasonSummary";
             currentYear.value.leagueWeek = 0;
         } else if (currentYear.value.leagueWeek > 0) {
             currentYear.value.leagueWeek++;
         }
+    }
+    if (currentYear.value.currentMonth === "July" && currentYear.value.currentDay === 25) {
+        finishSeason(leagues, manager, currentYear, teamsMap, playersMap, managerHistory, achievements, nationalTeams, retiredPlayers, playerAwards, tournaments);
+        currentPage.value = "SeasonSummary";
     }
     if (nextDay > maxDays) {
         nextDay = 1;

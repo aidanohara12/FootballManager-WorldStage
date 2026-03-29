@@ -339,3 +339,192 @@
     border: 2px solid #3b82f6;
     box-shadow: 0 1px 6px rgba(59, 130, 246, 0.25);
 }
+
+/* International Tournament Layout */
+.intTournamentContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding: 1rem;
+    max-height: 63vh;
+    overflow: hidden;
+}
+
+.phaseLabel {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--primary-color);
+    text-align: center;
+    letter-spacing: 0.5px;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* Group Stage */
+.groupsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    overflow-y: auto;
+    max-height: 80vh;
+    width: 100%;
+}
+
+/* Qualifying Brackets */
+.qualifyingContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 0.5rem;
+}
+
+.qualifyingBracket {
+    background: var(--color-surface, #f9f9f9);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    overflow-x: scroll;
+}
+
+.groupContainer {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.groupTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--primary-color);
+    padding: 0.5rem 0.75rem;
+    text-align: center;
+}
+
+.groupTable {
+    display: flex;
+    flex-direction: column;
+}
+
+.groupHeaderRow {
+    display: grid;
+    grid-template-columns: 2.5fr repeat(8, 1fr);
+    padding: 0.4rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #888;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.groupRow {
+    display: grid;
+    grid-template-columns: 2.5fr repeat(8, 1fr);
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+}
+
+.groupRow:last-child {
+    border-bottom: none;
+}
+
+.groupQualify {
+    background: linear-gradient(90deg, rgba(0, 180, 0, 0.1), rgba(0, 180, 0, 0.03));
+}
+
+.groupTeamCol {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.groupStatCol {
+    text-align: center;
+    color: #666;
+}
+
+.groupStatColBold {
+    text-align: center;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Group & Friendly Match Results */
+.groupMatches {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #eee;
+}
+
+.groupMatch {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.78rem;
+    border-bottom: 1px solid #f5f5f5;
+    align-items: center;
+}
+
+.groupMatch:last-child {
+    border-bottom: none;
+}
+
+.groupMatchTeam {
+    color: #444;
+    font-weight: 500;
+}
+
+.groupMatchTeam:last-child {
+    text-align: right;
+}
+
+.groupMatchScore {
+    text-align: center;
+    font-weight: 600;
+    color: #666;
+    min-width: 3.5rem;
+}
+
+.friendlyContainer {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    overflow: scroll;
+    overflow-x: hidden;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.friendlyTableContainer {
+    display: flex;
+    flex-direction: column;
+    width: 35vw
+}
+
+.friendlyKnockoutContainer {
+    display: flex;
+    flex-direction: column;
+    width: 50vw
+}
+
+.groupTableContainer {
+    display: flex;
+    flex-direction: column;
+    width: 30vw;
+    height: 60vh;
+}
+
+.knockoutContainer {
+    display: flex;
+    flex-direction: column;
+    width: 60vw;
+    height: 60vh;
+    overflow-y: scroll;
+}

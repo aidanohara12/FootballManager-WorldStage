@@ -2,17 +2,32 @@ import logo from '../../assets/Images/logo.png';
 import styles from './Schedule.module.css';
 import WeekSchedule from "../../Components/WeekSchedule/WeekSchedule";
 import { signal, type Signal } from '@preact/signals-react';
-import type { Match, Player, PlayerAwards, Team, Tournament } from '../../Models/WorldStage';
+import type { InternationalTournament, Match, Player, PlayerAwards, Team, Tournament } from '../../Models/WorldStage';
 import { advanceTournamentRound, isEuropeanTournament } from '../../Utils/TournamentSchedule';
+import {
+    updateGroupStandings,
+    isGroupStageComplete,
+    advanceToKnockout,
+    advanceInternationalKnockout,
+    areFriendliesComplete,
+    advanceFriendlyToMiniTournament,
+    advanceFriendlyKnockout,
+    advanceWorldCupQualifying,
+    advanceWorldCupToKnockout,
+    advanceWorldCupKnockout,
+    isWorldCupYear,
+    isMajorTournamentYear,
+} from '../../Utils/InternationalTournamentSchedule';
 import MiniTable from "../../Components/Table/Table";
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
-import { moveToNextDay } from "../../Utils/Calendar";
+import { moveToNextDay, months } from "../../Utils/Calendar";
 import getCurrentWeek from "../../Components/WeekSchedule/GetCurrentWeek";
 import { simulateGame } from "../../Utils/SimulateGame";
 import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
 import LeagueWeekMatches from '../../Components/LeagueWeekMatches/LeagueWeekMatches';
 import { useGameContext } from '../../Context/GameContext';
+import { flagName } from '../../Models/Countries';
 interface ScheduleProps {
     isFirstSeason: Signal<boolean>;
     currentPage: Signal<string>;
@@ -41,12 +56,13 @@ const matchClicked = signal<Match | undefined>(undefined);
 
 export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwards }: ScheduleProps) {
     const ctx = useGameContext();
-    const { teamsMap, playersMap, userManager: manager, leagues, currentYear, tournaments } = ctx;
+    const { teamsMap, playersMap, userManager: manager, leagues, currentYear, tournaments, internationalTournaments, currentInternationalTournament, currentTournament } = ctx;
     const managerTeam = teamsMap.value.get(manager.value.team);
+    const managerNationalTeam = teamsMap.value.get(manager.value.country);
     const leagueTeamNames = leagues.value.find((l) => l.name === managerTeam?.leagueName)?.teams;
     const leageTeams = leagueTeamNames?.map((name) => teamsMap.value.get(name)).filter((t): t is Team => !!t);
     const date = `${String(monthToNumber[currentYear.value.currentMonth]).padStart(2, "0")}/${String(currentYear.value.currentDay).padStart(2, "0")}/${currentYear.value.year}`;
-    const foundMatch = managerTeam?.Schedule.find(m => m.date === date);
+    const foundMatch = managerTeam?.Schedule.find(m => m.date === date) || managerNationalTeam?.Schedule.find(m => m.date === date);
     const todayMatch = foundMatch ? signal<Match>(foundMatch) : undefined;
     // Compute dates for all days of the current week
     const currentWeekDays = getCurrentWeek(currentYear.value.currentMonth, currentYear.value.currentDay, currentYear.value.currentDayOfWeek, currentYear.value.year);
@@ -61,15 +77,44 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                 if (match) managerWeekMatches.push(match);
             }
         }
+        if (managerNationalTeam) {
+            for (const weekDate of weekDates) {
+                const match = managerNationalTeam.Schedule.find(m => m.date === weekDate);
+                if (match && !managerWeekMatches.includes(match)) managerWeekMatches.push(match);
+            }
+        }
         matches.value = managerWeekMatches;
     }, [date]);
+
+    // On Sunday/Monday, show last week's league results; otherwise show this week's
+    const dayOfWeek = currentYear.value.currentDayOfWeek;
+    const showPrevWeek = dayOfWeek === "Sunday";
+    const leagueWeekDates = (() => {
+        if (!showPrevWeek) return weekDates;
+        // Compute previous week's dates (7 days back)
+        const monthIndex = months.indexOf(currentYear.value.currentMonth);
+        const today = new Date(currentYear.value.year, monthIndex, currentYear.value.currentDay);
+        const prevWeekDates: string[] = [];
+        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const todayDowIndex = dayNames.indexOf(dayOfWeek);
+        const prevSundayOffset = -todayDowIndex - 7;
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() + prevSundayOffset + i);
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            const yyyy = String(d.getFullYear());
+            prevWeekDates.push(`${mm}/${dd}/${yyyy}`);
+        }
+        return prevWeekDates;
+    })();
 
     const allMatchesForWeek: Match[] = [];
     const seenMatchKeys = new Set<string>();
     leagueTeamNames?.forEach((teamName) => {
         const team = teamsMap.value.get(teamName);
         if (!team) return;
-        for (const weekDate of weekDates) {
+        for (const weekDate of leagueWeekDates) {
             const match = team.Schedule.find(m => m.date === weekDate);
             if (match) {
                 const key = `${match.homeTeamName}-${match.awayTeamName}`;
@@ -78,6 +123,22 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                     allMatchesForWeek.push(match);
                 }
             }
+        }
+    });
+
+    // Gather international matches for the week from the manager's tournament
+    const internationalMatchesForWeek: Match[] = [];
+    const intSeenKeys = new Set<string>();
+    internationalTournaments.value.forEach((tournament: InternationalTournament) => {
+        if (tournament.currentPhase === "not_started") return;
+        // Only show tournaments the manager's country participates in
+        if (!tournament.teams.some(t => t.teamName === manager.value.country)) return;
+        for (const match of tournament.matches) {
+            if (!weekDates.includes(match.date)) continue;
+            const key = `${match.homeTeamName}-${match.awayTeamName}-${match.tournamentRound}`;
+            if (intSeenKeys.has(key)) continue;
+            intSeenKeys.add(key);
+            internationalMatchesForWeek.push(match);
         }
     });
     useSignals();
@@ -138,6 +199,104 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
         }
     }
 
+    function simulateInternationalMatches(simulated: Set<string>) {
+        let anySimulated = false;
+        internationalTournaments.value.forEach((tournament: InternationalTournament) => {
+            if (tournament.currentPhase === "complete" || tournament.currentPhase === "not_started") return;
+
+            const todayMatches = tournament.matches.filter(m => m.date === date && !m.played);
+            todayMatches.forEach((match) => {
+                const matchKey = `${match.homeTeamName}-${match.awayTeamName}`;
+                if (simulated.has(matchKey)) return;
+                simulated.add(matchKey);
+                anySimulated = true;
+                const matchSignal = signal<Match>(match);
+                simulateGame(matchSignal, teamsMap.value, playersMap.value, manager);
+                match.played = true;
+
+                // Knockout matches (not group stage, not friendlies) need penalty on draw
+                const isGroupMatch = match.tournamentRound?.startsWith("Group");
+                const isFriendlyMatch = match.tournamentRound?.startsWith("Friendly");
+                if (!isGroupMatch && !isFriendlyMatch && match.homeScore === match.awayScore) {
+                    match.penaltyWin = true;
+                    if (Math.random() < 0.5) {
+                        match.homeScore++;
+                    } else {
+                        match.awayScore++;
+                    }
+                }
+            });
+
+            if (todayMatches.length > 0) {
+                const isWorldCup = tournament.name === "World Cup";
+
+                // World Cup qualifying phase
+                if (tournament.currentPhase === "qualifying") {
+                    const currentRoundMatches = tournament.matches.filter(
+                        m => m.tournamentRound?.startsWith("WCQ-") &&
+                            m.tournamentRound.endsWith(tournament.currentRound!.replace("WCQ ", ""))
+                    );
+                    const allPlayed = currentRoundMatches.length > 0 && currentRoundMatches.every(m => m.played);
+                    if (allPlayed) {
+                        advanceWorldCupQualifying(tournament, currentYear.value.year, teamsMap);
+                    }
+                }
+                // Update group standings after group matches
+                else if (tournament.currentPhase === "group") {
+                    updateGroupStandings(tournament);
+                    if (isGroupStageComplete(tournament)) {
+                        if (isWorldCup) {
+                            advanceWorldCupToKnockout(tournament, currentYear.value.year, teamsMap);
+                        } else {
+                            advanceToKnockout(tournament, currentYear.value.year, teamsMap);
+                        }
+                    }
+                }
+                // Advance knockout rounds
+                else if (tournament.currentPhase === "knockout") {
+                    const currentRoundMatches = tournament.matches.filter(
+                        m => m.tournamentRound === tournament.currentRound
+                    );
+                    const allPlayed = currentRoundMatches.every(m => m.played);
+                    if (allPlayed) {
+                        if (isWorldCup) {
+                            advanceWorldCupKnockout(tournament, currentYear.value.year, teamsMap, playersMap.value, currentYear);
+                        } else {
+                            advanceInternationalKnockout(tournament, currentYear.value.year, teamsMap, playersMap.value, currentYear);
+                        }
+                    }
+                }
+                // Friendly tournament: check if friendlies done, then advance mini tournament
+                else if (tournament.currentPhase === "friendly") {
+                    if (tournament.currentRound === "Friendlies" && areFriendliesComplete(tournament)) {
+                        advanceFriendlyToMiniTournament(tournament, currentYear.value.year, teamsMap);
+                    } else if (tournament.currentRound !== "Friendlies") {
+                        const currentRoundMatches = tournament.matches.filter(
+                            m => m.tournamentRound === tournament.currentRound && !m.tournamentRound?.startsWith("Friendly")
+                        );
+                        const allPlayed = currentRoundMatches.every(m => m.played);
+                        if (allPlayed) {
+                            advanceFriendlyKnockout(tournament, currentYear.value.year, teamsMap, playersMap.value, currentYear);
+                        }
+                    }
+                }
+            }
+        });
+        if (anySimulated) {
+            internationalTournaments.value = [...internationalTournaments.value];
+        }
+    }
+
+    // Determine if we're in the international period based on when the first international match is scheduled
+    let intStartTime = Infinity;
+    internationalTournaments.value.forEach(t => {
+        if (t.currentPhase === "not_started" || t.matches.length === 0) return;
+        const firstMatchTime = new Date(t.matches[0].date).getTime();
+        if (firstMatchTime < intStartTime) intStartTime = firstMatchTime;
+    });
+    const currentDateObj = new Date(currentYear.value.year, months.indexOf(currentYear.value.currentMonth), currentYear.value.currentDay);
+    const isIntPeriod = intStartTime !== Infinity && currentDateObj.getTime() >= intStartTime;
+
     function simulateDay() {
         const simulated = new Set<string>();
         leagues.value.forEach((league) => {
@@ -155,13 +314,42 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                 }
             });
         });
+        // Determine international tournament type based on the calendar year the tournaments play in (year + 1)
+        const intYear = currentYear.value.year + 1;
+        if (isWorldCupYear(intYear)) {
+            currentInternationalTournament.value = "World Cup";
+        } else if (isMajorTournamentYear(intYear)) {
+            currentInternationalTournament.value = "Continental";
+        } else {
+            currentInternationalTournament.value = "Friendly";
+        }
 
         simulateTournamentMatches(simulated);
+        simulateInternationalMatches(simulated);
 
         // Trigger signal re-render so UI updates
         teamsMap.value = new Map(teamsMap.value);
         isSimulated[date] = true;
     }
+
+    const isIntMonth = isIntPeriod;
+
+    // Find the manager's active international tournament (with groups)
+    const managerIntTournament = internationalTournaments.value.find(t =>
+        t.teams.some(tm => tm.teamName === manager.value.country) &&
+        t.currentPhase !== "not_started"
+    );
+    // Sort groups so manager's group is first
+    const managerGroups = managerIntTournament?.groups ? (() => {
+        const mc = manager.value.country;
+        const groups = managerIntTournament.groups!;
+        const idx = groups.findIndex(g => g.teams.includes(mc));
+        if (idx <= 0) return groups;
+        const sorted = [...groups];
+        const [mg] = sorted.splice(idx, 1);
+        sorted.unshift(mg);
+        return sorted;
+    })() : undefined;
 
     return (
         <div>
@@ -215,8 +403,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                             disabled={!!todayMatch && !isSimulated[date]}
                             onClick={() => {
                                 if (!isSimulated[date]) {
-                                    simulateTournamentMatches(new Set<string>());
-                                    teamsMap.value = new Map(teamsMap.value);
+                                    simulateDay();
                                 }
                                 moveToNextDay(ctx, isSimulated, isFirstSeason, currentPage, retiredPlayers, playerAwards);
                             }}
@@ -226,22 +413,74 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                     </div>
                 </div>
                 <div className={styles.miniTable}>
-                    <div>
-                        <h4 className={styles.miniTableTitle}>League Table</h4>
-                        <MiniTable
-                            leagueTitle="League Table"
-                            leageTeams={leageTeams}
-                            managerTeam={managerTeam}
-                        />
+                    <div className={styles.miniTableTwo}>
+                        {!isIntMonth && (
+                            <>
+                                <h4 className={styles.miniTableTitle}>League Table</h4>
+                                <MiniTable
+                                    leagueTitle="League Table"
+                                    leageTeams={leageTeams}
+                                    managerTeam={managerTeam}
+                                />
+                            </>
+                        )}
+                        {isIntMonth && managerGroups && (
+                            <div className={styles.miniGroupsScroll}>
+                                <h4 className={styles.miniTableTitle}>{managerIntTournament?.name} Groups</h4>
+                                {managerGroups.map(group => {
+                                    const mc = manager.value.country;
+                                    return (
+                                        <div key={group.name} className={styles.miniGroup}>
+                                            <div className={styles.miniGroupTitle}>{group.name}</div>
+                                            <table className={styles.miniGroupTable}>
+                                                <thead>
+                                                    <tr>
+                                                        <th style={{ textAlign: 'left' }}>Team</th>
+                                                        <th>P</th>
+                                                        <th>GD</th>
+                                                        <th>Pts</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {group.standings.map((s) => (
+                                                        <tr key={s.teamName} className={s.teamName === mc ? styles.miniGroupManager : ''}>
+                                                            <td style={{ textAlign: 'left' }}>{flagName(s.teamName)}</td>
+                                                            <td>{s.wins + s.draws + s.losses}</td>
+                                                            <td>{s.goalsFor - s.goalsAgainst}</td>
+                                                            <td style={{ fontWeight: 700 }}>{s.points}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                        {isIntMonth && !managerGroups && (
+                            <div className={styles.miniTable}>
+                                <h4 className={styles.miniTableTitle}>League Table</h4>
+                                <MiniTable
+                                    leagueTitle="League Table"
+                                    leageTeams={leageTeams}
+                                    managerTeam={managerTeam}
+                                />
+                            </div>
+                        )}
                     </div>
                     <div className={styles.matchTable}>
-                        <h4 className={styles.miniTableTitle}>League Matches</h4>
+                        {!isIntMonth && (
+                            <h4 className={styles.miniTableTitle}>League Matches</h4>
+                        )}
                         <LeagueWeekMatches
                             allMatches={allMatchesForWeek}
+                            internationalMatches={internationalMatchesForWeek}
                             matchClicked={matchClicked}
                             teamsMap={teamsMap}
                             playersMap={playersMap}
                             managerTeam={managerTeam}
+                            managerCountry={manager.value.country}
+                            isIntPeriod={isIntPeriod}
                         />
                     </div>
                 </div>

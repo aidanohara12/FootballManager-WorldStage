@@ -1,6 +1,7 @@
 .tableContainer {
     min-width: 350px;
     margin: 0 auto;
+    height: 35vh;
 }
 
 .table {
@@ -10,6 +11,7 @@
     border: 1.5px solid var(--primary-color, #00A86B);
     overflow: hidden;
     font-size: 0.7rem;
+    height: 90%;
 }
 
 .tableHeader {
