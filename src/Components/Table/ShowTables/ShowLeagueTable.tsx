@@ -35,14 +35,14 @@ export function ShowLeagueTable({ leagueTitle, leageTeams, managerTeam }: ShowLe
                     </div>
                 </div>
                 <div className={styles.tableBody}>
-                    {leageTeams?.sort((a, b) => getTeamGoalDiff(b) - getTeamGoalDiff(a)).sort((a, b) => getTeamPoints(b) - getTeamPoints(a)).map((team) => {
+                    {leageTeams?.sort((a, b) => getTeamGoalDiff(b) - getTeamGoalDiff(a)).sort((a, b) => getTeamPoints(b) - getTeamPoints(a)).map((team, index) => {
                         const goalDiff = team.goalsFor - team.goalsAgainst;
                         const goalDiffClass = goalDiff > 0 ? styles.positive : goalDiff < 0 ? styles.negative : styles.neutral;
                         const gamesPlayed = team.wins + team.losses + team.draws;
 
                         return (
                             <div key={team.name} className={`${styles.tableRow} ${isManagerTeam(team) ? styles.managerTeam : ''}`}>
-                                <div className={`${styles.teamName} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.name}</div>
+                                <div className={`${styles.teamName} ${isManagerTeam(team) ? styles.managerText : ''}`}>{index + 1}. {team.name}</div>
                                 <div className={`${styles.statCell} ${isManagerTeam(team) ? styles.managerText : ''}`}>{gamesPlayed}</div>
                                 <div className={`${styles.statCell} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.points}</div>
                                 <div className={`${styles.statCell} ${isManagerTeam(team) ? styles.managerText : ''}`}>{team.wins}</div>

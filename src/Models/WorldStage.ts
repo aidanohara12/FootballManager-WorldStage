@@ -28,9 +28,15 @@ export interface Player {
     name: string;
     position: string;
     overall: number;
+    stamina: number;
+    trainingIntency: string;
+    injured: boolean;
+    gamesInjured: number;
     country: string;
     startingNational?: boolean;
     startingTeam?: boolean;
+    startingTeamWithoutInjury?: boolean;
+    startingNationalWithoutInjury?: boolean;
     team: string;
     age: number;
     potential: number;

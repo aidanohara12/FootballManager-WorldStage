@@ -65,13 +65,22 @@ export function Tournaments() {
     const defaultOption = isIntPeriod ? "International Tournaments" : "Tournaments";
 
     // Find the active international tournament based on currentInternationalTournament type
+    const continentalNames = ["Euros", "Copa America", "AFCON", "Asian Cup"];
+    const friendlyNames = ["Euros Friendly", "American Friendly", "Africa Friendly", "Asian Friendly"];
     const activeIntTournament = (() => {
         if (!currentInternationalTournament) return managerInternationalTournament ?? null;
         if (currentInternationalTournament === "World Cup") {
             return internationalTournaments.find(t => t.name === "World Cup") ?? null;
         }
-        // "Continental" or "Friendly" — find the one the manager's country is in
-        return managerInternationalTournament ?? null;
+        if (currentInternationalTournament === "Continental") {
+            return internationalTournaments.find(t =>
+                continentalNames.includes(t.name) && t.teams.some(tm => tm.teamName === manager.country)
+            ) ?? null;
+        }
+        // "Friendly"
+        return internationalTournaments.find(t =>
+            friendlyNames.includes(t.name) && t.teams.some(tm => tm.teamName === manager.country)
+        ) ?? null;
     })();
 
     const [selectedOption, setSelectedOption] = useState<string>(defaultOption);

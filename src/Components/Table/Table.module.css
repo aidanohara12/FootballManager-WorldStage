@@ -1,7 +1,7 @@
 .tableContainer {
     min-width: 350px;
     margin: 0 auto;
-    height: 35vh;
+    height: 90%;
 }
 
 .table {
@@ -9,9 +9,9 @@
     border-radius: 10px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     border: 1.5px solid var(--primary-color, #00A86B);
-    overflow: hidden;
+    overflow-y: scroll;
     font-size: 0.7rem;
-    height: 90%;
+    height: 87%;
 }
 
 .tableHeader {
@@ -42,8 +42,7 @@
 }
 
 .tableBody {
-    max-height: 260px;
-    overflow-y: auto;
+    overflow-y: scroll;
 }
 
 .tableBody::-webkit-scrollbar {

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { signal, type Signal } from "@preact/signals-react";
 import styles from "./SelectClub.module.css";
 import { Top50Countries } from "../../../Models/Countries.ts";
@@ -63,7 +63,9 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
             const players = getTeamPlayersClub(team, playersMap);
             players.forEach((p) => {
                 if (p.position === currentPosition.name) {
-                    p.startingTeam = selectedPlayers.value.includes(p.name);
+                    const isStarter = selectedPlayers.value.includes(p.name);
+                    p.startingTeam = isStarter;
+                    p.startingTeamWithoutInjury = isStarter;
                 }
             });
             teamsMap.value = new Map(teamsMap.value);
@@ -116,6 +118,13 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
         }
     }, []);
 
+    const playerListRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (playerListRef.current) {
+            playerListRef.current.scrollTop = 0;
+        }
+    }, [currentPositionIndex.value]);
+
     const managerTeamPlayers = managerTeam ? getTeamPlayersClub(managerTeam, playersMap) : [];
 
     return (
@@ -146,7 +155,7 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
 
                     <div className={styles.positionSection}>
                         <h5>{currentPosition.name}s</h5>
-                        <div className={styles.playerList}>
+                        <div ref={playerListRef} className={styles.playerList}>
                             {managerTeamPlayers
                                 .filter((p: any) => p.position === currentPosition.name)
                                 .sort((a: any, b: any) => b.overall - a.overall)

@@ -123,21 +123,31 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
 
             leagues.value.forEach(league => {
                 if (topLeagues.includes(league.name)) {
+                    // Compute current standings directly (league.topThree may not be set yet on first season)
+                    const leagueTeams = league.teams
+                        .map(t => teamsMap.value.get(t))
+                        .filter((t): t is Team => !!t);
+                    const sorted = [...leagueTeams].sort((a, b) =>
+                        (b.points - a.points) || ((b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst))
+                    );
                     const resolve = (names: string[]) => names
                         .filter(n => !lockedTeams.has(n))
                         .map(n => teamsMap.value.get(n))
                         .filter((t): t is Team => !!t);
-                    addTeamsToTournament(cl, resolve(league.topThree));
-                    addTeamsToTournament(el, resolve(league.topSix));
-                    addTeamsToTournament(conf, resolve(league.topNine));
+                    addTeamsToTournament(cl, resolve(sorted.slice(0, 3).map(t => t.name)));
+                    addTeamsToTournament(el, resolve(sorted.slice(3, 6).map(t => t.name)));
+                    addTeamsToTournament(conf, resolve(sorted.slice(6, 9).map(t => t.name)));
                 }
             });
 
             // Adjust manager budget based on season performance
             if (managerTeam) {
-                const finishedTopThree = leagues.value.some(league =>
-                    topLeagues.includes(league.name) && league.topThree.includes(managerTeam.name)
-                );
+                const managerLeagueObj = leagues.value.find(l => l.name === managerTeam.leagueName);
+                const finishedTopThree = managerLeagueObj ? (() => {
+                    const lt = managerLeagueObj.teams.map(t => teamsMap.value.get(t)).filter((t): t is Team => !!t);
+                    const s = [...lt].sort((a, b) => (b.points - a.points) || ((b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst)));
+                    return s.slice(0, 3).some(t => t.name === managerTeam.name);
+                })() : false;
                 const wonTrophyThisSeason = leagues.value.some(l => l.pastChampions[l.pastChampions.length - 1] === managerTeam.name) ||
                     tournaments.value.some(t => t.pastChampions[t.pastChampions.length - 1]?.teamName === managerTeam.name);
 

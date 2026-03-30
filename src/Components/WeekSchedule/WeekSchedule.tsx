@@ -7,9 +7,10 @@ interface WeekScheduleProps {
     matches: Signal<Match[]>;
     currentYear: Signal<currentYear>;
     manager: Signal<Manager>;
+    trainingDayDate?: string | null;
 }
 
-export function WeekSchedule({ matches, currentYear, manager }: WeekScheduleProps) {
+export function WeekSchedule({ matches, currentYear, manager, trainingDayDate }: WeekScheduleProps) {
     const currentWeekDays: Week = getCurrentWeek(currentYear.value.currentMonth, currentYear.value.currentDay, currentYear.value.currentDayOfWeek, currentYear.value.year);
     const isToday = (day: string) => day === currentYear.value.currentDayOfWeek;
 
@@ -27,9 +28,10 @@ export function WeekSchedule({ matches, currentYear, manager }: WeekScheduleProp
                 {Object.entries(currentWeekDays.weekDays).map(([day, { dayNumber, dateStr }]) => {
                     const hasMatch = matchDateSet.has(dateStr);
                     const match = matchByDate.get(dateStr);
+                    const isTraining = trainingDayDate === dateStr;
 
                     return (
-                        <div key={day} className={`${styles.weekDay} ${isToday(day) ? styles.today : ''} ${hasMatch ? styles.matchDay : ''}`}>
+                        <div key={day} className={`${styles.weekDay} ${isToday(day) ? styles.today : ''} ${hasMatch ? styles.matchDay : ''} ${isTraining ? styles.trainingDay : ''}`}>
                             <div className={styles.dayName}>{day.slice(0, 3)}</div>
                             <div className={styles.dayNumber}>{dayNumber}</div>
                             {hasMatch && match && (
@@ -38,6 +40,9 @@ export function WeekSchedule({ matches, currentYear, manager }: WeekScheduleProp
                                         ? match.tournamentName?.split(' ').map(w => w[0]).join('')
                                         : 'League'}
                                 </div>
+                            )}
+                            {isTraining && !hasMatch && (
+                                <div className={styles.trainingIndicator}>Train</div>
                             )}
                         </div>
                     );

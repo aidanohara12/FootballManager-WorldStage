@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { signal, type Signal } from "@preact/signals-react";
 import Top50Countries from "../../../Models/Countries.ts";
 import styles from "./SelectNational.module.css";
@@ -56,7 +56,9 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
             if (managerNT) {
                 const players = getTeamPlayers(managerNT.team.players, playersMap);
                 players.forEach((p) => {
-                    p.startingNational = updatedAllSelected.includes(p.name);
+                    const isStarter = updatedAllSelected.includes(p.name);
+                    p.startingNational = isStarter;
+                    p.startingNationalWithoutInjury = isStarter;
                 });
             }
             nationalTeams.value = [...nationalTeams.value];
@@ -79,6 +81,13 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
             setNationalTeamStartingPlayers(nationalTeams, playersMap);
         }
     }, []);
+
+    const playerListRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (playerListRef.current) {
+            playerListRef.current.scrollTop = 0;
+        }
+    }, [currentPositionIndex.value]);
 
     const managerNT = nationalTeams.value.find((nt) => nt.country === manager.value.country);
     const managerNTPlayers = managerNT ? getTeamPlayers(managerNT.team.players, playersMap) : [];
@@ -106,7 +115,7 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
 
                     <div className={styles.positionSection}>
                         <h5>{currentPosition.name}s</h5>
-                        <div className={styles.playerList}>
+                        <div ref={playerListRef} className={styles.playerList}>
                             {managerNTPlayers
                                 .filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
@@ -135,8 +144,8 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
                                                     <h5 className={styles.statLabel}>Team: {p.team}</h5>
                                                 </span>
                                                 {p.newPlayer && (
-                                                    <span className={styles.newSigning}>
-                                                        <h5 className={styles.newSigningLabel}>New Call Up!</h5>
+                                                    <span className={styles.statBadge}>
+                                                        <h5 className={styles.statLabel}>New Call Up!</h5>
                                                     </span>
                                                 )}
                                             </div>

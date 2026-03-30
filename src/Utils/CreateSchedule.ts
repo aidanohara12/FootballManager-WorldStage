@@ -128,6 +128,23 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
     return schedule;
 }
 
+function ballonDorWeight(player: Player): number {
+    let weight = 0;
+    weight = player.otherTrophiesThisSeason * 2;
+    weight += player.importantTrophiesThisSeason * 5;
+    if(player.position === "Goalkeeper") {
+        weight += player.cleanSheets * 2;
+    } else if(player.position === "Defender") {
+        weight += player.cleanSheets * 1.5;
+        weight += player.totalAssists * 1.5;
+        weight += player.totalGoals * 1.5;
+    } else {
+        weight += player.totalAssists * 1.25;
+        weight += player.totalGoals * 1.25;
+    }
+    return weight;
+}
+
 export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, playerAwards: Signal<PlayerAwards>): void {
     const leagueAwardKeys: Record<string, { bestPlayer: keyof PlayerAwards; goldenBoot: keyof PlayerAwards; }> = {
         "Premier League": { bestPlayer: "premBestPlayer", goldenBoot: "premGoldenBoot" },
@@ -174,11 +191,7 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
     if (allPlayers.length === 0) return;
 
     // Ballon d'Or: most G/A across top leagues
-    const ballonDor = [...topLeaguePlayers].sort((a, b) => {
-        const trophyDiff = b.importantTrophiesThisSeason - a.importantTrophiesThisSeason;
-        if (trophyDiff !== 0) return trophyDiff;
-        return (b.leagueGoals + b.leagueAssists) - (a.leagueGoals + a.leagueAssists);
-    })[0];
+    const ballonDor = [...topLeaguePlayers].sort((a, b) => ballonDorWeight(b) - ballonDorWeight(a))[0];
     playerAwards.value.ballonDorWinners.push(ballonDor.name);
     ballonDor.awards++;
 

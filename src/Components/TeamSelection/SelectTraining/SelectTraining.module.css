@@ -1,0 +1,254 @@
+.selectNationalContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+.selectNationalContainer h3 {
+    color: var(--secondary-color, #1A1A1A);
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-top: -1rem;
+    margin-bottom: -1rem;
+    text-align: center;
+}
+
+.selectNationalContainer h4 {
+    color: var(--primary-color, #00A86B);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+/* Compact mode for inline schedule use */
+.compactContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.compactContainer h4 {
+    color: var(--primary-color, #00A86B);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    text-align: center;
+}
+
+.compactContainer .teamCard {
+    max-width: 100%;
+    box-shadow: none;
+    border: none;
+    padding: 0.5rem;
+}
+
+.compactContainer .playerList {
+    max-height: 300px;
+}
+
+.compactContainer .trainingRules {
+    margin-bottom: 0.5rem;
+}
+
+.scrollHint {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+    margin: 0 0 0.4rem;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.trainingRules {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    border: 1px solid #e0e0e0;
+}
+
+.trainingRules p {
+    margin: 0.2rem 0;
+}
+
+.teamCard {
+    background: white;
+    padding: 1rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 600px;
+    border: 3px solid var(--primary-color, #00A86B);
+}
+
+.teamCard h4 {
+    color: var(--secondary-color, #1A1A1A);
+    margin-bottom: 0.5rem;
+    margin-top: 0.25rem;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.bulkButtons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+}
+
+.bulkButtons button {
+    padding: 0.4rem 1rem;
+    border: 2px solid var(--primary-color, #00A86B);
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    background: white;
+    color: var(--primary-color, #00A86B);
+    transition: all 0.2s ease;
+}
+
+.bulkButtons button:hover {
+    background: var(--primary-color, #00A86B);
+    color: white;
+}
+
+/* Scrollable player list */
+.playerList {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.playerList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.playerList::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.playerList::-webkit-scrollbar-thumb {
+    background: var(--primary-color, #00A86B);
+    border-radius: 10px;
+}
+
+/* Player row: select | name | OVR | stamina bar */
+.playerRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    margin-bottom: 0.3rem;
+    background: #fafafa;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.playerRow:hover {
+    background: #f0f0f0;
+}
+
+.trainingSelect {
+    width: 70px;
+    padding: 0.25rem 0.3rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.playerName {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.playerOvr {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #f39c12;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Stamina bar */
+.staminaBarContainer {
+    position: relative;
+    width: 100px;
+    height: 16px;
+    background: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.staminaBarFill {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.staminaLabel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #333;
+    pointer-events: none;
+}
+
+.confirmContainer {
+    display: flex;
+    justify-content: center;
+    padding-top: 0.75rem;
+    border-top: 2px solid #e0e0e0;
+}
+
+.nextButton {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--primary-color, #00A86B) 0%, #008f5d 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 168, 107, 0.3);
+    transition: all 0.3s ease;
+}
+
+.nextButton:hover {
+    background: linear-gradient(135deg, #008f5d 0%, #006644 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 168, 107, 0.4);
+}
+
+.nextButton:active {
+    transform: translateY(0);
+}

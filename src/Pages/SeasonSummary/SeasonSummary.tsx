@@ -4,6 +4,8 @@ import styles from './SeasonSummary.module.css'
 import PlayerAttributesView from '../../Components/Formation/PlayerAttributesView';
 import { useEffect, useState } from 'react';
 import { useGameContext } from '../../Context/GameContext';
+import { isWorldCupYear, isMajorTournamentYear } from '../../Utils/InternationalTournamentSchedule';
+import Top50Countries from '../../Models/Countries';
 
 interface SeasonSummaryProps {
     currentPage: Signal<string>;
@@ -16,15 +18,15 @@ const showBallonDorWinner = signal<boolean>(false);
 const showGoldenBootWinner = signal<boolean>(false);
 const showBestKeeper = signal<boolean>(false);
 
-const tournamentType: Record<string, string> = {
-    0: "World Cup",
-    1: "Friendly",
-    2: "Continental",
-    3: "Friendly",
+function getTournamentTypeName(year: number): string {
+    const intYear = year;
+    if (isWorldCupYear(intYear)) return "World Cup";
+    if (isMajorTournamentYear(intYear)) return "Continental";
+    return "Friendly";
 }
 
 export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: SeasonSummaryProps) {
-    const { leagues, teamsMap, playersMap, userManager: manager, currentYear, tournaments } = useGameContext();
+    const { leagues, teamsMap, playersMap, userManager: manager, currentYear, tournaments, internationalTournaments } = useGameContext();
     const ballonDorWinner = playersMap.value.get(playerAwards.value.ballonDorWinners[playerAwards.value.ballonDorWinners.length - 1]);
     const goldenBootWinner = playersMap.value.get(playerAwards.value.goldenBootWinners[playerAwards.value.goldenBootWinners.length - 1]);
     const bestKeeper = playersMap.value.get(playerAwards.value.bestKeeper[playerAwards.value.bestKeeper.length - 1]);
@@ -44,7 +46,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
     const primeraDivisionGoldenBoot = playersMap.value.get(playerAwards.value.primeraDivisionGoldenBoot[playerAwards.value.primeraDivisionGoldenBoot.length - 1]);
     const [tournamentTypeName, setTournamentTypeName] = useState<string>("");
     useEffect(() => {
-        setTournamentTypeName(tournamentType[currentYear.value.yearsCompleted]);
+        setTournamentTypeName(getTournamentTypeName(currentYear.value.year));
     }, [currentYear.value.yearsCompleted]);
 
     useEffect(() => {
@@ -63,33 +65,33 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
             <h1>Season Summary</h1>
             <div className={styles.leftSide}>
                 <div className={styles.tournamentType}>
-                    <h3>{tournamentTypeName} Winners</h3>
+                    <h3>{tournamentTypeName} Winner{tournamentTypeName === "World Cup" ? "" : "s"}</h3>
                     {tournamentTypeName === "World Cup" && (
                         <div>
-                            {tournaments.value.filter(t => t.name === tournamentTypeName).map(tournament => (
+                            {internationalTournaments.value.filter(t => t.name === "World Cup").map(tournament => (
                                 <div key={tournament.name}>
                                     <h4>{tournament.name}</h4>
-                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName}</p>
+                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName} {Top50Countries.find((c) => c.country === tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName)?.flag}</p>
                                 </div>
                             ))}
                         </div>
                     )}
                     {tournamentTypeName === "Continental" && (
                         <div>
-                            {tournaments.value.filter(t => t.name === "Euros" || t.name === "Copa America" || t.name === "AFCON" || t.name === "Asian Cup").map(tournament => (
+                            {internationalTournaments.value.filter(t => t.name === "Euros" || t.name === "Copa America" || t.name === "AFCON" || t.name === "Asian Cup").map(tournament => (
                                 <div key={tournament.name}>
                                     <h4>{tournament.name}</h4>
-                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName}</p>
+                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName} {Top50Countries.find((c) => c.country === tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName)?.flag}</p>
                                 </div>
                             ))}
                         </div>
                     )}
                     {tournamentTypeName === "Friendly" && (
                         <div>
-                            {tournaments.value.filter(t => t.name === "Euros Friendly" || t.name === "American Friendly" || t.name === "Africa Friendly" || t.name === "Asian Friendly").map(tournament => (
+                            {internationalTournaments.value.filter(t => t.name === "Euros Friendly" || t.name === "American Friendly" || t.name === "Africa Friendly" || t.name === "Asian Friendly").map(tournament => (
                                 <div key={tournament.name}>
                                     <h4>{tournament.name}</h4>
-                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName}</p>
+                                    <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName} {Top50Countries.find((c) => c.country === tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName)?.flag}</p>
                                 </div>
                             ))}
                         </div>
@@ -280,6 +282,9 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                     <div className={styles.leagueWinnersList}>
                         {tournaments.value.map(tournament => {
                             const winner = tournament.pastChampions[tournament.pastChampions.length - 1];
+                            if (currentYear.value.yearsCompleted === 1 && tournament.pastChampions.length === 0) {
+                                return null;
+                            }
                             return (
                                 <div key={tournament.name} className={winner?.teamName === manager.value.team ? styles.winner : ''}>
                                     <div className={styles.playerName}>

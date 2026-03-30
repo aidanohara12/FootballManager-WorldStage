@@ -90,3 +90,25 @@
     color: white;
     background: rgba(255, 255, 255, 0.25);
 }
+
+.trainingDay {
+    position: relative;
+}
+
+.trainingIndicator {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #f39c12;
+    background: rgba(243, 156, 18, 0.12);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+}
+
+.today .trainingIndicator {
+    color: white;
+    background: rgba(255, 255, 255, 0.25);
+}

@@ -1,48 +1,76 @@
 import type { Signal } from "@preact/signals-react";
 import type { Manager, Match, Player, Team } from "../Models/WorldStage";
+import { Top50Countries } from "../Models/Countries";
+
+function getPlayerOverallWithStamina(player: Player): number {
+    if (player.stamina > 40) return player.overall;
+    if (player.stamina > 30) return player.overall - 1;
+    if (player.stamina > 20) return player.overall - 2;
+    if (player.stamina > 10) return player.overall - 3;
+    return player.overall - 4;
+}
 
 function getPlayers(team: Team, playersMap: Map<string, Player>): Player[] {
     return team.players.map((name) => playersMap.get(name)!).filter(Boolean);
 }
 
-function positionAvg(teamPlayers: Player[], position: string): number {
-    const group = teamPlayers?.filter((p: Player) => p.startingTeam && p.position === position);
+function positionAvg(teamPlayers: Player[], position: string, isNational: boolean): number {
+    const group = teamPlayers?.filter((p: Player) =>
+        (isNational ? p.startingNational : p.startingTeam) && p.position === position
+    );
     if (!group || group.length === 0) return 0;
-    return group.map((p: Player) => p.overall).reduce((a: number, b: number) => a + b, 0) / group.length;
+    return group.map((p: Player) => getPlayerOverallWithStamina(p)).reduce((a: number, b: number) => a + b, 0) / group.length;
 }
 
-function autoAssignStarters(team: Team, playersMap: Map<string, Player>): void {
+// Sub in the next best non-injured, non-starting player for each injured starter
+function subInjuredStarters(team: Team, playersMap: Map<string, Player>, isNational: boolean): void {
     const players = getPlayers(team, playersMap);
-    const starterCount = players.filter((p) => p.startingTeam).length;
-    if (starterCount >= 11) return;
+    const startingKey = isNational ? 'startingNational' : 'startingTeam';
+    const injuredStarters = players.filter(p => p[startingKey] && p.injured);
 
-    // Reset and re-pick best players by position: 3 FW, 3 MF, 4 DF, 1 GK = 11
-    players.forEach((p) => p.startingTeam = false);
-    const byPos = (pos: string) => players
-        .filter((p) => p.position === pos)
-        .sort((a, b) => b.overall - a.overall);
+    for (const injured of injuredStarters) {
+        injured[startingKey] = false;
+        // Find the best available replacement at the same position
+        const replacement = players
+            .filter(p => !p[startingKey] && !p.injured && p.position === injured.position)
+            .sort((a, b) => b.overall - a.overall)[0];
+        if (replacement) {
+            replacement[startingKey] = true;
+        }
+    }
+}
 
-    byPos("Forward").slice(0, 3).forEach((p) => p.startingTeam = true);
-    byPos("Midfielder").slice(0, 3).forEach((p) => p.startingTeam = true);
-    byPos("Defender").slice(0, 4).forEach((p) => p.startingTeam = true);
-    byPos("Goalkeeper").slice(0, 1).forEach((p) => p.startingTeam = true);
+// After a game, decrement gamesInjured for all players on both teams and recover if 0
+function updateInjuryStatus(team: Team, playersMap: Map<string, Player>): void {
+    const players = getPlayers(team, playersMap);
+    for (const player of players) {
+        if (player.injured && player.gamesInjured > 0) {
+            player.gamesInjured--;
+            if (player.gamesInjured <= 0) {
+                player.injured = false;
+                player.gamesInjured = 0;
+            }
+        }
+    }
 }
 
 export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, playersMap: Map<string, Player>, manager: Signal<Manager>): void {
     const homeTeam = teamsMap.get(match.value.homeTeamName)!;
     const awayTeam = teamsMap.get(match.value.awayTeamName)!;
 
-    autoAssignStarters(homeTeam, playersMap);
-    autoAssignStarters(awayTeam, playersMap);
+    const isNational: boolean = Top50Countries.some(c => c.country === homeTeam.name);
+
+    subInjuredStarters(homeTeam, playersMap, isNational);
+    subInjuredStarters(awayTeam, playersMap, isNational);
 
     const homePlayers = getPlayers(homeTeam, playersMap);
     const awayPlayers = getPlayers(awayTeam, playersMap);
 
     //get home team info
-    const homeTeamForwardAvg = positionAvg(homePlayers, "Forward");
-    const homeTeamMidfieldAvg = positionAvg(homePlayers, "Midfielder");
-    const homeTeamDefenderAvg = positionAvg(homePlayers, "Defender");
-    const homeTeamGoalkeeperAvg = positionAvg(homePlayers, "Goalkeeper");
+    const homeTeamForwardAvg = positionAvg(homePlayers, "Forward", isNational);
+    const homeTeamMidfieldAvg = positionAvg(homePlayers, "Midfielder", isNational);
+    const homeTeamDefenderAvg = positionAvg(homePlayers, "Defender", isNational);
+    const homeTeamGoalkeeperAvg = positionAvg(homePlayers, "Goalkeeper", isNational);
     const homeOverallAvg = (homeTeamForwardAvg + homeTeamMidfieldAvg + homeTeamDefenderAvg + homeTeamGoalkeeperAvg) / 4;
     const isTactitianHome: boolean = homeTeam.manager.type === "Tactitian";
     const homeForm = homeTeam.form.filter((f: string) => f === "W").length;
@@ -50,10 +78,10 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
     let homeWiner = false;
 
     //get away team info
-    const awayTeamForwardAvg = positionAvg(awayPlayers, "Forward");
-    const awayTeamMidfieldAvg = positionAvg(awayPlayers, "Midfielder");
-    const awayTeamDefenderAvg = positionAvg(awayPlayers, "Defender");
-    const awayTeamGoalkeeperAvg = positionAvg(awayPlayers, "Goalkeeper");
+    const awayTeamForwardAvg = positionAvg(awayPlayers, "Forward", isNational);
+    const awayTeamMidfieldAvg = positionAvg(awayPlayers, "Midfielder", isNational);
+    const awayTeamDefenderAvg = positionAvg(awayPlayers, "Defender", isNational);
+    const awayTeamGoalkeeperAvg = positionAvg(awayPlayers, "Goalkeeper", isNational);
     const awayOverallAvg = (awayTeamForwardAvg + awayTeamMidfieldAvg + awayTeamDefenderAvg + awayTeamGoalkeeperAvg) / 4;
     const isTactitianAway: boolean = awayTeam.manager.type === "Tactitian";
     const awayForm = awayTeam.form.filter((f: string) => f === "W").length;
@@ -241,7 +269,7 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         awayTeamScore = homeTeamScore;
     }
 
-    const scorers = calculateScorers(homePlayers, awayPlayers, homeTeamScore, awayTeamScore, isLeague);
+    const scorers = calculateScorers(homePlayers, awayPlayers, homeTeamScore, awayTeamScore, isLeague, isNational);
 
     // Update team goals for/against (league only)
     if (isLeague) {
@@ -284,6 +312,10 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
     m.homeAssists = scorers.homeAssists;
     m.awayAssists = scorers.awayAssists;
 
+    // Decrement injury counters for both teams after the game
+    updateInjuryStatus(homeTeam, playersMap);
+    updateInjuryStatus(awayTeam, playersMap);
+
     // Also trigger signal update for any signal subscribers
     match.value = { ...m };
 }
@@ -306,19 +338,26 @@ function generateMinute(usedMinutes: Set<number>): string {
     return `${minute}`;
 }
 
-function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeamScore: number, awayTeamScore: number, isLeague: boolean): { homeScorers: [string, string][], awayScorers: [string, string][], homeAssists: [string, string][], awayAssists: [string, string][] } {
-    const homeTeamStarters = homePlayers.filter((p: Player) => p.startingTeam).sort((a: Player, b: Player) => b.overall - a.overall);
-    const awayTeamStarters = awayPlayers.filter((p: Player) => p.startingTeam).sort((a: Player, b: Player) => b.overall - a.overall);
+function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeamScore: number, awayTeamScore: number, isLeague: boolean, isNational: boolean): { homeScorers: [string, string][], awayScorers: [string, string][], homeAssists: [string, string][], awayAssists: [string, string][] } {
+    const startingKey = isNational ? 'startingNational' : 'startingTeam';
+    // Use starters if available, otherwise fall back to full roster sorted by overall
+    const homeTeamStarters = homePlayers.filter((p: Player) => p[startingKey]).sort((a: Player, b: Player) => b.overall - a.overall);
+    const awayTeamStarters = awayPlayers.filter((p: Player) => p[startingKey]).sort((a: Player, b: Player) => b.overall - a.overall);
+    const homeFallback = homeTeamStarters.length > 0 ? homeTeamStarters : [...homePlayers].sort((a, b) => b.overall - a.overall);
+    const awayFallback = awayTeamStarters.length > 0 ? awayTeamStarters : [...awayPlayers].sort((a, b) => b.overall - a.overall);
 
-    const homeTeamStartingForwards = homeTeamStarters.filter((p: Player) => p.position === "Forward").sort((a: Player, b: Player) => b.overall - a.overall);
-    const awayTeamStartingForwards = awayTeamStarters.filter((p: Player) => p.position === "Forward").sort((a: Player, b: Player) => b.overall - a.overall);
-    const homeTeamStartingMidfielders = homeTeamStarters.filter((p: Player) => p.position === "Midfielder").sort((a: Player, b: Player) => b.overall - a.overall);
-    const awayTeamStartingMidfielders = awayTeamStarters.filter((p: Player) => p.position === "Midfielder").sort((a: Player, b: Player) => b.overall - a.overall);
-    const homeTeamStartingDefenders = homeTeamStarters.filter((p: Player) => p.position === "Defender").sort((a: Player, b: Player) => b.overall - a.overall);
-    const awayTeamStartingDefenders = awayTeamStarters.filter((p: Player) => p.position === "Defender").sort((a: Player, b: Player) => b.overall - a.overall);
+    const homeTeamStartingForwards = homeFallback.filter((p: Player) => p.position === "Forward").sort((a: Player, b: Player) => b.overall - a.overall);
+    const awayTeamStartingForwards = awayFallback.filter((p: Player) => p.position === "Forward").sort((a: Player, b: Player) => b.overall - a.overall);
+    const homeTeamStartingMidfielders = homeFallback.filter((p: Player) => p.position === "Midfielder").sort((a: Player, b: Player) => b.overall - a.overall);
+    const awayTeamStartingMidfielders = awayFallback.filter((p: Player) => p.position === "Midfielder").sort((a: Player, b: Player) => b.overall - a.overall);
+    const homeTeamStartingDefenders = homeFallback.filter((p: Player) => p.position === "Defender").sort((a: Player, b: Player) => b.overall - a.overall);
+    const awayTeamStartingDefenders = awayFallback.filter((p: Player) => p.position === "Defender").sort((a: Player, b: Player) => b.overall - a.overall);
 
     const pickFromGroup = (group: Player[], fallbackStarters: Player[]): Player => {
-        if (group.length === 0) return fallbackStarters[0]; // fallback to correct team
+        if (group.length === 0) {
+            if (fallbackStarters.length > 0) return fallbackStarters[0];
+            return homePlayers[0] ?? awayPlayers[0]; // ultimate fallback
+        }
         const rng = Math.random();
         if (rng < 0.5) return group[0];
         if (rng < 0.75) return group[Math.min(1, group.length - 1)];
@@ -354,11 +393,11 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         const rng = Math.random();
         let scorer: Player;
         if (rng < 0.65) {
-            scorer = pickFromGroup(homeTeamStartingForwards, homeTeamStarters);
+            scorer = pickFromGroup(homeTeamStartingForwards, homeFallback);
         } else if (rng < 0.95) {
-            scorer = pickFromGroup(homeTeamStartingMidfielders, homeTeamStarters);
+            scorer = pickFromGroup(homeTeamStartingMidfielders, homeFallback);
         } else {
-            scorer = pickFromGroup(homeTeamStartingDefenders, homeTeamStarters);
+            scorer = pickFromGroup(homeTeamStartingDefenders, homeFallback);
         }
         scorer.totalGoals++;
         if (isLeague) scorer.leagueGoals++;
@@ -378,11 +417,11 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         const rng = Math.random();
         let scorer: Player;
         if (rng < 0.65) {
-            scorer = pickFromGroup(awayTeamStartingForwards, awayTeamStarters);
+            scorer = pickFromGroup(awayTeamStartingForwards, awayFallback);
         } else if (rng < 0.95) {
-            scorer = pickFromGroup(awayTeamStartingMidfielders, awayTeamStarters);
+            scorer = pickFromGroup(awayTeamStartingMidfielders, awayFallback);
         } else {
-            scorer = pickFromGroup(awayTeamStartingDefenders, awayTeamStarters);
+            scorer = pickFromGroup(awayTeamStartingDefenders, awayFallback);
         }
         scorer.totalGoals++;
         if (isLeague) scorer.leagueGoals++;

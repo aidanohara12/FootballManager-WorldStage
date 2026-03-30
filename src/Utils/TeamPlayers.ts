@@ -157,12 +157,14 @@ function buildPlayer(position: string, team: string, overall: number, potential:
         contractAmount: playerValue,
         startingNational: false,
         startingTeam: false,
+        startingNationalWithoutInjury: false,
+        startingTeamWithoutInjury: false,
         newPlayer: false,
         leagueGoals: 0, leagueAssists: 0,
         countryGoals: 0, countryAssists: 0,
         cleanSheets: 0, totalGoals: 0, totalAssists: 0,
         otherTrophiesThisSeason: 0, importantTrophiesThisSeason: 0,
-        awards: 0, trophies: 0
+        awards: 0, trophies: 0, stamina: 100, trainingIntency: "Medium", injured: false, gamesInjured: 0,
     };
 }
 

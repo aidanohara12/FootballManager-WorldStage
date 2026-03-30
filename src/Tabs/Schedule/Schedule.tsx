@@ -20,8 +20,9 @@ import {
 } from '../../Utils/InternationalTournamentSchedule';
 import MiniTable from "../../Components/Table/Table";
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { moveToNextDay, months } from "../../Utils/Calendar";
+import SelectTraining from '../../Components/TeamSelection/SelectTraining/SelectTraining';
 import getCurrentWeek from "../../Components/WeekSchedule/GetCurrentWeek";
 import { simulateGame } from "../../Utils/SimulateGame";
 import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
@@ -134,13 +135,45 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
         // Only show tournaments the manager's country participates in
         if (!tournament.teams.some(t => t.teamName === manager.value.country)) return;
         for (const match of tournament.matches) {
-            if (!weekDates.includes(match.date)) continue;
+            if (!leagueWeekDates.includes(match.date)) continue;
             const key = `${match.homeTeamName}-${match.awayTeamName}-${match.tournamentRound}`;
             if (intSeenKeys.has(key)) continue;
             intSeenKeys.add(key);
             internationalMatchesForWeek.push(match);
         }
     });
+    const [trainingDone, setTrainingDone] = useState<Record<string, boolean>>({});
+
+    // Pick one training day per week: first Mon-Thu without a match
+    const trainingDayDate: string | null = (() => {
+        const trainingDays = ["Monday", "Tuesday", "Wednesday", "Thursday"];
+        const matchDates = new Set<string>();
+        if (managerTeam) {
+            for (const wd of weekDates) {
+                if (managerTeam.Schedule.some(m => m.date === wd)) matchDates.add(wd);
+            }
+        }
+        if (managerNationalTeam) {
+            for (const wd of weekDates) {
+                if (managerNationalTeam.Schedule.some(m => m.date === wd)) matchDates.add(wd);
+            }
+        }
+        for (const day of trainingDays) {
+            const wd = currentWeekDays.weekDays[day];
+            if (wd && !matchDates.has(wd.dateStr)) return wd.dateStr;
+        }
+        return null;
+    })();
+
+    const isTrainingDay = trainingDayDate === date;
+    const needsTraining = isTrainingDay && !trainingDone[date];
+    const trainingPanelRef = useRef<HTMLDivElement>(null);
+    const trainingConfirmRef = useRef<(() => void) | null>(null);
+    useEffect(() => {
+        if (needsTraining && trainingPanelRef.current) {
+            trainingPanelRef.current.scrollTop = 0;
+        }
+    }, [needsTraining]);
     useSignals();
 
     function simulateTournamentMatches(simulated: Set<string>) {
@@ -314,8 +347,9 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                 }
             });
         });
-        // Determine international tournament type based on the calendar year the tournaments play in (year + 1)
-        const intYear = currentYear.value.year + 1;
+        // Determine international tournament type based on the calendar year the tournaments play in
+        // After January, currentYear.value.year is already the correct tournament year (e.g., 2026 for World Cup)
+        const intYear = currentYear.value.year;
         if (isWorldCupYear(intYear)) {
             currentInternationalTournament.value = "World Cup";
         } else if (isMajorTournamentYear(intYear)) {
@@ -362,6 +396,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                         matches={matches}
                         currentYear={currentYear}
                         manager={manager}
+                        trainingDayDate={trainingDayDate}
                     />
                     {todayMatch ? (
                         <div
@@ -390,6 +425,19 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                                 </div>
                             )}
                         </div>
+                    ) : needsTraining ? (
+                        <div ref={trainingPanelRef} className={styles.trainingPanel}>
+                            <SelectTraining
+                                compact
+                                isInternational={isIntMonth}
+                                onComplete={() => setTrainingDone(prev => ({ ...prev, [date]: true }))}
+                                onConfirmReady={(fn) => { trainingConfirmRef.current = fn; }}
+                            />
+                        </div>
+                    ) : isTrainingDay && trainingDone[date] ? (
+                        <div className={styles.game}>
+                            <span className={styles.noGame}>Training Complete — Ready to advance</span>
+                        </div>
                     ) : (
                         <div className={styles.game}>
                             <span className={styles.noGame}>No Games Scheduled</span>
@@ -399,8 +447,17 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                         {todayMatch && !isSimulated[date] && (
                             <button onClick={simulateDay}>Simulate Game</button>
                         )}
+                        {needsTraining && (
+                            <button onClick={() => {
+                                if (trainingConfirmRef.current) {
+                                    trainingConfirmRef.current();
+                                }
+                            }}>
+                                Set Training Plan
+                            </button>
+                        )}
                         <button
-                            disabled={!!todayMatch && !isSimulated[date]}
+                            disabled={(!!todayMatch && !isSimulated[date]) || needsTraining}
                             onClick={() => {
                                 if (!isSimulated[date]) {
                                     simulateDay();
@@ -458,30 +515,43 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                             </div>
                         )}
                         {isIntMonth && !managerGroups && (
-                            <div className={styles.miniTable}>
-                                <h4 className={styles.miniTableTitle}>League Table</h4>
-                                <MiniTable
-                                    leagueTitle="League Table"
-                                    leageTeams={leageTeams}
-                                    managerTeam={managerTeam}
-                                />
+                            <div style={{ textAlign: 'center', padding: '1rem', color: '#888' }}>
+                                <h4 className={styles.miniTableTitle}>International Tournament</h4>
+                                <p>No groups yet — view Tournaments tab for matches</p>
                             </div>
                         )}
                     </div>
                     <div className={styles.matchTable}>
                         {!isIntMonth && (
-                            <h4 className={styles.miniTableTitle}>League Matches</h4>
+                            <>
+                                <h4 className={styles.miniTableTitle}>League Matches</h4>
+                                <LeagueWeekMatches
+                                    allMatches={allMatchesForWeek}
+                                    internationalMatches={[]}
+                                    matchClicked={matchClicked}
+                                    teamsMap={teamsMap}
+                                    playersMap={playersMap}
+                                    managerTeam={managerTeam}
+                                    managerCountry={manager.value.country}
+                                    isIntPeriod={false}
+                                />
+                            </>
                         )}
-                        <LeagueWeekMatches
-                            allMatches={allMatchesForWeek}
-                            internationalMatches={internationalMatchesForWeek}
-                            matchClicked={matchClicked}
-                            teamsMap={teamsMap}
-                            playersMap={playersMap}
-                            managerTeam={managerTeam}
-                            managerCountry={manager.value.country}
-                            isIntPeriod={isIntPeriod}
-                        />
+                        {isIntMonth && (
+                            <>
+                                <h4 className={styles.miniTableTitle}>International Matches</h4>
+                                <LeagueWeekMatches
+                                    allMatches={[]}
+                                    internationalMatches={internationalMatchesForWeek}
+                                    matchClicked={matchClicked}
+                                    teamsMap={teamsMap}
+                                    playersMap={playersMap}
+                                    managerTeam={managerTeam}
+                                    managerCountry={manager.value.country}
+                                    isIntPeriod={true}
+                                />
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

@@ -357,9 +357,9 @@ export function advanceInternationalKnockout(
     const nextRoundName = getKnockoutRoundName(advancingTeams.length);
     tournament.currentRound = nextRoundName;
 
-    // Schedule date: June 1st Saturday + 2 weeks per round
+    // Schedule date: June 1st Saturday + 1 week per round
     const baseDate = findSaturday(year, 5, 1);
-    baseDate.setDate(baseDate.getDate() + (roundNumber + 1) * 14);
+    baseDate.setDate(baseDate.getDate() + (roundNumber + 1) * 7);
     const nextDate = formatDate(baseDate);
 
     // Shuffle for new matchups
