@@ -128,13 +128,13 @@ export function createSchedule(league: League, currentYear: Signal<currentYear>)
     return schedule;
 }
 
-function ballonDorWeight(player: Player): number {
+function ballonDorWeight(player: Player, isTop5: boolean): number {
     let weight = 0;
     weight = player.otherTrophiesThisSeason * 2;
     weight += player.importantTrophiesThisSeason * 5;
-    if(player.position === "Goalkeeper") {
+    if (player.position === "Goalkeeper") {
         weight += player.cleanSheets * 2;
-    } else if(player.position === "Defender") {
+    } else if (player.position === "Defender") {
         weight += player.cleanSheets * 1.5;
         weight += player.totalAssists * 1.5;
         weight += player.totalGoals * 1.5;
@@ -142,6 +142,7 @@ function ballonDorWeight(player: Player): number {
         weight += player.totalAssists * 1.25;
         weight += player.totalGoals * 1.25;
     }
+    if (isTop5) weight *= 1.3;
     return weight;
 }
 
@@ -156,9 +157,12 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
         "Primeira Liga": { bestPlayer: "primeraDivisionBestPlayer", goldenBoot: "primeraDivisionGoldenBoot" },
     };
 
+    const top5Leagues = new Set(["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1"]);
+
     // Collect all players across all leagues
     const allPlayers: Player[] = [];
     const topLeaguePlayers: Player[] = [];
+    const top5PlayerNames = new Set<string>();
 
     leagues.value.forEach(league => {
         const leaguePlayers: Player[] = [];
@@ -172,6 +176,7 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
                     leaguePlayers.push(player);
                     allPlayers.push(player);
                     if (isTopLeague) topLeaguePlayers.push(player);
+                    if (top5Leagues.has(league.name)) top5PlayerNames.add(player.name);
                 }
             });
         });
@@ -191,7 +196,7 @@ export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<
     if (allPlayers.length === 0) return;
 
     // Ballon d'Or: most G/A across top leagues
-    const ballonDor = [...topLeaguePlayers].sort((a, b) => ballonDorWeight(b) - ballonDorWeight(a))[0];
+    const ballonDor = [...topLeaguePlayers].sort((a, b) => ballonDorWeight(b, top5PlayerNames.has(b.name)) - ballonDorWeight(a, top5PlayerNames.has(a.name)))[0];
     playerAwards.value.ballonDorWinners.push(ballonDor.name);
     ballonDor.awards++;
 
@@ -224,7 +229,7 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
         leagueTeams.forEach(team => {
             allLeagueTeams.push(teamsMap.value.get(team) as Team);
         });
-        const winner = allLeagueTeams.sort((a,b) =>  (b.goalsFor-b.goalsAgainst) - (a.goalsFor) - (a.goalsAgainst)).sort((a, b) => b.points - a.points)[0];
+        const winner = allLeagueTeams.sort((a, b) => (b.goalsFor - b.goalsAgainst) - (a.goalsFor) - (a.goalsAgainst)).sort((a, b) => b.points - a.points)[0];
         league.pastChampions.push(winner.name);
         winner.manager.trophiesWon.push({
             trophy: league.name,
@@ -243,7 +248,7 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                 }
             }
         });
-        const sorted = [...allLeagueTeams].sort((a,b) =>  (b.goalsFor-b.goalsAgainst) - (a.goalsFor) - (a.goalsAgainst)).sort((a, b) => b.points - a.points);
+        const sorted = [...allLeagueTeams].sort((a, b) => (b.goalsFor - b.goalsAgainst) - (a.goalsFor) - (a.goalsAgainst)).sort((a, b) => b.points - a.points);
         league.topThree = sorted.slice(0, 3).map((t) => t.name);
         league.topSix = sorted.slice(3, 6).map((t) => t.name);
         league.topNine = sorted.slice(6, 9).map((t) => t.name);
@@ -312,8 +317,8 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
                             // Overall factor: lower overall = higher retirement chance
                             const overallFactor = curPlayer.overall < 70 ? 0.25
                                 : curPlayer.overall < 75 ? 0.15
-                                : curPlayer.overall < 80 ? 0.08
-                                : 0;
+                                    : curPlayer.overall < 80 ? 0.08
+                                        : 0;
                             retireChance = Math.min(ageFactor + overallFactor, 0.95);
                         }
                         // Age 42+ always retire
@@ -466,6 +471,21 @@ export function checkAchievements(manager: Signal<Manager>, currentYear: Signal<
     achievements.value = updated;
 }
 
+function getTrainingPoints(overall: number, potential: number): number {
+    const overallAlowed = potential - overall;
+    if (overallAlowed < 0) return 0;
+    else if (overallAlowed < 3) return 300;
+    else if (overallAlowed < 6) return 250;
+    else if (overallAlowed < 9) return 200;
+    else if (overallAlowed < 12) return 150;
+    else if (overallAlowed < 15) return 100;
+    else if (overallAlowed < 18) return 75;
+    else if (overallAlowed < 21) return 50;
+    else if (overallAlowed < 24) return 30;
+    else return 10;
+}
+
+
 
 export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>): void {
     const isDeveloper = manager.value.type === "Developer";
@@ -574,4 +594,11 @@ export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>):
     if (player.value.potential > 99) player.value.potential = 99;
     if (player.value.overall < 1) player.value.overall = 1;
     if (player.value.potential < 1) player.value.potential = 1;
+
+    //update training points
+    player.value.trainingUpgradePoints = getTrainingPoints(player.value.overall, player.value.potential);
+    if (player.value.trainingUpgradePoints < player.value.trainingPoints) {
+        player.value.trainingPoints = 0;
+        player.value.overall++;
+    }
 }

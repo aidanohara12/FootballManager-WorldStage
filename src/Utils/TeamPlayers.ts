@@ -48,8 +48,12 @@ export function getTeamPlayersClub(team: Team, playersMap: Signal<Map<string, Pl
     return team.players.map((name) => playersMap.value.get(name)!).filter(Boolean);
 }
 
+const countryNames = new Set(Top50Countries.map(c => c.country));
+
 export function setTeamStartingPlayers(teamsMap: Signal<Map<string, Team>>, playersMap: Signal<Map<string, Player>>) {
     teamsMap.value.forEach((team) => {
+        // Skip national teams — they use startingNational, not startingTeam
+        if (countryNames.has(team.name)) return;
         const players = getTeamPlayersClub(team, playersMap);
 
         players.forEach((p) => p.startingTeam = false);
@@ -146,9 +150,23 @@ function weightedOverall(entries: [number, number, number][]): number {
     return randInt(last[1], last[2]);
 }
 
+export function getTrainingPoints(overall: number, potential: number): number {
+    const gap = potential - overall;
+    if (gap <= 0) return 0;
+    if (gap < 3)  return 200;
+    if (gap < 6)  return 160;
+    if (gap < 9)  return 120;
+    if (gap < 12) return 90;
+    if (gap < 15) return 70;
+    if (gap < 18) return 50;
+    if (gap < 21) return 35;
+    return 20;
+}
+
 function buildPlayer(position: string, team: string, overall: number, potential: number, country: string, age: number): Player {
     const calculatedValue = Math.pow((overall - 50) / 10, 3) * 0.35;
     const playerValue = Math.max(0.05, calculatedValue);
+    const trainingsPointMax = getTrainingPoints(overall, potential);
     return {
         name: getRandomPlayerName(country),
         position, overall, potential, country, team, age,
@@ -164,7 +182,8 @@ function buildPlayer(position: string, team: string, overall: number, potential:
         countryGoals: 0, countryAssists: 0,
         cleanSheets: 0, totalGoals: 0, totalAssists: 0,
         otherTrophiesThisSeason: 0, importantTrophiesThisSeason: 0,
-        awards: 0, trophies: 0, stamina: 100, trainingIntency: "Medium", injured: false, gamesInjured: 0,
+        awards: 0, trophies: 0, stamina: 100, trainingIntency: "Medium", trainingPoints: 0, trainingUpgradePoints: trainingsPointMax, injured: false, weeksInjured: 0,
+        
     };
 }
 
@@ -407,13 +426,14 @@ export function createNationalPlayer(position: string, countryName: string, youn
 export function createUniquePlayer(position: string, teamName: string, PlayersMap: Map<string, Player>, teamMap: Signal<Map<string, Team>>, countryName?: string): Player {
     const curTeam = teamMap.value.get(teamName);
     const league = curTeam?.leagueName || curTeam?.league || "";
+    const upOne = curTeam?.manager.isUserManager
 
     let createFn: (pos: string, team: string, country?: string) => Player;
-    if (top5Leagues.includes(league)) {
+    if (top5Leagues.includes(league) || (otherDiv1Leagues.includes(league) && upOne)) {
         createFn = createRandomPlayer;
-    } else if (otherDiv1Leagues.includes(league)) {
+    } else if (otherDiv1Leagues.includes(league) || (secondDivisionLeagues.includes(league) && upOne)) {
         createFn = createOtherDiv1Player;
-    } else if (secondDivisionLeagues.includes(league)) {
+    } else if (secondDivisionLeagues.includes(league) || upOne) {
         createFn = createLowerLevelPlayer;
     } else {
         createFn = createLowestLevelPlayer;
@@ -557,7 +577,11 @@ export function getNationalAllTeamPlayers(nationalTeams: Signal<NationalTeam[]>,
         const defenders = countryPlayers.filter((p) => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 6);
         const goalkeepers = countryPlayers.filter((p) => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 2);
 
-        nt.team.players = [...forwards, ...midfielders, ...defenders, ...goalkeepers].map((p) => p.name);
+        // Top 20: 18 positional picks + 2 best remaining
+        const picked = new Set([...forwards, ...midfielders, ...defenders, ...goalkeepers].map(p => p.name));
+        const remaining = countryPlayers.filter(p => !picked.has(p.name)).sort((a, b) => b.overall - a.overall).slice(0, 2);
+
+        nt.team.players = [...forwards, ...midfielders, ...defenders, ...goalkeepers, ...remaining].map((p) => p.name);
     });
 
     playersMap.value = new Map(playersMap.value);

@@ -407,7 +407,7 @@ export function scheduleFriendlyTournament(
     tournament.groups = undefined;
     tournament.teams.forEach(t => { t.nextRound = true; });
 
-    // Phase 1: Friendly matches in May — alternating Wed/Sat for 5 matchdays
+    // Phase 1: Friendly matches — alternating Wed/Sat from May through early June
     const shuffled = [...teamNames].sort(() => Math.random() - 0.5);
     const friendlyDates = [
         formatDate(findWednesday(year, 4, 1)), // May Week 1 Wed
@@ -415,6 +415,11 @@ export function scheduleFriendlyTournament(
         formatDate(findWednesday(year, 4, 2)), // May Week 2 Wed
         formatDate(findSaturday(year, 4, 2)),  // May Week 2 Sat
         formatDate(findWednesday(year, 4, 3)), // May Week 3 Wed
+        formatDate(findSaturday(year, 4, 3)),  // May Week 3 Sat
+        formatDate(findWednesday(year, 4, 4)), // May Week 4 Wed
+        formatDate(findSaturday(year, 4, 4)),  // May Week 4 Sat
+        formatDate(findWednesday(year, 5, 1)), // June Week 1 Wed
+        formatDate(findSaturday(year, 5, 1)),  // June Week 1 Sat
     ];
 
     // Create random friendly pairings for each matchday

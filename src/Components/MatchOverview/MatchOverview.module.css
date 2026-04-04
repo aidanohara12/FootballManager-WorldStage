@@ -161,3 +161,26 @@
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
+
+/* Injury styles */
+.injuryTitle {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #e74c3c;
+    margin: 0 0 0.2rem 0;
+}
+
+.injuryName {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #e74c3c;
+}
+
+.injuryWeeks {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #c0392b;
+    min-width: 2rem;
+}

@@ -82,7 +82,9 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap
         goalkeeperCount++;
     }
 
-    return nationalTeamPlayers.map((p) => p.name);
+    // Take top 20 players by overall
+    nationalTeamPlayers.sort((a, b) => b.overall - a.overall);
+    return nationalTeamPlayers.slice(0, 20).map((p) => p.name);
 }
 
 export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, Team>>, PlayersMap: Map<string, Player>, NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[], WorldCup: WorldCup) {
@@ -166,7 +168,8 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
                 careerWins: 0,
                 careerLosses: 0,
                 careerDraws: 0,
-                trophiesWon: []
+                trophiesWon: [],
+                isUserManager: false
             },
             color: teamData.color,
             players: [],
@@ -226,7 +229,8 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
                     careerWins: 0,
                     careerLosses: 0,
                     careerDraws: 0,
-                    trophiesWon: []
+                    trophiesWon: [],
+                    isUserManager: false
                 },
                 color: '',
                 players: [],

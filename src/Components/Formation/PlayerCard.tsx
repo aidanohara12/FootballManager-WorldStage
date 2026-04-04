@@ -18,8 +18,16 @@ export function PlayerCard({ player, selectedPlayer }: PlayerCardProps) {
         Goalkeeper: "GK"
     };
 
+    const isInjured = player.injured;
+
     return (
-        <div className={styles.playerCard} onClick={(e) => { e.stopPropagation(); selectedPlayer.value = player; }}>
+        <div
+            className={`${styles.playerCard} ${isInjured ? styles.playerCardInjured : ''}`}
+            onClick={(e) => { e.stopPropagation(); selectedPlayer.value = player; }}
+        >
+            {isInjured && (
+                <div className={styles.injuryBadge}>INJ ({player.weeksInjured}w)</div>
+            )}
             <div className={styles.playerName}>{player.name}: {positionMapping[player.position as "Forward" | "Midfielder" | "Defender" | "Goalkeeper"]}</div>
 
             <div className={styles.playerStats}>

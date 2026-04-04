@@ -7,14 +7,16 @@ import { setTeamStartingPlayers, getTeamPlayersClub } from "../../../Utils/TeamP
 import { useGameContext } from "../../../Context/GameContext.tsx";
 
 interface SelectClubProps {
-    currentPage: Signal<string>;
-    isFirstSeason: Signal<boolean>;
+    currentPage?: Signal<string>;
+    isFirstSeason?: Signal<boolean>;
+    onComplete?: () => void;
+    wasClicked?: boolean;
 }
 const selectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 const committedSalary = signal<number>(0);
 
-export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
+export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked }: SelectClubProps) {
     useSignals();
     const { teamsMap, playersMap, userManager: manager } = useGameContext();
     const positions = [
@@ -65,7 +67,7 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
                 if (p.position === currentPosition.name) {
                     const isStarter = selectedPlayers.value.includes(p.name);
                     p.startingTeam = isStarter;
-                    p.startingTeamWithoutInjury = isStarter;
+                    if (!onComplete) p.startingTeamWithoutInjury = isStarter;
                 }
             });
             teamsMap.value = new Map(teamsMap.value);
@@ -89,7 +91,11 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
                     curPlayer.cleanSheets = 0;
                 });
             });
-            currentPage.value = "MainPage";
+            if (onComplete) {
+                onComplete();
+            } else if (currentPage) {
+                currentPage.value = "MainPage";
+            }
         }
     }
 
@@ -113,7 +119,7 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
         currentPositionIndex.value = 0;
         selectedPlayers.value = [];
         committedSalary.value = 0;
-        if (isFirstSeason.value) {
+        if (isFirstSeason?.value) {
             setTeamStartingPlayers(teamsMap, playersMap);
         }
     }, []);
@@ -129,7 +135,7 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
 
     return (
         <div className={styles.selectNationalContainer}>
-            <h3>Select Your Club Team Starters for this Season!</h3>
+            {!wasClicked && <h3>Select Your Club Team Starters for this Season!</h3>}
             <h4>Select {currentPosition.name}s ({selectedPlayers.value.length}/{currentPosition.max})</h4>
             <div className={styles.budgetBar}>
                 <span>Budget: ${budget.toFixed(1)}M</span>
@@ -160,16 +166,25 @@ export function SelectClub({ currentPage, isFirstSeason }: SelectClubProps) {
                                 .filter((p: any) => p.position === currentPosition.name)
                                 .sort((a: any, b: any) => b.overall - a.overall)
                                 .map((p: any) => (
-                                    <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
+                                    <div
+                                        key={p.name}
+                                        className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''} ${p.injured ? styles.playerItemInjured : ''}`}
+                                        onClick={() => !p.injured && handlePlayerToggle(p.name)}
+                                        style={{ cursor: p.injured ? 'not-allowed' : 'pointer' }}
+                                    >
                                         <input
                                             type="checkbox"
                                             id={p.name}
                                             value={p.name}
                                             checked={selectedPlayers.value.includes(p.name)}
+                                            disabled={p.injured}
                                             readOnly
                                         />
                                         <div className={styles.playerInfo}>
-                                            <div className={styles.playerName}>{p.name}</div>
+                                            <div className={styles.playerName}>
+                                                {p.name}
+                                                {p.injured && <span className={styles.injuredBadge}>INJ ({p.weeksInjured}w)</span>}
+                                            </div>
                                             <div className={styles.playerStats}>
                                                 <span className={styles.statBadge}>
                                                     <h5 className={styles.statLabel}>Age: {p.age}</h5>

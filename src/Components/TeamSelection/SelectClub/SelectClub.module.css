@@ -292,6 +292,29 @@
     }
 }
 
+.playerItemInjured {
+    background: #fff0f0;
+    opacity: 0.6;
+    border-color: #e74c3c !important;
+}
+
+.playerItemInjured:hover {
+    transform: none;
+    border-color: #e74c3c !important;
+    background: #ffe5e5;
+}
+
+.injuredBadge {
+    display: inline-block;
+    background: #e74c3c;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
 .budgetBar {
     display: flex;
     justify-content: center;

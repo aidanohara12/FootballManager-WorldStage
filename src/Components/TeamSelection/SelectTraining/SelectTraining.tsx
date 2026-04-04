@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { signal, type Signal } from "@preact/signals-react";
 import styles from "./SelectTraining.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
-import { setTeamStartingPlayers, getTeamPlayersClub, getTeamPlayers } from "../../../Utils/TeamPlayers.ts";
+import { setTeamStartingPlayers, getTeamPlayersClub, getTeamPlayers, getTrainingPoints } from "../../../Utils/TeamPlayers.ts";
 import { useGameContext } from "../../../Context/GameContext.tsx";
 import type { Player } from "../../../Models/WorldStage.ts";
+import { PlayerAttributesView } from "../../Formation/PlayerAttributesView.tsx";
 
 interface SelectTrainingProps {
     currentPage?: Signal<string>;
@@ -31,50 +32,99 @@ function staminaColor(stamina: number): string {
     const g = Math.round(200);
     return `rgb(${r}, ${g}, 30)`;
 }
-
 export function SelectTraining({ currentPage, isFirstSeason, onComplete, compact, isInternational, onConfirmReady }: SelectTrainingProps) {
     useSignals();
     const { teamsMap, playersMap, userManager: manager, nationalTeams } = useGameContext();
     const [, forceUpdate] = useState(0);
+    const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
     const managerTeam = teamsMap.value.get(manager.value.team);
     const managerNT = nationalTeams.value.find((nt) => nt.country === manager.value.country);
     const trainingTeamPlayers = isInternational && managerNT
-        ? getTeamPlayers(managerNT.team.players, playersMap)
+        ? getTeamPlayers(managerNT.team.players, playersMap).splice(0, 20) //top 20 players
         : managerTeam ? getTeamPlayersClub(managerTeam, playersMap) : [];
     const trainingTeamName = isInternational ? manager.value.country : managerTeam?.name;
     const trainingTeamColor = isInternational ? undefined : managerTeam?.color;
 
     function applyTraining(player: Player) {
+        if (player.injured) return; // injured players cannot train
         const type = player.trainingIntency || "Medium";
+        const canUpgrade = player.potential > player.overall;
         let peopleInjured = [];
         if (type === "High") {
             if (Math.random() < 0.1) {
                 player.injured = true;
-                player.gamesInjured = 3;
-                peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next 3 games.`);
+                const injuryChance = Math.random();
+                let weeks = 0;
+                if (injuryChance < 0.65) {
+                    weeks = Math.floor(Math.random() * 2) + 1;  // 1-2 weeks
+                } else if (injuryChance < 0.90) {
+                    weeks = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
+                } else {
+                    weeks = Math.floor(Math.random() * 6) + 5;  // 5-10 weeks
+                }
+                player.weeksInjured = weeks;
+                peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next ${weeks} week(s).`);
+            }
+            if (canUpgrade) {
+                const trainingGain = 10 + Math.floor(Math.random() * 6);  // 10-15 TP
+                player.trainingPoints += trainingGain;
+                if (player.trainingPoints >= player.trainingUpgradePoints) {
+                    player.trainingPoints = 0;
+                    player.overall++;
+                }
+                player.trainingUpgradePoints = getTrainingPoints(player.overall, player.potential);
             }
             const loss = 8 + Math.floor(Math.random() * 5);
             player.stamina = Math.max(0, player.stamina - loss);
         } else if (type === "Medium") {
             if (Math.random() < 0.02) {
                 player.injured = true;
-                player.gamesInjured = 3;
-                peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next 3 games.`);
+                const injuryChance = Math.random();
+                let weeks = 0;
+                if (injuryChance < 0.65) {
+                    weeks = Math.floor(Math.random() * 2) + 1;  // 1-2 weeks
+                } else if (injuryChance < 0.90) {
+                    weeks = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
+                } else {
+                    weeks = Math.floor(Math.random() * 6) + 5;  // 5-10 weeks
+                }
+                player.weeksInjured = weeks;
+                peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next ${weeks} week(s).`);
             }
-            const loss = 3 + Math.floor(Math.random() * 3);
+            if (canUpgrade) {
+                const trainingGain = 6 + Math.floor(Math.random() * 5);  // 6-10 TP
+                player.trainingPoints += trainingGain;
+                if (player.trainingPoints >= player.trainingUpgradePoints) {
+                    player.trainingPoints = 0;
+                    player.overall++;
+                }
+                player.trainingUpgradePoints = getTrainingPoints(player.overall, player.potential);
+            }
+            const loss = 3 + Math.floor(Math.random() * 4);
             player.stamina = Math.max(0, player.stamina - loss);
         } else if (type === "Low") {
+            if (canUpgrade) {
+                const trainingGain = 1 + Math.floor(Math.random() * 3);  // 1-3 TP
+                player.trainingPoints += trainingGain;
+                if (player.trainingPoints >= player.trainingUpgradePoints) {
+                    player.trainingPoints = 0;
+                    player.overall++;
+                }
+                player.trainingUpgradePoints = getTrainingPoints(player.overall, player.potential);
+            }
             const gain = 5 + Math.floor(Math.random() * 6);
             player.stamina = Math.min(100, player.stamina + gain);
         }
         if (peopleInjured.length > 0) {
-            alert(`${peopleInjured.join(", ")}`);
+            const injuredList = peopleInjured.join(", ");
+            alert(`${injuredList}`);
         }
     }
 
     function setAllToType(trainingType: string) {
         trainingTeamPlayers.forEach(p => {
+            if (p.injured) return;
             p.trainingIntency = trainingType;
         });
         forceUpdate(n => n + 1);
@@ -119,9 +169,10 @@ export function SelectTraining({ currentPage, isFirstSeason, onComplete, compact
             <h4>Select Training Intensity</h4>
             <h3 className={styles.scrollHint}>Scroll To View</h3>
             <div className={styles.trainingRules}>
-                <p><strong>High:</strong> +0.3–0.5 OVR | -8 to -12 stamina | 10% injury</p>
-                <p><strong>Medium:</strong> +0.1–0.2 OVR | -3 to -5 stamina | 2% injury</p>
-                <p><strong>Low:</strong> No OVR gain | +5 to +10 stamina | No injury</p>
+                <p><strong>Training Points</strong> Once Training Points Reach Max -- The Player Gains +1 OVR</p>
+                <p><strong>High:</strong> +10-15 TP | -8 to -12 stamina | 10% injury risk</p>
+                <p><strong>Medium:</strong> +6-10 TP | -3 to -6 stamina | 2% injury risk</p>
+                <p><strong>Low:</strong> +1-3 TP | +5 to +10 stamina | No injury risk</p>
             </div>
 
             {trainingTeamPlayers.length > 0 && (
@@ -138,21 +189,34 @@ export function SelectTraining({ currentPage, isFirstSeason, onComplete, compact
                         {trainingTeamPlayers
                             .sort((a, b) => b.overall - a.overall)
                             .map((p) => (
-                                <div key={p.name} className={styles.playerRow}>
-                                    <select
-                                        className={styles.trainingSelect}
-                                        value={p.trainingIntency || "Medium"}
-                                        onChange={(e) => {
-                                            p.trainingIntency = e.target.value;
-                                            forceUpdate(n => n + 1);
-                                        }}
-                                    >
-                                        <option value="High">High</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="Low">Low</option>
-                                    </select>
-                                    <span className={styles.playerName}>{p.name} -- {p.position}</span>
-                                    <span className={styles.playerOvr}>{p.overall}</span>
+                                <div key={p.name} className={`${styles.playerRow} ${p.injured ? styles.playerRowInjured : ''}`}>
+                                    {p.injured ? (
+                                        <span className={styles.injuredLabel}>INJ ({p.weeksInjured}w)</span>
+                                    ) : (
+                                        <select
+                                            className={styles.trainingSelect}
+                                            value={p.trainingIntency || "Medium"}
+                                            onChange={(e) => {
+                                                p.trainingIntency = e.target.value;
+                                                forceUpdate(n => n + 1);
+                                            }}
+                                        >
+                                            <option value="High">High</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="Low">Low</option>
+                                        </select>
+                                    )}
+                                    <span className={styles.playerName} onClick={() => setSelectedPlayer(p)} style={{ cursor: "pointer" }}>{p.name} -- {p.position}</span>
+                                    <div className={styles.tpBarContainer}>
+                                        <div
+                                            className={styles.tpBarFill}
+                                            style={{
+                                                width: `${Math.min(100, (p.trainingPoints / (p.trainingUpgradePoints || 1)) * 100)}%`,
+                                            }}
+                                        />
+                                        <span className={styles.tpLabel}>{p.trainingPoints}/{p.trainingUpgradePoints} TP</span>
+                                    </div>
+                                    <span className={styles.playerOvr}>{p.overall} OVR</span>
                                     <div className={styles.staminaBarContainer}>
                                         <div
                                             className={styles.staminaBarFill}
@@ -174,6 +238,13 @@ export function SelectTraining({ currentPage, isFirstSeason, onComplete, compact
                             </button>
                         </div>
                     )}
+                </div>
+            )}
+            {selectedPlayer && (
+                <div className={styles.overlay} onClick={() => setSelectedPlayer(null)}>
+                    <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+                        <PlayerAttributesView player={selectedPlayer} onClose={() => setSelectedPlayer(null)} />
+                    </div>
                 </div>
             )}
         </div>

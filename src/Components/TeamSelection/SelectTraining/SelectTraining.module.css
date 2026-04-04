@@ -158,6 +158,28 @@
     background: #f0f0f0;
 }
 
+.playerRowInjured {
+    background: #fff0f0;
+    opacity: 0.7;
+    border: 1px solid #e74c3c;
+}
+
+.playerRowInjured:hover {
+    background: #ffe5e5;
+}
+
+.injuredLabel {
+    width: 70px;
+    padding: 0.25rem 0.3rem;
+    background: #e74c3c;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: center;
+    flex-shrink: 0;
+}
+
 .trainingSelect {
     width: 70px;
     padding: 0.25rem 0.3rem;
@@ -180,13 +202,50 @@
     min-width: 0;
 }
 
+/* Training points progress bar */
+.tpBarContainer {
+    position: relative;
+    width: 100px;
+    height: 16px;
+    background: #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.tpBarFill {
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #5b9bd5, #2e75b6);
+    transition: width 0.3s ease;
+}
+
+.tpLabel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #333;
+    pointer-events: none;
+}
+
 .playerOvr {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
     color: #f39c12;
-    width: 28px;
+    white-space: nowrap;
     text-align: center;
     flex-shrink: 0;
+    padding: 0.15rem 0.4rem;
+    background: #fff8e1;
+    border-radius: 6px;
+    border: 1px solid #f39c12;
 }
 
 /* Stamina bar */
@@ -251,4 +310,26 @@
 
 .nextButton:active {
     transform: translateY(0);
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
 }

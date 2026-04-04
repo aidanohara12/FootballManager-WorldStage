@@ -46,7 +46,8 @@ export function CreateManager() {
             careerWins: 0,
             careerLosses: 0,
             careerDraws: 0,
-            trophiesWon: []
+            trophiesWon: [],
+            isUserManager: true
         };
 
         // Update the club team's manager directly in teamsMap

@@ -7,15 +7,17 @@ import { setNationalTeamStartingPlayers, getTeamPlayers } from "../../../Utils/T
 import { useGameContext } from "../../../Context/GameContext.tsx";
 
 interface SelectNationalProps {
-    currentPage: Signal<string>;
-    isFirstSeason: Signal<boolean>;
+    currentPage?: Signal<string>;
+    isFirstSeason?: Signal<boolean>;
+    onComplete?: () => void;
+    wasClicked?: boolean;
 }
 
 const selectedPlayers = signal<string[]>([]);
 const allSelectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 
-export function SelectNational({ currentPage, isFirstSeason }: SelectNationalProps) {
+export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClicked }: SelectNationalProps) {
     useSignals();
     const { nationalTeams, playersMap, userManager: manager } = useGameContext();
 
@@ -58,11 +60,15 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
                 players.forEach((p) => {
                     const isStarter = updatedAllSelected.includes(p.name);
                     p.startingNational = isStarter;
-                    p.startingNationalWithoutInjury = isStarter;
+                    if (!onComplete) p.startingNationalWithoutInjury = isStarter;
                 });
             }
             nationalTeams.value = [...nationalTeams.value];
-            currentPage.value = "SelectClub";
+            if (onComplete) {
+                onComplete();
+            } else if (currentPage) {
+                currentPage.value = "SelectClub";
+            }
         }
     }
 
@@ -77,7 +83,7 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
         currentPositionIndex.value = 0;
         selectedPlayers.value = [];
         allSelectedPlayers.value = [];
-        if (isFirstSeason.value) {
+        if (isFirstSeason?.value) {
             setNationalTeamStartingPlayers(nationalTeams, playersMap);
         }
     }, []);
@@ -94,7 +100,7 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
 
     return (
         <div className={styles.selectNationalContainer}>
-            <h3>Select Your National Team Starters for this Season!</h3>
+            {!wasClicked && <h3>Select Your National Team Starters for this Season!</h3>}
             <h4>Select {currentPosition.name}s ({selectedPlayers.value.length}/{currentPosition.max})</h4>
 
             {/* Progress indicator */}
@@ -120,16 +126,25 @@ export function SelectNational({ currentPage, isFirstSeason }: SelectNationalPro
                                 .filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
                                 .map((p) => (
-                                    <div key={p.name} className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''}`} onClick={() => handlePlayerToggle(p.name)} style={{ cursor: 'pointer' }}>
+                                    <div
+                                        key={p.name}
+                                        className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''} ${p.injured ? styles.playerItemInjured : ''}`}
+                                        onClick={() => !p.injured && handlePlayerToggle(p.name)}
+                                        style={{ cursor: p.injured ? 'not-allowed' : 'pointer' }}
+                                    >
                                         <input
                                             type="checkbox"
                                             id={p.name}
                                             value={p.name}
                                             checked={selectedPlayers.value.includes(p.name)}
+                                            disabled={p.injured}
                                             readOnly
                                         />
                                         <div className={styles.playerInfo}>
-                                            <div className={styles.playerName}>{p.name}</div>
+                                            <div className={styles.playerName}>
+                                                {p.name}
+                                                {p.injured && <span className={styles.injuredBadge}>INJ ({p.weeksInjured}w)</span>}
+                                            </div>
                                             <div className={styles.playerStats}>
                                                 <span className={styles.statBadge}>
                                                     <h5 className={styles.statLabel}>Age: {p.age}</h5>

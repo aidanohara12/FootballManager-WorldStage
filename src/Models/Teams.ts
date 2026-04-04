@@ -179,11 +179,7 @@ export const Championship = [
     { name: "Preston North End", league: "Championship", color: "#FFFFFF", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Queens Park Rangers", league: "Championship", color: "#005CAB", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Cardiff City", league: "Championship", color: "#0070B5", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Plymouth Argyle", league: "Championship", color: "#00573F", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Derby County", league: "Championship", color: "#000000", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Sheffield Wednesday", league: "Championship", color: "#0057A0", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Portsmouth", league: "Championship", color: "#001489", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Oxford United", league: "Championship", color: "#F5D200", tournament: "FA Cup", tournament2: "Carabao Cup" }
+    { name: "Plymouth Argyle", league: "Championship", color: "#00573F", tournament: "FA Cup", tournament2: "Carabao Cup" }
 ];
 
 // La Liga 2 (Spain) - 2025/26 Season
@@ -195,8 +191,6 @@ export const LaLiga2 = [
     { name: "Córdoba", league: "La Liga 2", color: "#00A650", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
     { name: "Deportivo La Coruña", league: "La Liga 2", color: "#0055A5", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
     { name: "Eibar", league: "La Liga 2", color: "#2E3192", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
-    { name: "Eldense", league: "La Liga 2", color: "#0055A5", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
-    { name: "Ferrol", league: "La Liga 2", color: "#003DA5", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
     { name: "Granada", league: "La Liga 2", color: "#CC0000", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
     { name: "Huesca", league: "La Liga 2", color: "#2D2E83", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
     { name: "Leganés", league: "La Liga 2", color: "#003DA5", tournament: "Copa del Rey", tournament2: "Supercopa de España" },
@@ -311,10 +305,10 @@ export const SegundaLiga = [
     { name: "Oliveirense", league: "Segunda Liga", color: "#FF6600", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
     { name: "Penafiel", league: "Segunda Liga", color: "#006A3D", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
     { name: "Portimonense", league: "Segunda Liga", color: "#000000", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
-    { name: "Tondela", league: "Segunda Liga", color: "#006A3D", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
+    { name: "Vitória de Setúbal", league: "Segunda Liga", color: "#006A3D", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
     { name: "Vizela", league: "Segunda Liga", color: "#003DA5", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
     { name: "Académico Viseu", league: "Segunda Liga", color: "#003DA5", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
-    { name: "Alverca", league: "Segunda Liga", color: "#E2001A", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
+    { name: "Farense", league: "Segunda Liga", color: "#000000", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
     { name: "Marítimo", league: "Segunda Liga", color: "#006A3D", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
     { name: "Paços de Ferreira", league: "Segunda Liga", color: "#FFD700", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
     { name: "Feirense", league: "Segunda Liga", color: "#003DA5", tournament: "Taça de Portugal", tournament2: "Taça da Liga" },
@@ -332,21 +326,17 @@ export const LeagueOne = [
     { name: "Bolton Wanderers", league: "League One", color: "#003399", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Bradford City", league: "League One", color: "#7A263A", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Burton Albion", league: "League One", color: "#FFD700", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Cardiff City", league: "League One", color: "#0070B5", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Doncaster Rovers", league: "League One", color: "#E2001A", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Exeter City", league: "League One", color: "#E2001A", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Huddersfield Town", league: "League One", color: "#0E63AD", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Leyton Orient", league: "League One", color: "#E2001A", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Lincoln City", league: "League One", color: "#E2001A", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Luton Town", league: "League One", color: "#F78F1E", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Mansfield Town", league: "League One", color: "#FFD700", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Northampton Town", league: "League One", color: "#7A263A", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Peterborough United", league: "League One", color: "#003DA5", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Plymouth Argyle", league: "League One", color: "#00573F", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Port Vale", league: "League One", color: "#000000", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Reading", league: "League One", color: "#004494", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Rotherham United", league: "League One", color: "#E2001A", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "Stevenage", league: "League One", color: "#E2001A", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Stockport County", league: "League One", color: "#003DA5", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Wigan Athletic", league: "League One", color: "#003DA5", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Wycombe Wanderers", league: "League One", color: "#003DA5", tournament: "FA Cup", tournament2: "Carabao Cup" }
@@ -392,13 +382,11 @@ export const SerieC = [
     { name: "Perugia", league: "Serie C", color: "#E2001A", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
     { name: "Potenza", league: "Serie C", color: "#8B0000", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
     { name: "Pro Vercelli", league: "Serie C", color: "#FFFFFF", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
-    { name: "Salernitana", league: "Serie C", color: "#8B1212", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
     { name: "Ternana", league: "Serie C", color: "#E2001A", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
     { name: "Torres", league: "Serie C", color: "#E2001A", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
     { name: "Trapani", league: "Serie C", color: "#8B1212", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
     { name: "Triestina", league: "Serie C", color: "#E2001A", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
     { name: "Vicenza", league: "Serie C", color: "#E2001A", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" },
-    { name: "Cosenza", league: "Serie C", color: "#E2001A", tournament: "Coppa Italia", tournament2: "Supercoppa Italiana" }
 ];
 
 // 3. Liga (Germany) - 2025/26 Season
@@ -425,10 +413,8 @@ export const Liga3 = [
 
 // Championnat National (France) - 2025/26 Season
 export const National = [
-    { name: "Caen", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "Châteauroux", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "Concarneau", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
-    { name: "Dijon", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "FC Rouen", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "Fleury 91", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "Le Puy Foot", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
@@ -436,12 +422,15 @@ export const National = [
     { name: "Paris 13 Atletico", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "Quevilly-Rouen", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "SC Aubagne", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
-    { name: "Sochaux", league: "National", color: "#FFD700", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "Stade Briochin", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
-    { name: "Valenciennes", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "FC Versailles", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
     { name: "Villefranche", league: "National", color: "#000000", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
-    { name: "Bourg-en-Bresse", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" }
+    { name: "Bourg-en-Bresse", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
+    { name: "Nancy", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
+    { name: "Sedan", league: "National", color: "#006A3D", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
+    { name: "Tours FC", league: "National", color: "#003DA5", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
+    { name: "US Avranches", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" },
+    { name: "Boulogne", league: "National", color: "#E2001A", tournament: "Coupe de France", tournament2: "Coupe de la Ligue" }
 ];
 
 // Tweede Divisie (Netherlands) - 2025/26 Season

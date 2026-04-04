@@ -3,6 +3,8 @@ import type { Player, PlayerAwards, Team } from "../Models/WorldStage";
 import { finishSeason } from "./CreateSchedule";
 import type { GameContextType } from "../Context/GameContext";
 import { addTeamsToTournament } from './TournamentSchedule';
+import { getTrainingPoints } from './TeamPlayers';
+import { Top50Countries } from '../Models/Countries';
 
 export const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const daysOfTheMonth: Record<string, number> = {
@@ -55,6 +57,57 @@ export function getNextDay(currentDay: string): string {
     }
 }
 
+const countryNames = new Set(Top50Countries.map(c => c.country));
+
+function applyAutoTraining(player: Player, type: "Medium" | "Low") {
+    if (player.injured) return;
+    const canUpgrade = player.potential > player.overall;
+    if (type === "Medium") {
+        if (Math.random() < 0.02) {
+            player.injured = true;
+            player.weeksInjured = 1;
+        }
+        if (canUpgrade) {
+            const trainingGain = 6 + Math.floor(Math.random() * 5);  // 6-10 TP
+            player.trainingPoints += trainingGain;
+            if (player.trainingPoints >= player.trainingUpgradePoints) {
+                player.trainingPoints = 0;
+                player.overall++;
+            }
+            player.trainingUpgradePoints = getTrainingPoints(player.overall, player.potential);
+        }
+        const loss = 3 + Math.floor(Math.random() * 4);
+        player.stamina = Math.max(0, player.stamina - loss);
+    } else {
+        if (canUpgrade) {
+            const trainingGain = 1 + Math.floor(Math.random() * 3);  // 1-3 TP
+            player.trainingPoints += trainingGain;
+            if (player.trainingPoints >= player.trainingUpgradePoints) {
+                player.trainingPoints = 0;
+                player.overall++;
+            }
+            player.trainingUpgradePoints = getTrainingPoints(player.overall, player.potential);
+        }
+        const gain = 5 + Math.floor(Math.random() * 6);
+        player.stamina = Math.min(100, player.stamina + gain);
+    }
+}
+
+function trainNonManagerTeams(ctx: GameContextType) {
+    const { teamsMap, playersMap, userManager: manager, currentYear } = ctx;
+    const week = currentYear.value.leagueWeek;
+    const type: "Medium" | "Low" = week % 2 === 0 ? "Medium" : "Low";
+
+    teamsMap.value.forEach((team) => {
+        // Skip the manager's team (they train manually) and national teams
+        if (team.name === manager.value.team || countryNames.has(team.name)) return;
+        for (const playerName of team.players) {
+            const player = playersMap.value.get(playerName);
+            if (player) applyAutoTraining(player, type);
+        }
+    });
+}
+
 export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, boolean>, isFirstSeason: Signal<boolean>, currentPage: Signal<string>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>) {
     const { currentYear, leagues, teamsMap, playersMap, userManager: manager, managerHistory, achievements, nationalTeams, tournaments } = ctx;
     const cur = currentYear.value;
@@ -63,6 +116,72 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
     let nextDay = cur.currentDay + 1;
     let nextMonth = cur.currentMonth;
     let nextYear = cur.year;
+    // Auto-train all non-manager club teams on Mondays
+    if (cur.currentDayOfWeek === "Monday") {
+        trainNonManagerTeams(ctx);
+    }
+
+    // Decrement injury weeks every Sunday and alert manager about recoveries
+    if (cur.currentDayOfWeek === "Sunday") {
+        const recovered: Player[] = [];
+        playersMap.value.forEach((player) => {
+            if (player.injured && player.weeksInjured > 0) {
+                player.weeksInjured--;
+                if (player.weeksInjured <= 0) {
+                    player.injured = false;
+                    player.weeksInjured = 0;
+                    player.trainingIntency = "Low";
+                    recovered.push(player);
+                }
+            }
+        });
+
+        // For non-manager teams: auto-restore recovered players if they're better than current starter
+        const managerTeamName = manager.value.team;
+        const managerCountry = manager.value.country;
+        for (const player of recovered) {
+            // Club team auto-restore
+            if (player.team && player.team !== managerTeamName && player.team !== "Free Agent") {
+                const team = teamsMap.value.get(player.team);
+                if (team && !countryNames.has(team.name)) {
+                    const teamPlayers = team.players.map(n => playersMap.value.get(n)).filter(Boolean) as Player[];
+                    const samePosCurrent = teamPlayers.find(p => p.startingTeam && p.position === player.position && p.overall < player.overall);
+                    if (samePosCurrent) {
+                        samePosCurrent.startingTeam = false;
+                        player.startingTeam = true;
+                    }
+                }
+            }
+            // National team auto-restore
+            if (player.country !== managerCountry) {
+                const nt = nationalTeams.value.find(n => n.country === player.country);
+                if (nt) {
+                    const ntPlayers = nt.team.players.map(n => playersMap.value.get(n)).filter(Boolean) as Player[];
+                    const samePosCurrent = ntPlayers.find(p => p.startingNational && p.position === player.position && p.overall < player.overall);
+                    if (samePosCurrent) {
+                        samePosCurrent.startingNational = false;
+                        player.startingNational = true;
+                    }
+                }
+            }
+        }
+
+        // Alert manager about recovered players who were originally starters
+        // Only show club alerts during club season, international alerts during international period
+        const isInternationalPeriod = ["May", "June", "July"].includes(cur.currentMonth);
+        const managerRecovered = recovered.filter(p => {
+            if (isInternationalPeriod) {
+                return p.country === managerCountry && p.startingNationalWithoutInjury;
+            } else {
+                return p.team === managerTeamName && p.startingTeamWithoutInjury;
+            }
+        });
+        if (managerRecovered.length > 0) {
+            const names = managerRecovered.map(p => `${p.name} (${p.overall} OVR)`).join(", ");
+            alert(`${names} recovered from injury and can be put back in the starting lineup!`);
+        }
+    }
+
     const managerTeam = teamsMap.value.get(manager.value.team);
     const managerLeague = leagues.value.find(league => league.name === managerTeam?.leagueName);
     if (currentYear.value.currentDayOfWeek === "Monday") {

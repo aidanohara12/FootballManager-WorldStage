@@ -63,6 +63,9 @@ export function MainPage() {
             player.cleanSheets = 0;
             player.otherTrophiesThisSeason = 0;
             player.importantTrophiesThisSeason = 0;
+            player.injured = false;
+            player.weeksInjured = 0;
+            player.stamina = 100;
         });
         // Clear all team schedules and reset stats before creating new ones (ensures promoted/relegated teams start clean)
         teamsMap.value.forEach((team) => {

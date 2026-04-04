@@ -51,6 +51,9 @@ export function MatchOverview(props: MatchOverviewProps) {
                 <div className={styles.detailColumn}>
                     <ScorerList title="Scorers" entries={m.homeScorers} align="right" playersMap={playersMap} />
                     <AssistList title="Assists" entries={homeAssisters} align="right" playersMap={playersMap} />
+                    {m.homeInjuries && m.homeInjuries.length > 0 && (
+                        <InjuryList title="Injuries" entries={m.homeInjuries} align="right" playersMap={playersMap} />
+                    )}
                 </div>
 
                 <div className={styles.detailDivider}></div>
@@ -58,6 +61,9 @@ export function MatchOverview(props: MatchOverviewProps) {
                 <div className={styles.detailColumn}>
                     <ScorerList title="Scorers" entries={m.awayScorers} align="left" playersMap={playersMap} />
                     <AssistList title="Assists" entries={awayAssisters} align="left" playersMap={playersMap} />
+                    {m.awayInjuries && m.awayInjuries.length > 0 && (
+                        <InjuryList title="Injuries" entries={m.awayInjuries} align="left" playersMap={playersMap} />
+                    )}
                 </div>
             </div>
         </div>
@@ -117,6 +123,33 @@ function AssistList({ title, entries, align, playersMap }: { title: string, entr
                     </div>)
             }) : (
                 <div className={`${styles.noStats} ${align === "right" ? styles.alignRight : styles.alignLeft}`}>-</div>)}
+        </div>
+    );
+}
+
+function InjuryList({ title, entries, align, playersMap }: { title: string, entries: [string, number][], align: "left" | "right", playersMap: Map<string, Player> }) {
+    return (
+        <div className={styles.statSection}>
+            <h4 className={`${styles.injuryTitle} ${align === "right" ? styles.alignRight : styles.alignLeft}`}>{title}</h4>
+            {entries.map(([name, weeks]) => {
+                const player = playersMap.get(name);
+                const posLabel = player ? ` (${positionShort[player.position]})` : '';
+                return (
+                    <div key={name} className={`${styles.statRow} ${align === "right" ? styles.rowRight : styles.rowLeft}`}>
+                        {align === "right" ? (
+                            <>
+                                <span className={styles.injuryName}>{name}{posLabel}</span>
+                                <span className={styles.injuryWeeks}>{weeks}w</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className={styles.injuryWeeks}>{weeks}w</span>
+                                <span className={styles.injuryName}>{name}{posLabel}</span>
+                            </>
+                        )}
+                    </div>
+                );
+            })}
         </div>
     );
 }

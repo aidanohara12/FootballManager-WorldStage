@@ -40,18 +40,27 @@ function subInjuredStarters(team: Team, playersMap: Map<string, Player>, isNatio
     }
 }
 
-// After a game, decrement gamesInjured for all players on both teams and recover if 0
-function updateInjuryStatus(team: Team, playersMap: Map<string, Player>): void {
-    const players = getPlayers(team, playersMap);
-    for (const player of players) {
-        if (player.injured && player.gamesInjured > 0) {
-            player.gamesInjured--;
-            if (player.gamesInjured <= 0) {
-                player.injured = false;
-                player.gamesInjured = 0;
+
+// ~1% chance per starter to get injured during a match
+function applyMatchInjuries(players: Player[], isNational: boolean): [string, number][] {
+    const startingKey = isNational ? 'startingNational' : 'startingTeam';
+    const starters = players.filter(p => p[startingKey] && !p.injured);
+    const injuries: [string, number][] = [];
+    for (const player of starters) {
+        if (Math.random() < 0.01) {
+            player.injured = true;
+            const roll = Math.random();
+            if (roll < 0.65) {
+                player.weeksInjured = Math.floor(Math.random() * 2) + 1;  // 1-2 weeks
+            } else if (roll < 0.90) {
+                player.weeksInjured = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
+            } else {
+                player.weeksInjured = Math.floor(Math.random() * 6) + 5;  // 5-10 weeks
             }
+            injuries.push([player.name, player.weeksInjured]);
         }
     }
+    return injuries;
 }
 
 export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, playersMap: Map<string, Player>, manager: Signal<Manager>): void {
@@ -303,6 +312,10 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         }
     }
 
+    // Random match injuries for starters on both teams
+    const homeInjuries = applyMatchInjuries(homePlayers, isNational);
+    const awayInjuries = applyMatchInjuries(awayPlayers, isNational);
+
     // Mutate the original match object in-place so Schedule arrays stay in sync
     const m = match.value;
     m.homeScore = homeTeamScore;
@@ -311,10 +324,8 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
     m.awayScorers = scorers.awayScorers;
     m.homeAssists = scorers.homeAssists;
     m.awayAssists = scorers.awayAssists;
-
-    // Decrement injury counters for both teams after the game
-    updateInjuryStatus(homeTeam, playersMap);
-    updateInjuryStatus(awayTeam, playersMap);
+    m.homeInjuries = homeInjuries;
+    m.awayInjuries = awayInjuries;
 
     // Also trigger signal update for any signal subscribers
     match.value = { ...m };
@@ -364,7 +375,7 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         return group[Math.min(2, group.length - 1)];
     };
 
-    const getAssister = (scorer: Player, forwards: Player[], midfielders: Player[], defenders: Player[]): Player => {
+    const getAssister = (scorer: Player, forwards: Player[], midfielders: Player[], defenders: Player[], fullRoster: Player[]): Player => {
         const assistRng = Math.random();
         let assistPool: Player[];
         if (assistRng < 0.5) {
@@ -377,7 +388,12 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         const eligible = assistPool.filter((p: Player) => p.name !== scorer.name);
         if (eligible.length === 0) {
             const allEligible = [...forwards, ...midfielders, ...defenders].filter((p: Player) => p.name !== scorer.name);
-            if (allEligible.length === 0) return scorer;
+            if (allEligible.length === 0) {
+                // Fall back to any outfield player on the full roster
+                const rosterEligible = fullRoster.filter((p: Player) => p.name !== scorer.name && p.position !== "Goalkeeper");
+                if (rosterEligible.length === 0) return scorer;
+                return rosterEligible[Math.floor(Math.random() * rosterEligible.length)];
+            }
             return allEligible[Math.floor(Math.random() * allEligible.length)];
         }
         return eligible[Math.floor(Math.random() * eligible.length)];
@@ -403,7 +419,7 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         if (isLeague) scorer.leagueGoals++;
         else scorer.countryGoals++;
 
-        const assister = getAssister(scorer, homeTeamStartingForwards, homeTeamStartingMidfielders, homeTeamStartingDefenders);
+        const assister = getAssister(scorer, homeTeamStartingForwards, homeTeamStartingMidfielders, homeTeamStartingDefenders, homePlayers);
         assister.totalAssists++;
         if (isLeague) assister.leagueAssists++;
         else assister.countryAssists++;
@@ -427,7 +443,7 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         if (isLeague) scorer.leagueGoals++;
         else scorer.countryGoals++;
 
-        const assister = getAssister(scorer, awayTeamStartingForwards, awayTeamStartingMidfielders, awayTeamStartingDefenders);
+        const assister = getAssister(scorer, awayTeamStartingForwards, awayTeamStartingMidfielders, awayTeamStartingDefenders, awayPlayers);
         assister.totalAssists++;
         if (isLeague) assister.leagueAssists++;
         else assister.countryAssists++;

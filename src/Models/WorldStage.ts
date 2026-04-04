@@ -29,9 +29,11 @@ export interface Player {
     position: string;
     overall: number;
     stamina: number;
+    trainingPoints: number;
+    trainingUpgradePoints: number;
     trainingIntency: string;
     injured: boolean;
-    gamesInjured: number;
+    weeksInjured: number;
     country: string;
     startingNational?: boolean;
     startingTeam?: boolean;
@@ -70,6 +72,7 @@ export interface Manager {
     careerLosses: number;
     careerDraws: number;
     trophiesWon: trophy[];
+    isUserManager: boolean;
 }
 
 export interface Team {
@@ -114,6 +117,8 @@ export interface Match {
     penaltyWin?: boolean;
     leg?: number;
     played?: boolean;
+    homeInjuries?: [string, number][]; // [playerName, weeksInjured]
+    awayInjuries?: [string, number][];
 }
 
 export interface PlayerAwards {

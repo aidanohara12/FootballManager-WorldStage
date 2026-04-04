@@ -28,7 +28,7 @@ import { simulateGame } from "../../Utils/SimulateGame";
 import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
 import LeagueWeekMatches from '../../Components/LeagueWeekMatches/LeagueWeekMatches';
 import { useGameContext } from '../../Context/GameContext';
-import { flagName } from '../../Models/Countries';
+import { flagName, Top50Countries } from '../../Models/Countries';
 interface ScheduleProps {
     isFirstSeason: Signal<boolean>;
     currentPage: Signal<string>;
@@ -330,6 +330,21 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
     const currentDateObj = new Date(currentYear.value.year, months.indexOf(currentYear.value.currentMonth), currentYear.value.currentDay);
     const isIntPeriod = intStartTime !== Infinity && currentDateObj.getTime() >= intStartTime;
 
+    function hasInjuredStarters(): boolean {
+        if (!todayMatch) return false;
+        const match = todayMatch.value;
+        const isNational = Top50Countries.some((c: { country: string }) => c.country === match.homeTeamName);
+        const team = isNational ? managerNationalTeam : managerTeam;
+        if (!team) return false;
+        for (const playerName of team.players) {
+            const player = playersMap.value.get(playerName);
+            if (!player) continue;
+            const isStarter = isNational ? player.startingNational : player.startingTeam;
+            if (isStarter && player.injured) return true;
+        }
+        return false;
+    }
+
     function simulateDay() {
         const simulated = new Set<string>();
         leagues.value.forEach((league) => {
@@ -445,7 +460,13 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                     )}
                     <div className={styles.simButtom}>
                         {todayMatch && !isSimulated[date] && (
-                            <button onClick={simulateDay}>Simulate Game</button>
+                            <button onClick={() => {
+                                if (hasInjuredStarters()) {
+                                    alert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
+                                    return;
+                                }
+                                simulateDay();
+                            }}>Simulate Game</button>
                         )}
                         {needsTraining && (
                             <button onClick={() => {
@@ -460,6 +481,10 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                             disabled={(!!todayMatch && !isSimulated[date]) || needsTraining}
                             onClick={() => {
                                 if (!isSimulated[date]) {
+                                    if (hasInjuredStarters()) {
+                                        alert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
+                                        return;
+                                    }
                                     simulateDay();
                                 }
                                 moveToNextDay(ctx, isSimulated, isFirstSeason, currentPage, retiredPlayers, playerAwards);
