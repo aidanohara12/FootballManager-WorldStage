@@ -4,7 +4,7 @@
     min-height: 72vh;
     background:
         linear-gradient(180deg, #2d5016 0%, #1a3d0a 100%);
-    padding: 2rem;
+    padding: 1rem;
     position: relative;
     gap: 2rem;
 }

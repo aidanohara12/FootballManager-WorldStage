@@ -22,10 +22,10 @@ export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClic
     const { nationalTeams, playersMap, userManager: manager } = useGameContext();
 
     const positions = [
-        { name: "Forward", max: 3 },
-        { name: "Midfielder", max: 3 },
-        { name: "Defender", max: 4 },
-        { name: "Goalkeeper", max: 1 }
+        { name: "Forward", max: 5 },
+        { name: "Midfielder", max: 5 },
+        { name: "Defender", max: 6 },
+        { name: "Goalkeeper", max: 2 }
     ];
 
     const currentPosition = positions[currentPositionIndex.value];

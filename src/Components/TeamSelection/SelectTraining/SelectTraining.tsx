@@ -19,6 +19,20 @@ const selectedPlayers = signal<string[]>([]);
 const currentPositionIndex = signal<number>(0);
 const committedSalary = signal<number>(0);
 
+const playersNeededByPosition: Record<string, number> = {
+    "GK": 1,
+    "DEF": 4,
+    "MID": 4,
+    "FWD": 3,
+};
+
+const positionMapping: Record<string, string> = {
+    "Goalkeeper": "GK",
+    "Defender": "DEF",
+    "Midfielder": "MID",
+    "Forward": "FWD",
+};
+
 function staminaColor(stamina: number): string {
     const clamped = Math.max(0, Math.min(100, stamina));
     if (clamped <= 50) {
@@ -47,24 +61,29 @@ export function SelectTraining({ currentPage, isFirstSeason, onComplete, compact
     const trainingTeamColor = isInternational ? undefined : managerTeam?.color;
 
     function applyTraining(player: Player) {
+        const playerPositionInjuredAmount = playersNeededByPosition[positionMapping[player.position]];
+        const playerTeam = teamsMap.value.get(player.team);
         if (player.injured) return; // injured players cannot train
         const type = player.trainingIntency || "Medium";
         const canUpgrade = player.potential > player.overall;
         let peopleInjured = [];
         if (type === "High") {
             if (Math.random() < 0.1) {
-                player.injured = true;
-                const injuryChance = Math.random();
-                let weeks = 0;
-                if (injuryChance < 0.65) {
-                    weeks = Math.floor(Math.random() * 2) + 1;  // 1-2 weeks
-                } else if (injuryChance < 0.90) {
-                    weeks = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
-                } else {
-                    weeks = Math.floor(Math.random() * 6) + 5;  // 5-10 weeks
+                const healthyOfPosition = playerTeam?.players.map(id => playersMap.value.get(id)).filter(p => p && !p.injured && p.position === player.position && p.name !== player.name).length ?? 0;
+                if (healthyOfPosition >= playerPositionInjuredAmount) {
+                    player.injured = true;
+                    const injuryChance = Math.random();
+                    let weeks = 0;
+                    if (injuryChance < 0.65) {
+                        weeks = Math.floor(Math.random() * 2) + 2;  // 2-3 weeks
+                    } else if (injuryChance < 0.90) {
+                        weeks = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
+                    } else {
+                        weeks = Math.floor(Math.random() * 6) + 5;  // 5-10 weeks
+                    }
+                    player.weeksInjured = weeks;
+                    peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next ${weeks} week(s).`);
                 }
-                player.weeksInjured = weeks;
-                peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next ${weeks} week(s).`);
             }
             if (canUpgrade) {
                 const trainingGain = 10 + Math.floor(Math.random() * 6);  // 10-15 TP
@@ -79,18 +98,21 @@ export function SelectTraining({ currentPage, isFirstSeason, onComplete, compact
             player.stamina = Math.max(0, player.stamina - loss);
         } else if (type === "Medium") {
             if (Math.random() < 0.02) {
-                player.injured = true;
-                const injuryChance = Math.random();
-                let weeks = 0;
-                if (injuryChance < 0.65) {
-                    weeks = Math.floor(Math.random() * 2) + 1;  // 1-2 weeks
-                } else if (injuryChance < 0.90) {
-                    weeks = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
-                } else {
-                    weeks = Math.floor(Math.random() * 6) + 5;  // 5-10 weeks
+                const healthyOfPosition = playerTeam?.players.map(id => playersMap.value.get(id)).filter(p => p && !p.injured && p.position === player.position && p.name !== player.name).length ?? 0;
+                if (healthyOfPosition >= playerPositionInjuredAmount) {
+                    player.injured = true;
+                    const injuryChance = Math.random();
+                    let weeks = 0;
+                    if (injuryChance < 0.65) {
+                        weeks = Math.floor(Math.random() * 2) + 2;  // 2-3 weeks
+                    } else if (injuryChance < 0.90) {
+                        weeks = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
+                    } else {
+                        weeks = Math.floor(Math.random() * 6) + 5;  // 5-10 weeks
+                    }
+                    player.weeksInjured = weeks;
+                    peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next ${weeks} week(s).`);
                 }
-                player.weeksInjured = weeks;
-                peopleInjured.push(`${player.name} - ${player.overall} OVR got injured! They will be out for the next ${weeks} week(s).`);
             }
             if (canUpgrade) {
                 const trainingGain = 6 + Math.floor(Math.random() * 5);  // 6-10 TP

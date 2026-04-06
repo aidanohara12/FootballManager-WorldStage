@@ -51,7 +51,7 @@ function applyMatchInjuries(players: Player[], isNational: boolean): [string, nu
             player.injured = true;
             const roll = Math.random();
             if (roll < 0.65) {
-                player.weeksInjured = Math.floor(Math.random() * 2) + 1;  // 1-2 weeks
+                player.weeksInjured = Math.floor(Math.random() * 2) + 2;  // 2-3 weeks
             } else if (roll < 0.90) {
                 player.weeksInjured = Math.floor(Math.random() * 4) + 2;  // 2-5 weeks
             } else {
