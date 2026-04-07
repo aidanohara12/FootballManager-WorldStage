@@ -16,11 +16,11 @@ import SeasonSummary from "../SeasonSummary/SeasonSummary.tsx";
 import { useGameContext } from "../../Context/GameContext.tsx";
 import Tournaments from "../../Tabs/Tournaments/Tournaments.tsx";
 
-const currentPage = signal<string>("SelectNational");
-const activeTab = signal<string>("Schedule");
-const scheduleCreated = signal<boolean>(false);
-const isFirstSeason = signal<boolean>(true);
-const playerAwards = signal<PlayerAwards>({
+export const currentPage = signal<string>("SelectNational");
+export const activeTab = signal<string>("Schedule");
+export const scheduleCreated = signal<boolean>(false);
+export const isFirstSeason = signal<boolean>(true);
+export const playerAwards = signal<PlayerAwards>({
     ballonDorWinners: [],
     goldenBootWinners: [],
     bestKeeper: [],
@@ -40,7 +40,7 @@ const playerAwards = signal<PlayerAwards>({
     primeraDivisionGoldenBoot: []
 });
 
-const retiredPlayers = signal<Player[]>([]);
+export const retiredPlayers = signal<Player[]>([]);
 
 export function MainPage() {
     useSignals();

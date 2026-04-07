@@ -1,6 +1,8 @@
+import { useState } from "react";
 import styles from "./History.module.css";
 import ManagerStats from "../../Components/ManagerStats/ManagerStats";
 import { useGameContext } from "../../Context/GameContext";
+import { saveGame, deleteSave } from "../../Utils/SaveLoad";
 
 export function History() {
     const ctx = useGameContext();
@@ -8,12 +10,34 @@ export function History() {
     const achievements = ctx.achievements.value;
     const managerHistory = ctx.managerHistory.value;
     const currentYear = ctx.currentYear.value;
+    const [saveConfirm, setSaveConfirm] = useState(false);
+
+    function handleSave() {
+        saveGame();
+        setSaveConfirm(true);
+        setTimeout(() => setSaveConfirm(false), 2000);
+    }
+
+    function handleDelete() {
+        if (window.confirm("Delete your save and restart from the beginning? This cannot be undone.")) {
+            deleteSave();
+            window.location.reload();
+        }
+    }
 
     return (
         <div className={styles.historyContainer}>
+            <div className={styles.gameButtons}>
+                <button className={styles.saveButton} onClick={handleSave}>
+                    {saveConfirm ? "Saved!" : "Save Game"}
+                </button>
+                <button className={styles.deleteButton} onClick={handleDelete}>
+                    Delete Save &amp; Restart
+                </button>
+            </div>
             <div className={styles.trophiesContainer}>
                 <div>
-                    <div className={styles.trophiesTitle}>Trophy Cabnet</div>
+                    <div className={styles.trophiesTitle}>Trophy Cabinet</div>
                     <div className={styles.tint}>
                         {manager.trophiesWon.map((trophie, index) => (
                             <div key={index} className={styles.trophy}>

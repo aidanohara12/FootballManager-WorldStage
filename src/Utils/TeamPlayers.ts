@@ -20,25 +20,25 @@ export function setNationalTeamStartingPlayers(nationalTeams: Signal<NationalTea
         players
             .filter((p) => p.position === "Forward")
             .sort((a, b) => b.overall - a.overall)
-            .slice(0, 5)
+            .slice(0, 3)
             .forEach((p) => p.startingNational = true);
 
         players
             .filter((p) => p.position === "Midfielder")
             .sort((a, b) => b.overall - a.overall)
-            .slice(0, 5)
+            .slice(0, 3)
             .forEach((p) => p.startingNational = true);
 
         players
             .filter((p) => p.position === "Defender")
             .sort((a, b) => b.overall - a.overall)
-            .slice(0, 6)
+            .slice(0, 4)
             .forEach((p) => p.startingNational = true);
 
         players
             .filter((p) => p.position === "Goalkeeper")
             .sort((a, b) => b.overall - a.overall)
-            .slice(0, 2)
+            .slice(0, 1)
             .forEach((p) => p.startingNational = true);
     });
     nationalTeams.value = [...nationalTeams.value];

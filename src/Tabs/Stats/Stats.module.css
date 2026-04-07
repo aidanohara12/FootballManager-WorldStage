@@ -39,3 +39,31 @@
     background: var(--primary-color, #00A86B);
     color: var(--secondary-color, #1A1A1A);
 }
+
+.sectionTabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.sectionTab {
+    padding: 0.5rem 1.2rem;
+    border: 2px solid var(--primary-color, #00A86B);
+    border-radius: 20px;
+    background: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-color, #00A86B);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sectionTab:hover {
+    background: var(--primary-color, #00A86B);
+    color: white;
+}
+
+.sectionTabActive {
+    background: var(--primary-color, #00A86B);
+    color: white;
+}

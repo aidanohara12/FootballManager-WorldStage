@@ -56,13 +56,13 @@ export function TeamView() {
             const allTeamPlayers = managerNT.team.players.map(name => playersMap.value.get(name)!).filter(Boolean);
             allTeamPlayers.forEach(p => p.startingNational = false);
             //set forwards
-            allTeamPlayers.filter(p => p.position === "Forward" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 5).forEach(p => p.startingNational = true);
+            allTeamPlayers.filter(p => p.position === "Forward" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 3).forEach(p => p.startingNational = true);
             //set midfielders
-            allTeamPlayers.filter(p => p.position === "Midfielder" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 5).forEach(p => p.startingNational = true);
+            allTeamPlayers.filter(p => p.position === "Midfielder" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 3).forEach(p => p.startingNational = true);
             //set defenders
-            allTeamPlayers.filter(p => p.position === "Defender" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 6).forEach(p => p.startingNational = true);
+            allTeamPlayers.filter(p => p.position === "Defender" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 4).forEach(p => p.startingNational = true);
             //set goalkeepers
-            allTeamPlayers.filter(p => p.position === "Goalkeeper" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 2).forEach(p => p.startingNational = true);
+            allTeamPlayers.filter(p => p.position === "Goalkeeper" && !p.injured).sort((a, b) => b.overall - a.overall).slice(0, 1).forEach(p => p.startingNational = true);
         }
         playersMap.value = new Map(playersMap.value);
     }

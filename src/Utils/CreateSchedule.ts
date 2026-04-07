@@ -395,6 +395,13 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
             return team && team.leagueName === league.name;
         });
     });
+    // Age national-only callups (players with no club team) — they aren't in any league roster so finishSeason won't age them
+    playerMap.value.forEach((player) => {
+        if (player.team === "") {
+            player.age += 1;
+        }
+    });
+
     updateClubTeams(teamsMap, playerMap, manager.value.team);
     getNationalAllTeamPlayers(nationalTeams, playerMap, teamsMap);
     resetTournaments(tournaments);

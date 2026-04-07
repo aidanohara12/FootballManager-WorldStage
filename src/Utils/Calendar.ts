@@ -5,6 +5,7 @@ import type { GameContextType } from "../Context/GameContext";
 import { addTeamsToTournament } from './TournamentSchedule';
 import { getTrainingPoints } from './TeamPlayers';
 import { Top50Countries } from '../Models/Countries';
+import { saveGame } from './SaveLoad';
 
 export const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const daysOfTheMonth: Record<string, number> = {
@@ -309,4 +310,6 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
     const nextDayString = `${String(nextMonthNumber).padStart(2, "0")}/${String(nextDay).padStart(2, "0")}/${nextYear}`;
 
     isSimulated[nextDayString] = false;
+
+    saveGame();
 }

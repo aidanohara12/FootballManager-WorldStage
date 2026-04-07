@@ -1,6 +1,7 @@
 .historyContainer {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 1.5rem;
     padding: 1rem;
     max-width: 100%;
@@ -8,11 +9,53 @@
     padding-bottom: 5rem;
 }
 
+.gameButtons {
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    justify-content: space-between;
+}
+
+.saveButton {
+    padding: 0.6rem 1.4rem;
+    border: 2px solid var(--primary-color, #00A86B);
+    border-radius: 12px;
+    background: var(--primary-color, #00A86B);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.saveButton:hover {
+    background: #008f5d;
+    border-color: #008f5d;
+}
+
+.deleteButton {
+    padding: 0.6rem 1.4rem;
+    border: 2px solid #e74c3c;
+    border-radius: 12px;
+    background: white;
+    color: #e74c3c;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.deleteButton:hover {
+    background: #e74c3c;
+    color: white;
+}
+
 /* Trophy Cabinet */
 .trophiesContainer {
     background: white;
     width: 400px;
-    height: 80vh;
+    height: 68vh;
     border-radius: 16px;
     padding: 1.25rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -22,7 +65,7 @@
 .tint {
     background: gray;
     opacity: 0.3;
-    height: 65vh;
+    height: 55vh;
     border-radius: 16px;
     padding: 1.25rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -75,7 +118,7 @@
 /* Manager Stats Section */
 .managerStats {
     background: white;
-    height: 80vh;
+    height: 68vh;
     width: 400px;
     border-radius: 16px;
     padding: 1.25rem;
@@ -96,7 +139,7 @@
 /* Achievements */
 .achievementsContainer {
     background: white;
-    height: 80vh;
+    height: 68vh;
     width: 400px;
     border-radius: 16px;
     padding: 1.25rem;
@@ -105,7 +148,7 @@
 }
 
 .achievementsTitle {
-    height: 80vh !important;
+    height: 68vh !important;
     overflow-y: scroll;
 }
 

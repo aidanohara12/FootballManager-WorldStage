@@ -312,6 +312,17 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         }
     }
 
+    // Drain stamina for international match starters
+    if (isNational) {
+        const startingKey = 'startingNational';
+        for (const player of [...homePlayers, ...awayPlayers]) {
+            if (player[startingKey]) {
+                const drain = 5 + Math.floor(Math.random() * 6); // 5-10 stamina
+                player.stamina = Math.max(0, player.stamina - drain);
+            }
+        }
+    }
+
     // Random match injuries for starters on both teams
     const homeInjuries = applyMatchInjuries(homePlayers, isNational);
     const awayInjuries = applyMatchInjuries(awayPlayers, isNational);
