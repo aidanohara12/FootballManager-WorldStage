@@ -56,3 +56,39 @@
 .welcomeContainer button:active {
     transform: translateY(0);
 }
+
+/* ── Tablet (iPad portrait & landscape) ── */
+@media (max-width: 1024px) {
+    .logo {
+        width: 36rem;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .logo {
+        width: 90vw;
+        max-width: 420px;
+        margin-bottom: 1.5rem;
+    }
+
+    .welcomeContainer h3 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .welcomeContainer button {
+        font-size: 1rem;
+        padding: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        width: 85vw;
+    }
+
+    .welcomeContainer h3 {
+        font-size: 1.25rem;
+    }
+}

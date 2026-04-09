@@ -112,3 +112,52 @@
     color: white;
     background: rgba(255, 255, 255, 0.25);
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .weekScheduleContainer {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .weekScheduleContainer {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .dayName {
+        font-size: 0.6rem;
+    }
+
+    .dayNumber {
+        font-size: 1rem;
+    }
+
+    .weekDay {
+        padding: 0.35rem 0.15rem;
+    }
+
+    .matchIndicator,
+    .trainingIndicator {
+        font-size: 0.5rem;
+        padding: 1px 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .weekGrid {
+        gap: 2px;
+        padding: 0.35rem;
+    }
+
+    .dayName {
+        font-size: 0.5rem;
+    }
+
+    .dayNumber {
+        font-size: 0.85rem;
+    }
+}

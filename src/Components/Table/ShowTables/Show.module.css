@@ -202,6 +202,67 @@
     .tableHeaderCell {
         font-size: 0.75rem;
     }
+
+    .bracketContainer {
+        height: auto;
+        max-height: 60vh;
+    }
+
+    .intTournamentContainer {
+        flex-direction: column;
+        max-height: none;
+        overflow-y: auto;
+    }
+
+    .friendlyTableContainer {
+        width: 100%;
+    }
+
+    .friendlyKnockoutContainer {
+        width: 100%;
+    }
+
+    .groupTableContainer {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+    }
+
+    .knockoutContainer {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+    }
+
+    .groupsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .qualifyingContainer {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .tableHeaderRow,
+    .tableRow {
+        grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .teamName {
+        font-size: 0.75rem;
+    }
+
+    .matchup {
+        min-width: 150px;
+    }
+
+    .tieContainer {
+        min-width: 200px;
+    }
 }
 
 .form {

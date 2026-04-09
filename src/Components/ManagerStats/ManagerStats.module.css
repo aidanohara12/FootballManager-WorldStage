@@ -118,3 +118,22 @@
     min-width: 2rem;
     text-align: right;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .managerTitle {
+        font-size: 1rem;
+    }
+
+    .managerLeaders h4 {
+        font-size: 1rem;
+    }
+
+    .player {
+        padding: 0.4rem 0.5rem;
+    }
+
+    .playerName {
+        font-size: 0.85rem;
+    }
+}

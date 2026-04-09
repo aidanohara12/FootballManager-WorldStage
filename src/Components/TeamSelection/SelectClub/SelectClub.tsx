@@ -124,6 +124,20 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
         }
     }, []);
 
+    // TEMP: auto-select top players by overall for each position
+    useEffect(() => {
+        const pos = positions[currentPositionIndex.value];
+        const team = teamsMap.value.get(manager.value.team);
+        if (!team) return;
+        const players = getTeamPlayersClub(team, playersMap);
+        const top = players
+            .filter((p) => p.position === pos.name && !p.injured)
+            .sort((a, b) => b.overall - a.overall)
+            .slice(0, pos.max)
+            .map((p) => p.name);
+        selectedPlayers.value = top;
+    }, [currentPositionIndex.value]);
+
     const playerListRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         if (playerListRef.current) {

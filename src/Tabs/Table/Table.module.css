@@ -127,3 +127,53 @@
 .modal {
     position: relative;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .selectContainer {
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .selectContainer select {
+        font-size: 0.8rem;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .topContainer {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .topContainer h3 {
+        font-size: 1.2rem;
+    }
+
+    .selectContainer {
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .selectContainer h3 {
+        font-size: 1.2rem;
+        width: 100%;
+        text-align: center;
+        margin-right: 0;
+    }
+
+    .toggleButton {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .toggleButton {
+        font-size: 0.65rem;
+        padding: 0.3rem 0.7rem;
+    }
+}

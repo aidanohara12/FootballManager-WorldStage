@@ -158,3 +158,26 @@
         font-size: 0.8rem;
     }
 }
+
+@media (max-width: 480px) {
+    .playerAttributesView {
+        width: 90vw;
+        max-width: 320px;
+        padding: 0.85rem;
+    }
+
+    .playerName {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .statBadge {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .closeButton {
+        font-size: 0.85rem;
+        padding: 0.6rem;
+    }
+}

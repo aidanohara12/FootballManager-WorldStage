@@ -333,3 +333,102 @@
     max-height: 85vh;
     overflow-y: auto;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .selectNationalContainer {
+        padding: 1.5rem;
+    }
+
+    .teamCard {
+        max-width: 100%;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .selectNationalContainer {
+        padding: 1rem;
+        min-height: 100svh;
+    }
+
+    .selectNationalContainer h3 {
+        font-size: 1.25rem;
+    }
+
+    .selectNationalContainer h4 {
+        font-size: 1.1rem;
+    }
+
+    .teamCard {
+        max-width: 100%;
+        padding: 0.75rem;
+        border-radius: 14px;
+    }
+
+    .teamCard h4 {
+        font-size: 1.25rem;
+    }
+
+    .tpBarContainer,
+    .staminaBarContainer {
+        width: 70px;
+    }
+
+    .playerRow {
+        gap: 0.35rem;
+        padding: 0.35rem 0.4rem;
+    }
+
+    .playerName {
+        font-size: 0.8rem;
+    }
+
+    .playerOvr {
+        font-size: 0.7rem;
+        padding: 0.1rem 0.3rem;
+    }
+
+    .trainingSelect {
+        width: 58px;
+        font-size: 0.7rem;
+    }
+
+    .injuredLabel {
+        width: 58px;
+        font-size: 0.65rem;
+    }
+
+    .bulkButtons button {
+        font-size: 0.7rem;
+        padding: 0.35rem 0.75rem;
+    }
+
+    .nextButton {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .selectNationalContainer {
+        padding: 0.75rem;
+    }
+
+    .tpBarContainer,
+    .staminaBarContainer {
+        width: 56px;
+    }
+
+    .trainingSelect {
+        width: 52px;
+    }
+
+    .injuredLabel {
+        width: 52px;
+    }
+
+    .playerList {
+        max-height: 320px;
+    }
+}

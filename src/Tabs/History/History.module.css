@@ -199,3 +199,73 @@
     color: #bbb;
     border-left: 4px solid #ddd;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .trophiesContainer,
+    .managerStats,
+    .achievementsContainer {
+        width: 320px;
+        height: 60vh;
+    }
+
+    .tint {
+        height: 48vh;
+    }
+
+    .achievementsTitle {
+        height: 60vh !important;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .historyContainer {
+        flex-direction: column;
+        padding: 0.75rem 0.75rem 5rem 0.75rem;
+        gap: 1rem;
+    }
+
+    .trophiesContainer,
+    .managerStats,
+    .achievementsContainer {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+    }
+
+    .tint {
+        height: auto;
+        max-height: 40vh;
+    }
+
+    .achievementsTitle {
+        height: auto !important;
+        max-height: 50vh;
+    }
+
+    .gameButtons {
+        flex-wrap: wrap;
+    }
+
+    .saveButton,
+    .deleteButton {
+        flex: 1;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .trophiesTitle,
+    .managerTitle {
+        font-size: 1.1rem;
+    }
+
+    .trophy {
+        width: 60px;
+    }
+
+    .trophy h4 {
+        font-size: 1.25rem;
+    }
+}

@@ -88,6 +88,20 @@ export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClic
         }
     }, []);
 
+    // TEMP: auto-select top players by overall for each position
+    useEffect(() => {
+        const pos = positions[currentPositionIndex.value];
+        const managerNT = nationalTeams.value.find((nt) => nt.country === manager.value.country);
+        if (!managerNT) return;
+        const players = getTeamPlayers(managerNT.team.players, playersMap);
+        const top = players
+            .filter((p) => p.position === pos.name && !p.injured)
+            .sort((a, b) => b.overall - a.overall)
+            .slice(0, pos.max)
+            .map((p) => p.name);
+        selectedPlayers.value = top;
+    }, [currentPositionIndex.value]);
+
     const playerListRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         if (playerListRef.current) {

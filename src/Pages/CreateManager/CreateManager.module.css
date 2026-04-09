@@ -172,3 +172,44 @@
 .createManagerContainer button:active {
     transform: translateY(0);
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .createManagerContainer form {
+        max-width: 400px;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .createManagerContainer {
+        padding: 0.75rem;
+    }
+
+    .createManagerContainer h1 {
+        font-size: 1.7rem;
+        margin-bottom: 1rem;
+    }
+
+    .createManagerContainer form {
+        max-width: 100%;
+        padding: 1.25rem 1rem 1rem;
+    }
+
+    .formRow {
+        flex-direction: column;
+        gap: 0;
+        align-items: center;
+    }
+
+    .leagueRow {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .createManagerContainer h1 {
+        font-size: 1.4rem;
+    }
+}

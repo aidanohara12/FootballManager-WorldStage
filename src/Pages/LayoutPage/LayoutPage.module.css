@@ -7,3 +7,11 @@
     width: 100vw;
     background-color: var(--tertiary-color);
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .layoutPageContainer {
+        height: 100svh;
+        overflow: hidden;
+    }
+}

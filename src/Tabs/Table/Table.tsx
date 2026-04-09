@@ -101,7 +101,6 @@ export function Table() {
         <div>
             <div className={styles.topContainer}>
                 <h3 className={styles.title}>{getLeague()}</h3>
-                <button onClick={handleOptionChange}>Change To {nextOption()}</button>
             </div>
             <div className={styles.tableContainer}>
 

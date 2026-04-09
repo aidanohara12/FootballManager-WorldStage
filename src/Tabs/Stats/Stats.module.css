@@ -67,3 +67,41 @@
     background: var(--primary-color, #00A86B);
     color: white;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .select {
+        width: 35%;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .select {
+        width: 70%;
+    }
+
+    .title {
+        font-size: 1.25rem;
+    }
+
+    .sectionTabs {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .sectionTab {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .select {
+        width: 90%;
+    }
+
+    .title {
+        font-size: 1.1rem;
+    }
+}

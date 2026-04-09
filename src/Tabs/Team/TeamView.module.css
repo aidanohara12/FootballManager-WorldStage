@@ -100,3 +100,57 @@
     max-height: 90vh;
     overflow-y: auto;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .teamName {
+        font-size: 1.6rem;
+        margin-right: 10vw;
+    }
+
+    .switchTeamButton {
+        width: 10rem;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .teamName {
+        font-size: 1.3rem;
+        margin-right: 0;
+    }
+
+    .teamInfo {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding-bottom: 0.75rem;
+    }
+
+    .teamButtons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .switchTeamButton {
+        width: auto;
+    }
+
+    .selectedPlayer {
+        height: auto;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 1.25rem;
+    }
+
+    .setStartersModal {
+        max-width: 100%;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .teamName {
+        font-size: 1.1rem;
+    }
+}

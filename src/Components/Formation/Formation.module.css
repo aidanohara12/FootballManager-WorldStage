@@ -248,3 +248,92 @@
     font-size: 0.65rem;
     color: #3498db;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .formation {
+        gap: 1rem;
+    }
+
+    .bench {
+        width: 200px;
+    }
+
+    .forwards {
+        gap: 1rem;
+    }
+
+    .midfielders {
+        gap: 1.5rem;
+    }
+
+    .defenders {
+        gap: 0.8rem;
+    }
+}
+
+/* ── Mobile: bench moves below the pitch ── */
+@media (max-width: 768px) {
+    .formation {
+        flex-direction: column;
+        min-height: auto;
+        gap: 0;
+    }
+
+    .starters {
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
+    .forwards {
+        gap: 0.5rem;
+    }
+
+    .midfielders {
+        gap: 0.75rem;
+    }
+
+    .defenders {
+        gap: 0.4rem;
+    }
+
+    .bench {
+        width: 100%;
+        max-height: none;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        border-left: none;
+        border-top: 3px solid var(--primary-color, #00A86B);
+        border-radius: 0 0 10px 10px;
+        padding: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .bench .playerCard {
+        margin: 0;
+    }
+
+    .playerCard {
+        max-width: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    .playerCard {
+        max-width: 68px;
+    }
+
+    .forwards {
+        gap: 0.3rem;
+    }
+
+    .midfielders {
+        gap: 0.5rem;
+    }
+
+    .defenders {
+        gap: 0.2rem;
+    }
+}

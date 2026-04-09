@@ -85,3 +85,37 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .leagueWeekMatchesContainer {
+        max-width: 100%;
+        height: 20vh;
+    }
+
+    .leagueWeekMatches {
+        height: 80%;
+        overflow-y: auto;
+    }
+
+    .homeTeam,
+    .awayTeam {
+        font-size: 0.8rem;
+    }
+
+    .score {
+        font-size: 0.95rem;
+    }
+
+    .matchRow {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .homeTeam,
+    .awayTeam {
+        font-size: 0.7rem;
+    }
+}

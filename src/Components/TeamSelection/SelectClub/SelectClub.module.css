@@ -328,3 +328,88 @@
     font-weight: 600;
     color: var(--secondary-color, #1A1A1A);
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .selectNationalContainer {
+        padding: 1.5rem;
+    }
+
+    .selectNationalContainer h3 {
+        margin-top: 3rem;
+    }
+
+    .teamCard {
+        max-width: 100%;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .selectNationalContainer {
+        padding: 1rem;
+        min-height: 100svh;
+    }
+
+    .selectNationalContainer h3 {
+        font-size: 1.25rem;
+        margin-top: 3rem;
+    }
+
+    .selectNationalContainer h4 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+
+    .teamCard {
+        max-width: 100%;
+        padding: 0.75rem;
+        border-radius: 14px;
+    }
+
+    .teamCard h4 {
+        font-size: 1.5rem;
+    }
+
+    .positionSection h5 {
+        font-size: 1.2rem;
+    }
+
+    .buttonContainer {
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        gap: 0.75rem;
+    }
+
+    .buttonContainer button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.7rem;
+    }
+
+    .playerItem label {
+        font-size: 0.95rem;
+    }
+
+    .budgetBar {
+        gap: 1rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .selectNationalContainer h3 {
+        font-size: 1.1rem;
+    }
+
+    .teamCard h4 {
+        font-size: 1.25rem;
+    }
+
+    .playerItem {
+        padding: 0.75rem;
+    }
+
+    .playerName {
+        font-size: 0.95rem;
+    }
+}

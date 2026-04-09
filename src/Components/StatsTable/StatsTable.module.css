@@ -287,3 +287,63 @@
     max-height: 85vh;
     overflow-y: auto;
 }
+
+/* ── Tablet ── */
+@media (max-width: 1024px) {
+    .tableContainer,
+    .intTablecontainer {
+        max-width: 100%;
+        padding: 0.5rem 0.75rem 0.75rem;
+    }
+}
+
+/* ── Mobile ── */
+@media (max-width: 768px) {
+    .tableContainer {
+        margin-top: 0;
+        padding: 0.5rem 0.5rem 0.75rem;
+    }
+
+    .intTablecontainer {
+        margin-top: 0;
+        padding: 0.5rem 0.5rem 0.75rem;
+    }
+
+    .tabRow {
+        gap: 0.25rem;
+    }
+
+    .tabButton {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.7rem;
+    }
+
+    .nameCell {
+        font-size: 0.75rem;
+    }
+
+    .statCell {
+        font-size: 0.75rem;
+    }
+
+    .table {
+        height: 48vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .tabButton {
+        font-size: 0.65rem;
+        padding: 0.35rem 0.55rem;
+    }
+
+    .nameCell {
+        font-size: 0.7rem;
+    }
+
+    .posBadge {
+        min-width: 1.5rem;
+        font-size: 0.55rem;
+        padding: 0.1rem 0.25rem;
+    }
+}
