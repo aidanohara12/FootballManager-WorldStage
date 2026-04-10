@@ -187,9 +187,22 @@
 /* Responsive design */
 @media (max-width: 768px) {
 
+    .table {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .tableHeader {
+        min-width: 700px;
+    }
+
+    .tableBody {
+        min-width: 700px;
+    }
+
     .tableHeaderRow,
     .tableRow {
-        grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+        grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr;
         gap: 0.5rem;
         padding: 0.75rem;
         font-size: 0.85rem;
@@ -244,9 +257,10 @@
 }
 
 @media (max-width: 480px) {
+
     .tableHeaderRow,
     .tableRow {
-        grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+        grid-template-columns: 2.5fr 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr;
         gap: 0.25rem;
         padding: 0.5rem;
         font-size: 0.75rem;

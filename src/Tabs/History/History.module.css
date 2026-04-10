@@ -202,6 +202,7 @@
 
 /* ── Tablet ── */
 @media (max-width: 1024px) {
+
     .trophiesContainer,
     .managerStats,
     .achievementsContainer {
@@ -229,13 +230,12 @@
     .trophiesContainer,
     .managerStats,
     .achievementsContainer {
-        width: 100%;
+        width: 90%;
         height: auto;
         max-height: 50vh;
     }
 
     .tint {
-        height: auto;
         max-height: 40vh;
     }
 
@@ -256,6 +256,7 @@
 }
 
 @media (max-width: 480px) {
+
     .trophiesTitle,
     .managerTitle {
         font-size: 1.1rem;

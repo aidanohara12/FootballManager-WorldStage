@@ -290,6 +290,7 @@
 
 /* ── Tablet ── */
 @media (max-width: 1024px) {
+
     .tableContainer,
     .intTablecontainer {
         max-width: 100%;
@@ -309,8 +310,23 @@
         padding: 0.5rem 0.5rem 0.75rem;
     }
 
+    .tableBody {
+        min-width: 500px;
+        height: 90%;
+    }
+
+    .tableBody::-webkit-scrollbar {
+        display: none;
+    }
+
     .tabRow {
         gap: 0.25rem;
+        overflow-y: hidden;
+        scrollbar-width: none;
+    }
+
+    .tabRow::-webkit-scrollbar {
+        display: none;
     }
 
     .tabButton {
@@ -320,6 +336,8 @@
 
     .nameCell {
         font-size: 0.75rem;
+        overflow: visible;
+        text-overflow: unset;
     }
 
     .statCell {
@@ -328,6 +346,22 @@
 
     .table {
         height: 48vh;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .table::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tableHeader {
+        position: static;
+        min-width: 480px;
+    }
+
+    .tableHeaderRow,
+    .tableRow {
+        min-width: 480px;
     }
 }
 

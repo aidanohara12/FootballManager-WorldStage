@@ -142,6 +142,10 @@
 
 /* ── Mobile ── */
 @media (max-width: 768px) {
+    .tableContainer {
+        width: 98%;
+    }
+
     .topContainer {
         flex-wrap: wrap;
         gap: 0.5rem;

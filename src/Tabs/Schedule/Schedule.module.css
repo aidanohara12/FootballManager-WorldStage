@@ -409,6 +409,10 @@
     .trainingPanel {
         max-height: 40vh;
     }
+
+    .modal {
+        padding: 1rem;
+    }
 }
 
 @media (max-width: 480px) {

@@ -153,4 +153,8 @@
     .teamName {
         font-size: 1.1rem;
     }
+
+    .switchTeamButton {
+        display: none;
+    }
 }

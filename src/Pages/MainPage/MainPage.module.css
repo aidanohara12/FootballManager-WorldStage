@@ -78,6 +78,7 @@
         height: 90svh;
         overflow-y: scroll;
         scrollbar-width: none;
+        overflow-x: hidden;
     }
 
     .tabs::-webkit-scrollbar {

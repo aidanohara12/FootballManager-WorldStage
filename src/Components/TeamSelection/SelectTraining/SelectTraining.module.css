@@ -375,13 +375,21 @@
         width: 70px;
     }
 
+    .playerList {
+        overflow-x: auto;
+    }
+
     .playerRow {
         gap: 0.35rem;
         padding: 0.35rem 0.4rem;
+        min-width: 420px;
     }
 
     .playerName {
         font-size: 0.8rem;
+        overflow: visible;
+        text-overflow: unset;
+        min-width: 120px;
     }
 
     .playerOvr {
@@ -407,6 +415,14 @@
     .nextButton {
         padding: 0.6rem 1.5rem;
         font-size: 0.85rem;
+    }
+
+    .compactContainer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 90%;
+        padding: .5rem;
     }
 }
 
