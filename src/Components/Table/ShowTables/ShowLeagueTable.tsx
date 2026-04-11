@@ -7,7 +7,7 @@ interface ShowLeagueTableProps {
     managerTeam: Team;
 }
 
-export function ShowLeagueTable({ leagueTitle, leageTeams, managerTeam }: ShowLeagueTableProps) {
+export function ShowLeagueTable({ leageTeams, managerTeam }: ShowLeagueTableProps) {
     function getTeamPoints(team: Team) {
         return team.points;
     }

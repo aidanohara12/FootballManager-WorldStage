@@ -57,7 +57,7 @@ const matchClicked = signal<Match | undefined>(undefined);
 
 export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwards }: ScheduleProps) {
     const ctx = useGameContext();
-    const { teamsMap, playersMap, userManager: manager, leagues, currentYear, tournaments, internationalTournaments, currentInternationalTournament, currentTournament } = ctx;
+    const { teamsMap, playersMap, userManager: manager, leagues, currentYear, tournaments, internationalTournaments, currentInternationalTournament } = ctx;
     const managerTeam = teamsMap.value.get(manager.value.team);
     const managerNationalTeam = teamsMap.value.get(manager.value.country);
     const leagueTeamNames = leagues.value.find((l) => l.name === managerTeam?.leagueName)?.teams;

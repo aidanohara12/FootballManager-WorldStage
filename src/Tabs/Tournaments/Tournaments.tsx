@@ -37,8 +37,6 @@ export function Tournaments() {
     const internationalTournaments = ctx.internationalTournaments.value;
     const currentYear = ctx.currentYear.value;
     const currentInternationalTournament = ctx.currentInternationalTournament.value;
-    const currentTournament = ctx.currentTournament.value;
-
     const europeanTournaments = ['Champions League', 'Europa League', 'Conference League'];
     const countries = ['England', 'Spain', 'Italy', 'Germany', 'France', 'Netherlands', 'Portugal'];
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import logo from '../../assets/Images/logo.png';
 import styles from "./StartingPage.module.css";
 import { useGameContext } from '../../Context/GameContext';

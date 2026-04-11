@@ -2,9 +2,7 @@ import type { Signal } from "@preact/signals-react";
 import type {
     currentYear,
     InternationalGroup,
-    InternationalGroupStanding,
     InternationalTournament,
-    InternationalTournamentTeam,
     Match,
     NationalTeam,
     Player,
@@ -310,7 +308,7 @@ export function advanceInternationalKnockout(
     tournament: InternationalTournament,
     year: number,
     teamsMap: Signal<Map<string, Team>>,
-    playersMap: Map<string, Player>,
+    _playersMap: Map<string, Player>,
     currentYearSignal: Signal<currentYear>,
 ): void {
     const currentRound = tournament.currentRound;
@@ -526,7 +524,7 @@ export function advanceFriendlyKnockout(
     tournament: InternationalTournament,
     year: number,
     teamsMap: Signal<Map<string, Team>>,
-    playersMap: Map<string, Player>,
+    _playersMap: Map<string, Player>,
     currentYearSignal: Signal<currentYear>,
 ): void {
     const currentRound = tournament.currentRound;
@@ -945,7 +943,7 @@ export function advanceWorldCupKnockout(
     tournament: InternationalTournament,
     year: number,
     teamsMap: Signal<Map<string, Team>>,
-    playersMap: Map<string, Player>,
+    _playersMap: Map<string, Player>,
     currentYearSignal: Signal<currentYear>,
 ): void {
     const currentRound = tournament.currentRound;
@@ -1057,20 +1055,6 @@ export function isFriendlyTournamentYear(year: number): boolean {
     return !isMajorTournamentYear(year) && !isWorldCupYear(year);
 }
 
-// Map friendly tournament name to major tournament name
-const friendlyToMajorMap: Record<string, string> = {
-    "Euros Friendly": "Euros",
-    "American Friendly": "Copa America",
-    "Africa Friendly": "AFCON",
-    "Asian Friendly": "Asian Cup",
-};
-
-const majorToFriendlyMap: Record<string, string> = {
-    "Euros": "Euros Friendly",
-    "Copa America": "American Friendly",
-    "AFCON": "Africa Friendly",
-    "Asian Cup": "Asian Friendly",
-};
 
 export function isMajorTournament(name: string): boolean {
     return ["Euros", "Copa America", "AFCON", "Asian Cup"].includes(name);

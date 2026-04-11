@@ -7,7 +7,7 @@ interface TableProps {
     managerTeam?: Team;
 }
 
-export function MiniTable({ leagueTitle, leageTeams, managerTeam }: TableProps) {
+export function MiniTable({ leageTeams, managerTeam }: TableProps) {
     function getTeamPoints(team: Team) {
         return team.points;
     }

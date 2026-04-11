@@ -49,7 +49,7 @@ export function Table() {
         return "First";
     }
 
-    const [selectedOption, setSelectedOption] = useState<string>("Leagues");
+    const [selectedOption] = useState<string>("Leagues");
     const [selectedDivision, setSelectedDivision] = useState<string>(getManagerDivision());
 
     const filteredLeagues = sortedLeagues.filter(l => (divisionMap[selectedDivision] ?? []).includes(l.name));
@@ -58,26 +58,6 @@ export function Table() {
     const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(managerTournament ?? null);
     const [selectedInternationalTournament, setSelectedInternationalTournament] = useState<InternationalTournament | null>(managerInternationalTournaments ?? null);
 
-    function nextOption(): string {
-        if (selectedOption === "Leagues") {
-            return "Tournaments";
-        } else if (selectedOption === "Tournaments") {
-            return "International Tournaments";
-        } else if (selectedOption === "International Tournaments") {
-            return "Leagues";
-        }
-        return "Leagues"; // Default case
-    }
-
-    function handleOptionChange() {
-        if (selectedOption === "Leagues") {
-            setSelectedOption("Tournaments");
-        } else if (selectedOption === "Tournaments") {
-            setSelectedOption("International Tournaments");
-        } else if (selectedOption === "International Tournaments") {
-            setSelectedOption("Leagues");
-        }
-    }
 
     function getLeague(): string | undefined {
         if (selectedOption === "Leagues") {
@@ -165,7 +145,7 @@ export function Table() {
                                 ))}
                             </select>
                         </div>
-                        <ShowInternationalTournamentTable tournament={selectedIntTournament} onMatchClick={(m) => matchClicked.value = m} />
+                        <ShowInternationalTournamentTable tournament={selectedIntTournament} onMatchClick={(m) => matchClicked.value = m} manager={manager} />
                     </div>
                 )}
             </div>

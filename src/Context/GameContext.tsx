@@ -31,7 +31,8 @@ const userManager = signal<Manager>({
     careerWins: 0,
     careerLosses: 0,
     careerDraws: 0,
-    trophiesWon: []
+    trophiesWon: [],
+    isUserManager: false
 });
 const leagues = signal<League[]>([]);
 const tournaments = signal<Tournament[]>([]);

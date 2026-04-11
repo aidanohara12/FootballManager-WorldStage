@@ -524,7 +524,7 @@ export function updateClubTeams(teamsMap: Signal<Map<string, Team>>, playersMap:
     setTeamStartingPlayers(teamsMap, playersMap);
 }
 
-export function getNationalAllTeamPlayers(nationalTeams: Signal<NationalTeam[]>, playersMap: Signal<Map<string, Player>>, teamMap: Signal<Map<string, Team>>) {
+export function getNationalAllTeamPlayers(nationalTeams: Signal<NationalTeam[]>, playersMap: Signal<Map<string, Player>>, _teamMap: Signal<Map<string, Team>>) {
     nationalTeams.value.forEach((nt) => {
         const countryName = nt.country;
         const countryPlayers = Array.from(playersMap.value.values()).filter((p) => p.country === countryName);

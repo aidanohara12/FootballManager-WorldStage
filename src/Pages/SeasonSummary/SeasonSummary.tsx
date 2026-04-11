@@ -26,7 +26,7 @@ function getTournamentTypeName(year: number): string {
 }
 
 export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: SeasonSummaryProps) {
-    const { leagues, teamsMap, playersMap, userManager: manager, currentYear, tournaments, internationalTournaments } = useGameContext();
+    const { leagues, playersMap, userManager: manager, currentYear, tournaments, internationalTournaments } = useGameContext();
     const ballonDorWinner = playersMap.value.get(playerAwards.value.ballonDorWinners[playerAwards.value.ballonDorWinners.length - 1]);
     const goldenBootWinner = playersMap.value.get(playerAwards.value.goldenBootWinners[playerAwards.value.goldenBootWinners.length - 1]);
     const bestKeeper = playersMap.value.get(playerAwards.value.bestKeeper[playerAwards.value.bestKeeper.length - 1]);

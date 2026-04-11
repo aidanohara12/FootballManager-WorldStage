@@ -10,7 +10,7 @@ interface WeekScheduleProps {
     trainingDayDate?: string | null;
 }
 
-export function WeekSchedule({ matches, currentYear, manager, trainingDayDate }: WeekScheduleProps) {
+export function WeekSchedule({ matches, currentYear, trainingDayDate }: WeekScheduleProps) {
     const currentWeekDays: Week = getCurrentWeek(currentYear.value.currentMonth, currentYear.value.currentDay, currentYear.value.currentDayOfWeek, currentYear.value.year);
     const isToday = (day: string) => day === currentYear.value.currentDayOfWeek;
 
