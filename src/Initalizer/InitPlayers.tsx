@@ -82,9 +82,12 @@ function getNationalTeamPlayers(nation: string, AllPlayers: Player[], PlayersMap
         goalkeeperCount++;
     }
 
-    // Take top 20 players by overall
-    nationalTeamPlayers.sort((a, b) => b.overall - a.overall);
-    return nationalTeamPlayers.slice(0, 20).map((p) => p.name);
+    // Build squad positionally to guarantee minimum counts per position
+    const forwards = nationalTeamPlayers.filter(p => p.position === "Forward").sort((a, b) => b.overall - a.overall).slice(0, 5);
+    const midfielders = nationalTeamPlayers.filter(p => p.position === "Midfielder").sort((a, b) => b.overall - a.overall).slice(0, 5);
+    const defenders = nationalTeamPlayers.filter(p => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 6);
+    const goalkeepers = nationalTeamPlayers.filter(p => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 2);
+    return [...forwards, ...midfielders, ...defenders, ...goalkeepers].map((p) => p.name);
 }
 
 export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, Team>>, PlayersMap: Map<string, Player>, NationalTeams: NationalTeam[], Leagues: League[], Tournaments: Tournament[], InternationalTournaments: InternationalTournament[], WorldCup: WorldCup) {

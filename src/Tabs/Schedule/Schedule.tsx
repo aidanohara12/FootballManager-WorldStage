@@ -345,7 +345,86 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
         return false;
     }
 
+    function hasSuspendedStarters(): boolean {
+        if (!todayMatch) return false;
+        const match = todayMatch.value;
+        const isNational = Top50Countries.some((c: { country: string }) => c.country === match.homeTeamName);
+        const team = isNational ? managerNationalTeam : managerTeam;
+        if (!team) return false;
+        for (const playerName of team.players) {
+            const player = playersMap.value.get(playerName);
+            if (!player) continue;
+            const isStarter = isNational ? player.startingNational : player.startingTeam;
+            if (isStarter && player.gamesSuspended > 0) return true;
+        }
+        return false;
+    }
+
+    function decrementSuspensionsForToday(preGameSuspended: Set<string>) {
+        // Find all teams that played today
+        const teamsPlayedToday = new Set<string>();
+        leagues.value.forEach(league => {
+            league.teams.forEach(teamName => {
+                const team = teamsMap.value.get(teamName);
+                if (!team) return;
+                const match = team.Schedule.find(m => m.date === date && m.played);
+                if (match) {
+                    teamsPlayedToday.add(match.homeTeamName);
+                    teamsPlayedToday.add(match.awayTeamName);
+                }
+            });
+        });
+        tournaments.value.forEach(t => {
+            t.matches.forEach(m => {
+                if (m.date === date && m.played) {
+                    teamsPlayedToday.add(m.homeTeamName);
+                    teamsPlayedToday.add(m.awayTeamName);
+                }
+            });
+        });
+        internationalTournaments.value.forEach(t => {
+            t.matches.forEach(m => {
+                if (m.date === date && m.played) {
+                    teamsPlayedToday.add(m.homeTeamName);
+                    teamsPlayedToday.add(m.awayTeamName);
+                }
+            });
+        });
+
+        if (teamsPlayedToday.size === 0) return;
+
+        // Only decrement players who were already suspended BEFORE today's games ran
+        const isInternationalPeriod = ["May", "June", "July"].includes(currentYear.value.currentMonth);
+        const managerTeamName = manager.value.team;
+        const managerCountry = manager.value.country;
+        const returned: string[] = [];
+
+        playersMap.value.forEach(player => {
+            if (!preGameSuspended.has(player.name)) return;
+            if (!teamsPlayedToday.has(player.team) && !teamsPlayedToday.has(player.country)) return;
+            if (player.gamesSuspended <= 0) return;
+            player.gamesSuspended--;
+            if (player.gamesSuspended === 0) {
+                const isStarter = isInternationalPeriod
+                    ? player.country === managerCountry && player.startingNationalWithoutInjury
+                    : player.team === managerTeamName && player.startingTeamWithoutInjury;
+                if (isStarter) returned.push(`${player.name} (${player.overall} OVR)`);
+            }
+        });
+
+        if (returned.length > 0) {
+            alert(`Back from suspension and available for selection: ${returned.join(', ')}`);
+        }
+    }
+
     function simulateDay() {
+        // Snapshot who is suspended RIGHT NOW, before any games simulate.
+        // Only these players will have their ban decremented after today's games.
+        const preGameSuspended = new Set<string>();
+        playersMap.value.forEach(player => {
+            if (player.gamesSuspended > 0) preGameSuspended.add(player.name);
+        });
+
         const simulated = new Set<string>();
         leagues.value.forEach((league) => {
             league.teams.forEach((teamName) => {
@@ -375,6 +454,9 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
 
         simulateTournamentMatches(simulated);
         simulateInternationalMatches(simulated);
+
+        // Decrement suspensions now that today's games are done — players must wait for the next game
+        decrementSuspensionsForToday(preGameSuspended);
 
         // Trigger signal re-render so UI updates
         teamsMap.value = new Map(teamsMap.value);
@@ -465,6 +547,10 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                                     alert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
                                     return;
                                 }
+                                if (hasSuspendedStarters()) {
+                                    alert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
+                                    return;
+                                }
                                 simulateDay();
                             }}>Simulate Game</button>
                         )}
@@ -483,6 +569,10 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                                 if (!isSimulated[date]) {
                                     if (hasInjuredStarters()) {
                                         alert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
+                                        return;
+                                    }
+                                    if (hasSuspendedStarters()) {
+                                        alert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
                                         return;
                                     }
                                     simulateDay();
@@ -564,7 +654,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                         )}
                         {isIntMonth && (
                             <>
-                                <h4 className={styles.miniTableTitle}>International Matches</h4>
+                                <h4 className={styles.miniTableTitle} style={{ display: 'none' }}>International Matches</h4>
                                 <LeagueWeekMatches
                                     allMatches={[]}
                                     internationalMatches={internationalMatchesForWeek}

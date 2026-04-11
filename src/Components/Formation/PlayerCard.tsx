@@ -19,14 +19,18 @@ export function PlayerCard({ player, selectedPlayer }: PlayerCardProps) {
     };
 
     const isInjured = player.injured;
+    const isSuspended = (player.gamesSuspended ?? 0) > 0;
 
     return (
         <div
-            className={`${styles.playerCard} ${isInjured ? styles.playerCardInjured : ''}`}
+            className={`${styles.playerCard} ${isInjured ? styles.playerCardInjured : ''} ${isSuspended ? styles.playerCardSuspended : ''}`}
             onClick={(e) => { e.stopPropagation(); selectedPlayer.value = player; }}
         >
             {isInjured && (
                 <div className={styles.injuryBadge}>INJ ({player.weeksInjured}w)</div>
+            )}
+            {isSuspended && (
+                <div className={styles.suspendedBadge}>SUSP ({player.gamesSuspended}g)</div>
             )}
             <div className={styles.playerName}>{player.name}: {positionMapping[player.position as "Forward" | "Midfielder" | "Defender" | "Goalkeeper"]}</div>
 

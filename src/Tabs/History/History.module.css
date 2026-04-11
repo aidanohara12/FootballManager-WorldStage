@@ -17,6 +17,13 @@
     justify-content: space-between;
 }
 
+.boxesContainer {
+    display: flex;
+    flex-direction: row;
+    overflow-y: scroll;
+    gap: 1rem;
+}
+
 .saveButton {
     padding: 0.6rem 1.4rem;
     border: 2px solid var(--primary-color, #00A86B);
@@ -227,10 +234,17 @@
         gap: 1rem;
     }
 
+    .boxesContainer {
+        display: flex;
+        flex-direction: column;
+        overflow-y: scroll;
+        gap: 1rem;
+    }
+
     .trophiesContainer,
     .managerStats,
     .achievementsContainer {
-        width: 90%;
+        width: 85%;
         height: auto;
         max-height: 50vh;
     }

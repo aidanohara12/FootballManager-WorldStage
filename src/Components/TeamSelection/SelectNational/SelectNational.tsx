@@ -31,6 +31,8 @@ export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClic
     const currentPosition = positions[currentPositionIndex.value];
 
     function handlePlayerToggle(playerName: string) {
+        const player = playersMap.value.get(playerName);
+        if ((player?.gamesSuspended ?? 0) > 0) return;
         if (selectedPlayers.value.includes(playerName)) {
             selectedPlayers.value = selectedPlayers.value.filter((p) => p !== playerName);
         } else if (selectedPlayers.value.length < currentPosition.max) {
@@ -88,20 +90,6 @@ export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClic
         }
     }, []);
 
-    // TEMP: auto-select top players by overall for each position
-    useEffect(() => {
-        const pos = positions[currentPositionIndex.value];
-        const managerNT = nationalTeams.value.find((nt) => nt.country === manager.value.country);
-        if (!managerNT) return;
-        const players = getTeamPlayers(managerNT.team.players, playersMap);
-        const top = players
-            .filter((p) => p.position === pos.name && !p.injured)
-            .sort((a, b) => b.overall - a.overall)
-            .slice(0, pos.max)
-            .map((p) => p.name);
-        selectedPlayers.value = top;
-    }, [currentPositionIndex.value]);
-
     const playerListRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         if (playerListRef.current) {
@@ -139,25 +127,28 @@ export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClic
                             {managerNTPlayers
                                 .filter((p) => p.position === currentPosition.name)
                                 .sort((a, b) => b.overall - a.overall)
-                                .map((p) => (
+                                .map((p) => {
+                                    const isDisabled = p.injured || (p.gamesSuspended ?? 0) > 0;
+                                    return (
                                     <div
                                         key={p.name}
-                                        className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''} ${p.injured ? styles.playerItemInjured : ''}`}
-                                        onClick={() => !p.injured && handlePlayerToggle(p.name)}
-                                        style={{ cursor: p.injured ? 'not-allowed' : 'pointer' }}
+                                        className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''} ${p.injured ? styles.playerItemInjured : ''} ${(p.gamesSuspended ?? 0) > 0 ? styles.playerItemSuspended : ''}`}
+                                        onClick={() => !isDisabled && handlePlayerToggle(p.name)}
+                                        style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
                                     >
                                         <input
                                             type="checkbox"
                                             id={p.name}
                                             value={p.name}
                                             checked={selectedPlayers.value.includes(p.name)}
-                                            disabled={p.injured}
+                                            disabled={isDisabled}
                                             readOnly
                                         />
                                         <div className={styles.playerInfo}>
                                             <div className={styles.playerName}>
                                                 {p.name}
                                                 {p.injured && <span className={styles.injuredBadge}>INJ ({p.weeksInjured}w)</span>}
+                                                {(p.gamesSuspended ?? 0) > 0 && <span className={styles.suspendedBadge}>SUSP ({p.gamesSuspended}g)</span>}
                                             </div>
                                             <div className={styles.playerStats}>
                                                 <span className={styles.statBadge}>
@@ -180,7 +171,8 @@ export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClic
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                         </div>
                     </div>
 

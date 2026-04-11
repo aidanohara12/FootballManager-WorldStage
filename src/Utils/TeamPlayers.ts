@@ -182,7 +182,7 @@ function buildPlayer(position: string, team: string, overall: number, potential:
         countryGoals: 0, countryAssists: 0,
         cleanSheets: 0, totalGoals: 0, totalAssists: 0,
         otherTrophiesThisSeason: 0, importantTrophiesThisSeason: 0,
-        awards: 0, trophies: 0, stamina: 100, trainingIntency: "Medium", trainingPoints: 0, trainingUpgradePoints: trainingsPointMax, injured: false, weeksInjured: 0,
+        awards: 0, trophies: 0, stamina: 100, trainingIntency: "Medium", trainingPoints: 0, trainingUpgradePoints: trainingsPointMax, injured: false, weeksInjured: 0, seasonYellowCards: 0, consecutiveYellowCards: 0, seasonRedCards: 0, gamesSuspended: 0, careerYellowCards: 0, careerRedCards: 0
         
     };
 }
@@ -529,12 +529,11 @@ export function getNationalAllTeamPlayers(nationalTeams: Signal<NationalTeam[]>,
         const countryName = nt.country;
         const countryPlayers = Array.from(playersMap.value.values()).filter((p) => p.country === countryName);
 
-        // Squad needs: 5 starters + 1 bench per position (except GK: 2 starters + 1 bench, DEF: 6 starters + 2 bench)
         const positions: { pos: string; needed: number }[] = [
-            { pos: "Forward", needed: 6 },
-            { pos: "Midfielder", needed: 6 },
-            { pos: "Defender", needed: 8 },
-            { pos: "Goalkeeper", needed: 3 },
+            { pos: "Forward", needed: 5 },
+            { pos: "Midfielder", needed: 5 },
+            { pos: "Defender", needed: 6 },
+            { pos: "Goalkeeper", needed: 2 },
         ];
 
         for (const { pos, needed } of positions) {
@@ -573,11 +572,10 @@ export function getNationalAllTeamPlayers(nationalTeams: Signal<NationalTeam[]>,
             }
         }
 
-        // 23-man squad: 6F + 6M + 8D + 3GK (starters: 5F/5M/6D/2GK, 1 bench per position)
-        const forwards = countryPlayers.filter((p) => p.position === "Forward").sort((a, b) => b.overall - a.overall).slice(0, 6);
-        const midfielders = countryPlayers.filter((p) => p.position === "Midfielder").sort((a, b) => b.overall - a.overall).slice(0, 6);
-        const defenders = countryPlayers.filter((p) => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 8);
-        const goalkeepers = countryPlayers.filter((p) => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 3);
+        const forwards = countryPlayers.filter((p) => p.position === "Forward").sort((a, b) => b.overall - a.overall).slice(0, 5);
+        const midfielders = countryPlayers.filter((p) => p.position === "Midfielder").sort((a, b) => b.overall - a.overall).slice(0, 5);
+        const defenders = countryPlayers.filter((p) => p.position === "Defender").sort((a, b) => b.overall - a.overall).slice(0, 6);
+        const goalkeepers = countryPlayers.filter((p) => p.position === "Goalkeeper").sort((a, b) => b.overall - a.overall).slice(0, 2);
 
         nt.team.players = [...forwards, ...midfielders, ...defenders, ...goalkeepers].map((p) => p.name);
     });

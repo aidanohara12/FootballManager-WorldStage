@@ -176,6 +176,34 @@
     line-height: 1.2;
 }
 
+.playerCardSuspended {
+    border-color: #e67e22;
+    opacity: 0.7;
+    background: linear-gradient(135deg, #fffbf0 0%, #ffecd0 100%);
+}
+
+.playerCardSuspended::before {
+    background: linear-gradient(90deg, #e67e22, #d35400);
+}
+
+.playerCardSuspended:hover {
+    box-shadow: 0 3px 12px rgba(230, 126, 34, 0.3);
+}
+
+.suspendedBadge {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: #e67e22;
+    color: white;
+    font-size: 0.4rem;
+    font-weight: 800;
+    padding: 1px 3px;
+    border-radius: 3px;
+    z-index: 1;
+    line-height: 1.2;
+}
+
 .playerName {
     font-size: 0.45rem;
     font-weight: 800;

@@ -388,6 +388,7 @@
     }
 
     .matchTable {
+        max-height: 30vh;
         overflow-y: hidden;
     }
 

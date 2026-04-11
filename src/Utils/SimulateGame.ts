@@ -40,6 +40,23 @@ function subInjuredStarters(team: Team, playersMap: Map<string, Player>, isNatio
     }
 }
 
+// Sub in the next best available player for each suspended starter
+function subSuspendedStarters(team: Team, playersMap: Map<string, Player>, isNational: boolean): void {
+    const players = getPlayers(team, playersMap);
+    const startingKey = isNational ? 'startingNational' : 'startingTeam';
+    const suspendedStarters = players.filter(p => p[startingKey] && p.gamesSuspended > 0);
+
+    for (const suspended of suspendedStarters) {
+        suspended[startingKey] = false;
+        const replacement = players
+            .filter(p => !p[startingKey] && !p.injured && p.gamesSuspended === 0 && p.position === suspended.position)
+            .sort((a, b) => b.overall - a.overall)[0];
+        if (replacement) {
+            replacement[startingKey] = true;
+        }
+    }
+}
+
 
 // ~1% chance per starter to get injured during a match
 function applyMatchInjuries(players: Player[], isNational: boolean): [string, number][] {
@@ -63,6 +80,53 @@ function applyMatchInjuries(players: Player[], isNational: boolean): [string, nu
     return injuries;
 }
 
+function applyMatchCards(players: Player[], isNational: boolean): [string, string][] {
+    const startingKey = isNational ? 'startingNational' : 'startingTeam';
+    const starters = players.filter(p => p[startingKey] && !p.injured).filter(p => p.position !== "Goalkeeper");
+    const cards: [string, string][] = [];
+
+    const minRequired: Record<string, number> = { Forward: 3, Midfielder: 3, Defender: 4, Goalkeeper: 1 };
+    function canAffordSuspension(player: Player): boolean {
+        const min = minRequired[player.position] ?? 3;
+        const available = players.filter(p =>
+            p.position === player.position &&
+            p.name !== player.name &&
+            !p.injured &&
+            p.gamesSuspended === 0
+        ).length;
+        return available >= min;
+    }
+
+    for (const player of starters) {
+        if (Math.random() < 0.05) { // 5% chance of card
+            const wouldYellowSuspend = (player.seasonYellowCards + 1 >= 5) || (player.consecutiveYellowCards + 1 >= 2);
+
+            // Skip card entirely if the yellow suspension would leave the team short
+            if (wouldYellowSuspend && !canAffordSuspension(player)) continue;
+
+            player.seasonYellowCards += 1;
+            player.careerYellowCards += 1;
+            if (player.seasonYellowCards >= 5 || player.consecutiveYellowCards >= 2) {
+                player.gamesSuspended += 1;
+            }
+            let cardType = "yellow";
+
+            if (Math.random() < 0.05) {
+                // Red card: allow if player is already suspended from yellow (just extends ban,
+                // no further depth impact) OR if the team can afford another suspension
+                if (wouldYellowSuspend || canAffordSuspension(player)) {
+                    player.seasonRedCards += 1;
+                    player.careerRedCards += 1;
+                    player.gamesSuspended += 1;
+                    cardType = "red";
+                }
+            }
+            cards.push([player.name, cardType]);
+        }
+    }
+    return cards;
+}
+
 export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, playersMap: Map<string, Player>, manager: Signal<Manager>): void {
     const homeTeam = teamsMap.get(match.value.homeTeamName)!;
     const awayTeam = teamsMap.get(match.value.awayTeamName)!;
@@ -71,6 +135,8 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
 
     subInjuredStarters(homeTeam, playersMap, isNational);
     subInjuredStarters(awayTeam, playersMap, isNational);
+    subSuspendedStarters(homeTeam, playersMap, isNational);
+    subSuspendedStarters(awayTeam, playersMap, isNational);
 
     const homePlayers = getPlayers(homeTeam, playersMap);
     const awayPlayers = getPlayers(awayTeam, playersMap);
@@ -101,6 +167,18 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
     let draw = false;
 
     const totalOverallDiff = Math.abs(homeOverallAvg - awayOverallAvg);
+
+    // Random match cards for starters on both teams
+    const homeCards = applyMatchCards(homePlayers, isNational);
+    const awayCards = applyMatchCards(awayPlayers, isNational);
+
+    //check for yellow cards
+    if (homeCards.filter(([, type]) => type === "yellow").length >= 3) awayTotalPoints += 1;
+    if (awayCards.filter(([, type]) => type === "yellow").length >= 3) homeTotalPoints += 1;
+
+    //check for red cards
+    if (homeCards.some(([, type]) => type === "red")) awayTotalPoints += 3;
+    if (awayCards.some(([, type]) => type === "red")) homeTotalPoints += 3;
 
     //compare the two teams
     if (isTactitianAway) {
@@ -337,9 +415,12 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
     m.awayAssists = scorers.awayAssists;
     m.homeInjuries = homeInjuries;
     m.awayInjuries = awayInjuries;
+    m.homeCards = homeCards;
+    m.awayCards = awayCards;
 
     // Also trigger signal update for any signal subscribers
     match.value = { ...m };
+
 }
 
 function generateMinute(usedMinutes: Set<number>): string {

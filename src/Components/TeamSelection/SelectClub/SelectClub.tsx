@@ -39,15 +39,12 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
     const remaining = budget - totalSpent;
 
     function handlePlayerToggle(playerName: string) {
+        const player = playersMap.value.get(playerName);
+        if ((player?.gamesSuspended ?? 0) > 0) return;
         if (selectedPlayers.value.includes(playerName)) {
             selectedPlayers.value = selectedPlayers.value.filter((p) => p !== playerName);
         } else if (selectedPlayers.value.length < currentPosition.max) {
-            const player = playersMap.value.get(playerName);
             const playerSalary = player?.contractAmount ?? 0;
-            if (playerSalary > remaining) {
-                alert(`Not enough budget! Need $${playerSalary.toFixed(1)}M but only $${remaining.toFixed(1)}M remaining.`);
-                return;
-            }
             selectedPlayers.value = [...selectedPlayers.value, playerName];
         } else {
             alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
@@ -86,9 +83,6 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
                     curPlayer.leagueAssists = 0;
                     curPlayer.countryGoals = 0;
                     curPlayer.countryAssists = 0;
-                    curPlayer.totalGoals = 0;
-                    curPlayer.totalAssists = 0;
-                    curPlayer.cleanSheets = 0;
                 });
             });
             if (onComplete) {
@@ -124,20 +118,6 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
         }
     }, []);
 
-    // TEMP: auto-select top players by overall for each position
-    useEffect(() => {
-        const pos = positions[currentPositionIndex.value];
-        const team = teamsMap.value.get(manager.value.team);
-        if (!team) return;
-        const players = getTeamPlayersClub(team, playersMap);
-        const top = players
-            .filter((p) => p.position === pos.name && !p.injured)
-            .sort((a, b) => b.overall - a.overall)
-            .slice(0, pos.max)
-            .map((p) => p.name);
-        selectedPlayers.value = top;
-    }, [currentPositionIndex.value]);
-
     const playerListRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
         if (playerListRef.current) {
@@ -151,11 +131,6 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
         <div className={styles.selectNationalContainer}>
             {!wasClicked && <h3>Select Your Club Team Starters for this Season!</h3>}
             <h4>Select {currentPosition.name}s ({selectedPlayers.value.length}/{currentPosition.max})</h4>
-            <div className={styles.budgetBar}>
-                <span>Budget: ${budget.toFixed(1)}M</span>
-                <span>Spent: ${totalSpent.toFixed(1)}M</span>
-                <span>Remaining: ${remaining.toFixed(1)}M</span>
-            </div>
 
             {/* Progress indicator */}
             <div className={styles.progressIndicator}>
@@ -179,51 +154,55 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
                             {managerTeamPlayers
                                 .filter((p: any) => p.position === currentPosition.name)
                                 .sort((a: any, b: any) => b.overall - a.overall)
-                                .map((p: any) => (
-                                    <div
-                                        key={p.name}
-                                        className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''} ${p.injured ? styles.playerItemInjured : ''}`}
-                                        onClick={() => !p.injured && handlePlayerToggle(p.name)}
-                                        style={{ cursor: p.injured ? 'not-allowed' : 'pointer' }}
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            id={p.name}
-                                            value={p.name}
-                                            checked={selectedPlayers.value.includes(p.name)}
-                                            disabled={p.injured}
-                                            readOnly
-                                        />
-                                        <div className={styles.playerInfo}>
-                                            <div className={styles.playerName}>
-                                                {p.name}
-                                                {p.injured && <span className={styles.injuredBadge}>INJ ({p.weeksInjured}w)</span>}
-                                            </div>
-                                            <div className={styles.playerStats}>
-                                                <span className={styles.statBadge}>
-                                                    <h5 className={styles.statLabel}>Age: {p.age}</h5>
-                                                </span>
-                                                <span className={styles.statBadge}>
-                                                    <h5 className={styles.statLabel}>OVR: {p.overall}</h5>
-                                                </span>
-                                                <span className={styles.statBadge}>
-                                                    <h5 className={styles.statLabel}>POT: {p.potential}</h5>
-                                                </span>
-                                                <span className={styles.statBadge}>
-                                                    <h5 className={styles.statLabel}>Country: {p.country} {Top50Countries.find((c) => c.country === p.country)?.flag}</h5>
-                                                </span>
-                                                <span className={styles.statBadge}>
-                                                    <h5 className={styles.statLabel}>Contract: {p.contractYrs}yr/${p.contractAmount.toFixed(1)}M</h5>
-                                                </span>
-                                                {p.newPlayer && (
-                                                    <span className={styles.newSigning}>
-                                                        <h5 className={styles.newSigningLabel}>New Signing!</h5>
+                                .map((p: any) => {
+                                    const isDisabled = p.injured || p.gamesSuspended > 0;
+                                    return (
+                                        <div
+                                            key={p.name}
+                                            className={`${styles.playerItem} ${selectedPlayers.value.includes(p.name) ? styles.selected : ''} ${p.injured ? styles.playerItemInjured : ''} ${p.gamesSuspended > 0 ? styles.playerItemSuspended : ''}`}
+                                            onClick={() => !isDisabled && handlePlayerToggle(p.name)}
+                                            style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                id={p.name}
+                                                value={p.name}
+                                                checked={selectedPlayers.value.includes(p.name)}
+                                                disabled={isDisabled}
+                                                readOnly
+                                            />
+                                            <div className={styles.playerInfo}>
+                                                <div className={styles.playerName}>
+                                                    {p.name}
+                                                    {p.injured && <span className={styles.injuredBadge}>INJ ({p.weeksInjured}w)</span>}
+                                                    {p.gamesSuspended > 0 && <span className={styles.suspendedBadge}>SUSP ({p.gamesSuspended}g)</span>}
+                                                </div>
+                                                <div className={styles.playerStats}>
+                                                    <span className={styles.statBadge}>
+                                                        <h5 className={styles.statLabel}>Age: {p.age}</h5>
                                                     </span>
-                                                )}
+                                                    <span className={styles.statBadge}>
+                                                        <h5 className={styles.statLabel}>OVR: {p.overall}</h5>
+                                                    </span>
+                                                    <span className={styles.statBadge}>
+                                                        <h5 className={styles.statLabel}>POT: {p.potential}</h5>
+                                                    </span>
+                                                    <span className={styles.statBadge}>
+                                                        <h5 className={styles.statLabel}>Country: {p.country} {Top50Countries.find((c) => c.country === p.country)?.flag}</h5>
+                                                    </span>
+                                                    <span className={styles.statBadge}>
+                                                        <h5 className={styles.statLabel}>Contract: {p.contractYrs}yr/${p.contractAmount.toFixed(1)}M</h5>
+                                                    </span>
+                                                    {p.newPlayer && (
+                                                        <span className={styles.newSigning}>
+                                                            <h5 className={styles.newSigningLabel}>New Signing!</h5>
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                         </div>
                     </div>
 

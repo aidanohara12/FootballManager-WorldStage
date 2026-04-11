@@ -317,21 +317,34 @@
 @media (max-width: 768px) {
     .summaryContainer {
         flex-direction: column;
-        height: auto;
-        padding: 0.75rem 0.75rem 5rem 0.75rem;
+        height: 100vh;
+        padding: 0.75rem 0.75rem 6rem 0.75rem;
         gap: 0.75rem;
         overflow-y: auto;
     }
 
     .leftSide {
         min-width: 0;
+        overflow-y: scroll;
     }
 
     .retiredPlayers,
     .awards,
     .leagueWinners {
-        min-height: 200px;
-        max-height: 350px;
+        min-height: 20vh;
+        overflow: scroll;
+    }
+
+    .winnerContainer {
+        height: 20vh !important;
+        overflow-y: scroll;
+    }
+
+    .retiredPlayersList,
+    .awardsList,
+    .leagueWinnersList {
+        overflow: visible;
+        max-height: unset;
     }
 
     .returnButton {

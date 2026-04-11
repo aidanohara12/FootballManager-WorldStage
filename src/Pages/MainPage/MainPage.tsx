@@ -16,8 +16,8 @@ import SeasonSummary from "../SeasonSummary/SeasonSummary.tsx";
 import { useGameContext } from "../../Context/GameContext.tsx";
 import Tournaments from "../../Tabs/Tournaments/Tournaments.tsx";
 
-export const currentPage = signal<string>("SelectNational");
-export const activeTab = signal<string>("Schedule");
+export const currentPage = signal<string>(sessionStorage.getItem("__currentPage") ?? "SelectNational");
+export const activeTab = signal<string>(sessionStorage.getItem("__activeTab") ?? "Schedule");
 export const scheduleCreated = signal<boolean>(false);
 export const isFirstSeason = signal<boolean>(true);
 export const playerAwards = signal<PlayerAwards>({
@@ -46,6 +46,10 @@ export function MainPage() {
     useSignals();
     const { teamsMap, playersMap, leagues, currentYear, tournaments, internationalTournaments, nationalTeams } = useGameContext();
 
+    // Persist across HMR reloads — CSS changes won't reset the page
+    sessionStorage.setItem("__currentPage", currentPage.value);
+    sessionStorage.setItem("__activeTab", activeTab.value);
+
     if (currentPage.value !== "MainPage") {
         scheduleCreated.value = false;
     }
@@ -58,9 +62,6 @@ export function MainPage() {
             player.leagueAssists = 0;
             player.countryGoals = 0;
             player.countryAssists = 0;
-            player.totalGoals = 0;
-            player.totalAssists = 0;
-            player.cleanSheets = 0;
             player.otherTrophiesThisSeason = 0;
             player.importantTrophiesThisSeason = 0;
             player.injured = false;

@@ -185,6 +185,38 @@
     min-width: 2rem;
 }
 
+/* Card styles */
+.cardTitle {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #e67e22;
+    margin: 0 0 0.2rem 0;
+}
+
+.yellowCardName {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #b7860b;
+}
+
+.redCardName {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #c0392b;
+}
+
+.yellowCardIcon {
+    font-size: 0.85rem;
+    min-width: 1.5rem;
+}
+
+.redCardIcon {
+    font-size: 0.85rem;
+    min-width: 1.5rem;
+}
+
 /* ── Tablet ── */
 @media (max-width: 1024px) {
     .matchOverview {

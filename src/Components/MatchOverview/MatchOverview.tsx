@@ -54,6 +54,9 @@ export function MatchOverview(props: MatchOverviewProps) {
                     {m.homeInjuries && m.homeInjuries.length > 0 && (
                         <InjuryList title="Injuries" entries={m.homeInjuries} align="right" playersMap={playersMap} />
                     )}
+                    {m.homeCards && m.homeCards.length > 0 && (
+                        <CardList title="Cards" entries={m.homeCards} align="right" playersMap={playersMap} />
+                    )}
                 </div>
 
                 <div className={styles.detailDivider}></div>
@@ -63,6 +66,9 @@ export function MatchOverview(props: MatchOverviewProps) {
                     <AssistList title="Assists" entries={awayAssisters} align="left" playersMap={playersMap} />
                     {m.awayInjuries && m.awayInjuries.length > 0 && (
                         <InjuryList title="Injuries" entries={m.awayInjuries} align="left" playersMap={playersMap} />
+                    )}
+                    {m.awayCards && m.awayCards.length > 0 && (
+                        <CardList title="Cards" entries={m.awayCards} align="left" playersMap={playersMap} />
                     )}
                 </div>
             </div>
@@ -145,6 +151,34 @@ function InjuryList({ title, entries, align, playersMap }: { title: string, entr
                             <>
                                 <span className={styles.injuryWeeks}>{weeks}w</span>
                                 <span className={styles.injuryName}>{name}{posLabel}</span>
+                            </>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+function CardList({ title, entries, align, playersMap }: { title: string, entries: [string, string][], align: "left" | "right", playersMap: Map<string, Player> }) {
+    return (
+        <div className={styles.statSection}>
+            <h4 className={`${styles.cardTitle} ${align === "right" ? styles.alignRight : styles.alignLeft}`}>{title}</h4>
+            {entries.map(([name, cardType], i) => {
+                const player = playersMap.get(name);
+                const posLabel = player ? ` (${positionShort[player.position]})` : '';
+                const isRed = cardType === "red";
+                return (
+                    <div key={`${name}-${i}`} className={`${styles.statRow} ${align === "right" ? styles.rowRight : styles.rowLeft}`}>
+                        {align === "right" ? (
+                            <>
+                                <span className={isRed ? styles.redCardName : styles.yellowCardName}>{name}{posLabel}</span>
+                                <span className={isRed ? styles.redCardIcon : styles.yellowCardIcon}>{isRed ? "🟥" : "🟨"}</span>
+                            </>
+                        ) : (
+                            <>
+                                <span className={isRed ? styles.redCardIcon : styles.yellowCardIcon}>{isRed ? "🟥" : "🟨"}</span>
+                                <span className={isRed ? styles.redCardName : styles.yellowCardName}>{name}{posLabel}</span>
                             </>
                         )}
                     </div>

@@ -130,6 +130,7 @@
     flex-direction: column;
     align-items: center;
     gap: 1rem;
+    padding: 1rem;
 }
 
 .roundTitle {
@@ -190,6 +191,13 @@
     .table {
         overflow-x: auto;
         overflow-y: hidden;
+        width: 90%;
+    }
+
+    .friendlyContainer {
+        width: 85vw;
+        height: 40vh;
+        overflow-y: scroll;
     }
 
     .tableHeader {
@@ -219,12 +227,13 @@
     .bracketContainer {
         height: auto;
         max-height: 60vh;
+        width: 90%;
     }
 
     .intTournamentContainer {
-        flex-direction: column;
-        max-height: none;
-        overflow-y: auto;
+        flex-direction: column !important;
+        max-height: none !important;
+        overflow-y: auto !important;
     }
 
     .friendlyTableContainer {
@@ -236,15 +245,16 @@
     }
 
     .groupTableContainer {
-        width: 100%;
+        width: 80vw !important;
         height: auto;
         max-height: 50vh;
     }
 
     .knockoutContainer {
-        width: 100%;
+        width: 85vw !important;
         height: auto;
         max-height: 50vh;
+        overflow-x: hidden;
     }
 
     .groupsGrid {

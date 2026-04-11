@@ -49,6 +49,12 @@ export interface Player {
     leagueAssists: number;
     countryGoals: number;
     countryAssists: number;
+    seasonYellowCards: number;
+    consecutiveYellowCards: number;
+    seasonRedCards: number;
+    gamesSuspended: number;
+    careerYellowCards: number;
+    careerRedCards: number;
     totalGoals: number;
     totalAssists: number;
     cleanSheets: number;
@@ -119,6 +125,8 @@ export interface Match {
     played?: boolean;
     homeInjuries?: [string, number][]; // [playerName, weeksInjured]
     awayInjuries?: [string, number][];
+    homeCards?: [string, string][];
+    awayCards?: [string, string][]; // [playerName, cardType]
 }
 
 export interface PlayerAwards {
