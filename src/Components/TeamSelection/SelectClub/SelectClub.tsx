@@ -28,15 +28,15 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
 
     const currentPosition = positions[currentPositionIndex.value];
     const managerTeam = teamsMap.value.get(manager.value.team);
-    const budget = managerTeam?.moneyToSpend ?? 0;
+    // const budget = managerTeam?.moneyToSpend ?? 0;
 
     // Calculate salary of currently selected players in this step
     const currentStepSalary = selectedPlayers.value.reduce((sum, name) => {
         const p = playersMap.value.get(name);
         return sum + (p?.contractAmount ?? 0);
     }, 0);
-    const totalSpent = committedSalary.value + currentStepSalary;
-    const remaining = budget - totalSpent;
+    // const totalSpent = committedSalary.value + currentStepSalary;
+    // const remaining = budget - totalSpent;
 
     function handlePlayerToggle(playerName: string) {
         const player = playersMap.value.get(playerName);
@@ -44,7 +44,7 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
         if (selectedPlayers.value.includes(playerName)) {
             selectedPlayers.value = selectedPlayers.value.filter((p) => p !== playerName);
         } else if (selectedPlayers.value.length < currentPosition.max) {
-            const playerSalary = player?.contractAmount ?? 0;
+            // const playerSalary = player?.contractAmount ?? 0;
             selectedPlayers.value = [...selectedPlayers.value, playerName];
         } else {
             alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
