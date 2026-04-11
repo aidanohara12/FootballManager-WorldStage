@@ -109,8 +109,8 @@ function trainNonManagerTeams(ctx: GameContextType) {
     });
 }
 
-export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, boolean>, isFirstSeason: Signal<boolean>, currentPage: Signal<string>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>) {
-    const { currentYear, leagues, teamsMap, playersMap, userManager: manager, managerHistory, achievements, nationalTeams, tournaments } = ctx;
+export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, boolean>, isFirstSeason: Signal<boolean>, currentPage: Signal<string>, retiredPlayers: Signal<Player[]>, playerAwards: Signal<PlayerAwards>, preGameSuspended?: Set<string>) {
+    const { currentYear, leagues, teamsMap, playersMap, userManager: manager, managerHistory, achievements, nationalTeams, tournaments, internationalTournaments } = ctx;
     const cur = currentYear.value;
     const nextDayOfWeek = getNextDay(cur.currentDayOfWeek);
     const maxDays = getDaysInMonth(cur.currentMonth, cur.year);
@@ -310,6 +310,64 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
     const nextDayString = `${String(nextMonthNumber).padStart(2, "0")}/${String(nextDay).padStart(2, "0")}/${nextYear}`;
 
     isSimulated[nextDayString] = false;
+
+    //check if it is matchday
+    if (preGameSuspended && preGameSuspended.size > 0) {
+        const curMonthNumber = months.indexOf(cur.currentMonth) + 1;
+        const todayString = `${String(curMonthNumber).padStart(2, "0")}/${String(cur.currentDay).padStart(2, "0")}/${cur.year}`;
+
+        const teamsPlayedToday = new Set<string>();
+        leagues.value.forEach(league => {
+            league.teams.forEach(teamName => {
+                const team = teamsMap.value.get(teamName);
+                const match = team?.Schedule.find(m => m.date === todayString && m.played);
+                if (match) {
+                    teamsPlayedToday.add(match.homeTeamName);
+                    teamsPlayedToday.add(match.awayTeamName);
+                }
+            });
+        });
+        tournaments.value.forEach(t => {
+            t.matches.forEach(m => {
+                if (m.date === todayString && m.played) {
+                    teamsPlayedToday.add(m.homeTeamName);
+                    teamsPlayedToday.add(m.awayTeamName);
+                }
+            });
+        });
+        internationalTournaments.value.forEach(t => {
+            t.matches.forEach(m => {
+                if (m.date === todayString && m.played) {
+                    teamsPlayedToday.add(m.homeTeamName);
+                    teamsPlayedToday.add(m.awayTeamName);
+                }
+            });
+        });
+
+        if (teamsPlayedToday.size > 0) {
+            const isInternationalPeriod = ["May", "June", "July"].includes(cur.currentMonth);
+            const managerTeamName = manager.value.team;
+            const managerCountry = manager.value.country;
+            const returned: string[] = [];
+
+            playersMap.value.forEach(player => {
+                if (!preGameSuspended.has(player.name)) return;
+                if (!teamsPlayedToday.has(player.team) && !teamsPlayedToday.has(player.country)) return;
+                if (player.gamesSuspended <= 0) return;
+                player.gamesSuspended--;
+                if (player.gamesSuspended === 0) {
+                    const isStarter = isInternationalPeriod
+                        ? player.country === managerCountry && player.startingNationalWithoutInjury
+                        : player.team === managerTeamName && player.startingTeamWithoutInjury;
+                    if (isStarter) returned.push(`${player.name} (${player.overall} OVR)`);
+                }
+            });
+
+            if (returned.length > 0) {
+                alert(`Back from suspension and available for selection: ${returned.join(', ')}`);
+            }
+        }
+    }
 
     saveGame();
 }

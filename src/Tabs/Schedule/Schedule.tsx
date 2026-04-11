@@ -54,6 +54,7 @@ const monthToNumber: Record<string, number> = {
 const matches = signal<Match[]>([]);
 const isSimulated: Record<string, boolean> = {};
 const matchClicked = signal<Match | undefined>(undefined);
+let lastPreGameSuspended: Set<string> | undefined;
 
 export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwards }: ScheduleProps) {
     const ctx = useGameContext();
@@ -360,63 +361,6 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
         return false;
     }
 
-    function decrementSuspensionsForToday(preGameSuspended: Set<string>) {
-        // Find all teams that played today
-        const teamsPlayedToday = new Set<string>();
-        leagues.value.forEach(league => {
-            league.teams.forEach(teamName => {
-                const team = teamsMap.value.get(teamName);
-                if (!team) return;
-                const match = team.Schedule.find(m => m.date === date && m.played);
-                if (match) {
-                    teamsPlayedToday.add(match.homeTeamName);
-                    teamsPlayedToday.add(match.awayTeamName);
-                }
-            });
-        });
-        tournaments.value.forEach(t => {
-            t.matches.forEach(m => {
-                if (m.date === date && m.played) {
-                    teamsPlayedToday.add(m.homeTeamName);
-                    teamsPlayedToday.add(m.awayTeamName);
-                }
-            });
-        });
-        internationalTournaments.value.forEach(t => {
-            t.matches.forEach(m => {
-                if (m.date === date && m.played) {
-                    teamsPlayedToday.add(m.homeTeamName);
-                    teamsPlayedToday.add(m.awayTeamName);
-                }
-            });
-        });
-
-        if (teamsPlayedToday.size === 0) return;
-
-        // Only decrement players who were already suspended BEFORE today's games ran
-        const isInternationalPeriod = ["May", "June", "July"].includes(currentYear.value.currentMonth);
-        const managerTeamName = manager.value.team;
-        const managerCountry = manager.value.country;
-        const returned: string[] = [];
-
-        playersMap.value.forEach(player => {
-            if (!preGameSuspended.has(player.name)) return;
-            if (!teamsPlayedToday.has(player.team) && !teamsPlayedToday.has(player.country)) return;
-            if (player.gamesSuspended <= 0) return;
-            player.gamesSuspended--;
-            if (player.gamesSuspended === 0) {
-                const isStarter = isInternationalPeriod
-                    ? player.country === managerCountry && player.startingNationalWithoutInjury
-                    : player.team === managerTeamName && player.startingTeamWithoutInjury;
-                if (isStarter) returned.push(`${player.name} (${player.overall} OVR)`);
-            }
-        });
-
-        if (returned.length > 0) {
-            alert(`Back from suspension and available for selection: ${returned.join(', ')}`);
-        }
-    }
-
     function simulateDay() {
         // Snapshot who is suspended RIGHT NOW, before any games simulate.
         // Only these players will have their ban decremented after today's games.
@@ -455,12 +399,10 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
         simulateTournamentMatches(simulated);
         simulateInternationalMatches(simulated);
 
-        // Decrement suspensions now that today's games are done — players must wait for the next game
-        decrementSuspensionsForToday(preGameSuspended);
-
         // Trigger signal re-render so UI updates
         teamsMap.value = new Map(teamsMap.value);
         isSimulated[date] = true;
+        return preGameSuspended;
     }
 
     const isIntMonth = isIntPeriod;
@@ -551,7 +493,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                                     alert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
                                     return;
                                 }
-                                simulateDay();
+                                lastPreGameSuspended = simulateDay();
                             }}>Simulate Game</button>
                         )}
                         {needsTraining && (
@@ -575,9 +517,12 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                                         alert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
                                         return;
                                     }
-                                    simulateDay();
+                                    const suspended = simulateDay();
+                                    moveToNextDay(ctx, isSimulated, isFirstSeason, currentPage, retiredPlayers, playerAwards, suspended);
+                                } else {
+                                    moveToNextDay(ctx, isSimulated, isFirstSeason, currentPage, retiredPlayers, playerAwards, lastPreGameSuspended);
+                                    lastPreGameSuspended = undefined;
                                 }
-                                moveToNextDay(ctx, isSimulated, isFirstSeason, currentPage, retiredPlayers, playerAwards);
                             }}
                         >
                             Simulate to next day

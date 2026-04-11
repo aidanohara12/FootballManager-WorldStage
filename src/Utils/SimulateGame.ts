@@ -64,7 +64,7 @@ function applyMatchInjuries(players: Player[], isNational: boolean): [string, nu
     const starters = players.filter(p => p[startingKey] && !p.injured);
     const injuries: [string, number][] = [];
     for (const player of starters) {
-        if (Math.random() < 0.01) {
+        if (Math.random() < 0.005) {
             player.injured = true;
             const roll = Math.random();
             if (roll < 0.65) {
