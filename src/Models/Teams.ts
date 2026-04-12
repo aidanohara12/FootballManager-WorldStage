@@ -171,7 +171,7 @@ export const Championship = [
     { name: "Stoke City", league: "Championship", color: "#E03A3E", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Swansea City", league: "Championship", color: "#000000", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Watford", league: "Championship", color: "#FBEE23", tournament: "FA Cup", tournament2: "Carabao Cup" },
-    { name: "West Bromwich Albion", league: "Championship", color: "#122F67", tournament: "FA Cup", tournament2: "Carabao Cup" },
+    { name: "Wrexham", league: "Championship", color: "#E01A22", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Hull City", league: "Championship", color: "#F5A623", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Bristol City", league: "Championship", color: "#E21836", tournament: "FA Cup", tournament2: "Carabao Cup" },
     { name: "Blackburn Rovers", league: "Championship", color: "#009EE0", tournament: "FA Cup", tournament2: "Carabao Cup" },

@@ -496,6 +496,7 @@ function getTrainingPoints(overall: number, potential: number): number {
 
 export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>): void {
     const isDeveloper = manager.value.type === "Developer";
+    const isManagerTeam = player.value.team === manager.value.team;
     const diff = player.value.potential - player.value.overall;
     const age = player.value.age;
     const goals = player.value.leagueGoals;
@@ -503,93 +504,114 @@ export function improvePlayer(player: Signal<Player>, manager: Signal<Manager>):
     const contributions = goals + assists;
     const cleanSheets = player.value.cleanSheets;
     const isKeeper = player.value.position === "Goalkeeper";
-
-    // Each player has a hidden "luck" factor per season: some bloom, some stagnate
-    const luck = Math.random(); // 0-1, determines if this player develops well this year
+    const luck = Math.random();
 
     let change = 0;
 
-    // Under 20: growth varies a lot - some kids develop fast, others plateau
-    if (age < 20) {
-        if (diff >= 15 && luck > 0.3) {
-            change += luck > 0.7 ? 3 : 2;
-        } else if (diff >= 8 && luck > 0.4) {
-            change += luck > 0.75 ? 2 : 1;
-        } else if (diff > 0 && luck > 0.5) {
-            change += 1;
-        }
+    if (isManagerTeam) {
+        // ── MANAGER'S TEAM ── better coaching, higher growth ceiling ──────────
+        if (age < 20) {
+            if (diff >= 15 && luck > 0.2) change += luck > 0.6 ? 4 : 3;
+            else if (diff >= 8 && luck > 0.3) change += luck > 0.6 ? 3 : 2;
+            else if (diff > 0 && luck > 0.4) change += 2;
 
-        // Performance bonuses (harder to earn)
-        if (goals >= 8 && luck > 0.4) change += 1;
-        if (assists >= 6 && luck > 0.5) change += 1;
-        if (isKeeper && cleanSheets >= 6 && luck > 0.4) change += 1;
-        if (contributions >= 18) {
-            change += 1;
-            player.value.potential += Math.random() > 0.5 ? 1 : 2;
+            if (goals >= 6 && luck > 0.3) change += 1;
+            if (assists >= 4 && luck > 0.4) change += 1;
+            if (isKeeper && cleanSheets >= 5 && luck > 0.3) change += 1;
+            if (contributions >= 15) {
+                change += 1;
+                player.value.potential += Math.random() > 0.4 ? 2 : 1;
+            }
+            if (isDeveloper && Math.random() > 0.3) change += 1;
+            if (luck < 0.1 && change > 2) change = 2; // rarely stagnate
         }
-        if (isDeveloper && Math.random() > 0.4) change += 1;
+        else if (age < 25) {
+            if (diff >= 10 && luck > 0.25) change += luck > 0.6 ? 3 : 2;
+            else if (diff >= 5 && luck > 0.35) change += 2;
+            else if (diff > 0 && luck > 0.45) change += 1;
 
-        // Some young players just don't develop much (20% chance of no growth even with potential)
-        if (luck < 0.2 && change > 1) change = 1;
-    }
-    // 20-24: more consistent growth but still variable
-    else if (age < 25) {
-        if (diff >= 10 && luck > 0.35) {
-            change += luck > 0.7 ? 2 : 1;
-        } else if (diff >= 5 && luck > 0.45) {
-            change += 1;
-        } else if (diff > 0 && luck > 0.55) {
-            change += 1;
+            if (goals >= 10) change += 1;
+            if (assists >= 8 && luck > 0.4) change += 1;
+            if (isKeeper && cleanSheets >= 8) change += 1;
+            if (contributions >= 18) {
+                change += 1;
+                player.value.potential += 1;
+            }
+            if (isDeveloper && Math.random() > 0.4) change += 1;
+            if (luck < 0.1 && change > 0) change = 1; // rarely stagnate
         }
+        else if (age < 30) {
+            if (diff >= 8 && luck > 0.35) change += 2;
+            else if (diff >= 3 && luck > 0.45) change += 1;
 
-        if (goals >= 12) change += 1;
-        if (assists >= 10 && luck > 0.5) change += 1;
-        if (isKeeper && cleanSheets >= 10) change += 1;
-        if (contributions >= 22) {
-            player.value.potential += 1;
+            if (goals >= 15) change += 1;
+            if (assists >= 12 && luck > 0.5) change += 1;
+            if (isKeeper && cleanSheets >= 12) change += 1;
+            if (isDeveloper && diff > 0 && Math.random() > 0.5) change += 1;
         }
-        if (isDeveloper && Math.random() > 0.5) change += 1;
+        else {
+            // 30+: slower decline under good management
+            const declineChance = age >= 34 ? 0.65 : age >= 32 ? 0.5 : 0.3;
+            if (luck < declineChance) change -= 1;
+            if (age >= 33 && Math.random() < 0.5 && age < 36) change -= 2;
+            if (age >= 36) change -= 4;
 
-        // 15% chance of stagnating season
-        if (luck < 0.15 && change > 0) change = 0;
-    }
-    // 25-29: peak years, small improvements only
-    else if (age < 30) {
-        if (diff >= 8 && luck > 0.5) {
-            change += 1;
-        } else if (diff >= 3 && luck > 0.6) {
-            change += 1;
+            if (contributions >= 20 && diff > 0) change += 1;
+            if (isKeeper && cleanSheets >= 12) change += 1;
+            if (isDeveloper && diff > 0 && Math.random() > 0.5) change += 1;
+            player.value.potential -= Math.random() > 0.6 ? 1 : 0;
         }
+    } else {
+        // ── OTHER TEAMS ── slower growth, more stagnation ────────────────────
+        if (age < 20) {
+            if (diff >= 15 && luck > 0.45) change += luck > 0.8 ? 2 : 1;
+            else if (diff >= 8 && luck > 0.55) change += 1;
+            else if (diff > 0 && luck > 0.65) change += 1;
 
-        // Only exceptional seasons give boosts
-        if (goals >= 18) change += 1;
-        if (assists >= 15 && luck > 0.6) change += 1;
-        if (isKeeper && cleanSheets >= 15) change += 1;
-        if (isDeveloper && diff > 0 && Math.random() > 0.6) change += 1;
-    }
-    // 30+: decline, but rate varies by player
-    else {
-        // Some 30+ players maintain, most decline
-        const declineChance = age >= 34 ? 0.85 : age >= 32 ? 0.7 : 0.5;
+            if (goals >= 10 && luck > 0.5) change += 1;
+            if (assists >= 8 && luck > 0.6) change += 1;
+            if (isKeeper && cleanSheets >= 8 && luck > 0.5) change += 1;
+            if (contributions >= 22) {
+                change += 1;
+                player.value.potential += Math.random() > 0.6 ? 1 : 0;
+            }
+            if (isDeveloper && Math.random() > 0.5) change += 1;
+            if (luck < 0.3 && change > 1) change = 0; // stagnate more often
+        }
+        else if (age < 25) {
+            if (diff >= 10 && luck > 0.45) change += luck > 0.75 ? 2 : 1;
+            else if (diff >= 5 && luck > 0.55) change += 1;
+            else if (diff > 0 && luck > 0.65) change += 1;
 
-        if (luck < declineChance) {
-            change -= 1;
+            if (goals >= 14) change += 1;
+            if (assists >= 12 && luck > 0.6) change += 1;
+            if (isKeeper && cleanSheets >= 12) change += 1;
+            if (contributions >= 26) player.value.potential += 1;
+            if (isDeveloper && Math.random() > 0.6) change += 1;
+            if (luck < 0.25 && change > 0) change = 0;
         }
-        if (age >= 31 && age < 33) {
-            change -= 2;
-        }
-        if (age >= 33 && Math.random() < 0.75 && age < 36) {
-            change -= 3;
-        }
-        if (age >= 36) {
-            change -= 5;
-        }
+        else if (age < 30) {
+            if (diff >= 8 && luck > 0.65) change += 1;
+            else if (diff >= 3 && luck > 0.75) change += 1;
 
-        // Great seasons can offset decline
-        if (contributions >= 25 && diff > 0) change += 1;
-        if (isKeeper && cleanSheets >= 15) change += 1;
-        if (isDeveloper && diff > 0 && Math.random() > 0.6) change += 1;
-        player.value.potential -= Math.random() > 0.5 ? 1 : 0;
+            if (goals >= 20) change += 1;
+            if (assists >= 18 && luck > 0.7) change += 1;
+            if (isKeeper && cleanSheets >= 18) change += 1;
+            if (isDeveloper && diff > 0 && Math.random() > 0.7) change += 1;
+        }
+        else {
+            // 30+: faster decline without good management
+            const declineChance = age >= 34 ? 0.9 : age >= 32 ? 0.75 : 0.55;
+            if (luck < declineChance) change -= 1;
+            if (age >= 31 && age < 33) change -= 2;
+            if (age >= 33 && Math.random() < 0.8 && age < 36) change -= 3;
+            if (age >= 36) change -= 5;
+
+            if (contributions >= 28 && diff > 0) change += 1;
+            if (isKeeper && cleanSheets >= 18) change += 1;
+            if (isDeveloper && diff > 0 && Math.random() > 0.7) change += 1;
+            player.value.potential -= Math.random() > 0.5 ? 1 : 0;
+        }
     }
 
     player.value.overall += change;
