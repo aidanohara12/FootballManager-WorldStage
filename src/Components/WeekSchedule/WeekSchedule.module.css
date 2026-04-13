@@ -113,6 +113,28 @@
     background: rgba(255, 255, 255, 0.25);
 }
 
+.summaryDay {
+    position: relative;
+}
+
+.summaryIndicator {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: #8e44ad;
+    background: rgba(142, 68, 173, 0.12);
+    border-radius: 4px;
+    padding: 1px 5px;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+}
+
+.today .summaryIndicator {
+    color: white;
+    background: rgba(255, 255, 255, 0.25);
+}
+
 /* ── Tablet ── */
 @media (max-width: 1024px) {
     .weekScheduleContainer {

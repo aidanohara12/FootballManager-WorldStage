@@ -1,0 +1,122 @@
+.miniSeasonSummary {
+    background: white;
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--primary-color, #00A86B);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.winnersContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+}
+
+.leagueWinners {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.miniSeasonSummary h3 {
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary-color, #00A86B);
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+/* ── League section ── */
+.leagueResults {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.leagueResult,
+.userResult {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.leagueResultLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #444;
+}
+
+.leagueResultLabel:first-child {
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.userResultLabel {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary-color, #00A86B);
+    margin-bottom: 0.15rem;
+}
+
+/* ── Tournament section ── */
+.tournamentResults {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.tournamentResult {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.45rem 0.75rem;
+    gap: 0.15rem;
+}
+
+.tournamentName {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary-color, #00A86B);
+    text-align: center;
+}
+
+.tournamentWinner {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-align: center;
+}
+
+.tournamentResultLabel:last-child {
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.noTournament {
+    font-size: 0.78rem;
+    color: #aaa;
+    text-align: center;
+    padding: 0.4rem 0;
+}
+
+@media (max-width: 480px) {
+    .leagueResults {
+        grid-template-columns: 1fr;
+    }
+}

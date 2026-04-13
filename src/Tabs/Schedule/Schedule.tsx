@@ -29,6 +29,7 @@ import { MatchOverview } from '../../Components/MatchOverview/MatchOverview';
 import LeagueWeekMatches from '../../Components/LeagueWeekMatches/LeagueWeekMatches';
 import { useGameContext } from '../../Context/GameContext';
 import { flagName, Top50Countries } from '../../Models/Countries';
+import { MiniSeasonSummary } from '../../Components/MiniSeasonSummary/MiniSeasonSumamry';
 interface ScheduleProps {
     isFirstSeason: Signal<boolean>;
     currentPage: Signal<string>;
@@ -407,6 +408,31 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
 
     const isIntMonth = isIntPeriod;
 
+    // Season summary shows only on the first Friday after the last league match
+    const seasonSummaryDate = (() => {
+        if (currentYear.value.leagueWeek !== 0 || currentYear.value.currentMonth === "August") return null;
+        // Find the date of the last played league match in the manager's league
+        let lastMatchDate: Date | null = null;
+        leagueTeamNames?.forEach((teamName) => {
+            const team = teamsMap.value.get(teamName);
+            team?.Schedule.forEach((m) => {
+                if (!m.isLeagueMatch || !m.played) return;
+                const [mm, dd, yyyy] = m.date.split("/").map(Number);
+                const d = new Date(yyyy, mm - 1, dd);
+                if (!lastMatchDate || d > lastMatchDate) lastMatchDate = d;
+            });
+        });
+        if (!lastMatchDate) return null;
+        // Find the first Friday strictly after that date
+        const base = new Date((lastMatchDate as Date).getTime());
+        base.setDate(base.getDate() + 1);
+        while (base.getDay() !== 5) base.setDate(base.getDate() + 1);
+        const mm = String(base.getMonth() + 1).padStart(2, "0");
+        const dd = String(base.getDate()).padStart(2, "0");
+        return `${mm}/${dd}/${base.getFullYear()}`;
+    })();
+    const isMiniSeasonSummaryDay = seasonSummaryDate === date;
+
     // Find the manager's active international tournament (with groups)
     const managerIntTournament = internationalTournaments.value.find(t =>
         t.teams.some(tm => tm.teamName === manager.value.country) &&
@@ -436,6 +462,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                         currentYear={currentYear}
                         manager={manager}
                         trainingDayDate={trainingDayDate}
+                        seasonSummaryDate={seasonSummaryDate}
                     />
                     {todayMatch ? (
                         <div
@@ -477,11 +504,12 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                         <div className={styles.game}>
                             <span className={styles.noGame}>Training Complete — Ready to advance</span>
                         </div>
-                    ) : (
+                    ) : !isMiniSeasonSummaryDay ? (
                         <div className={styles.game}>
                             <span className={styles.noGame}>No Games Scheduled</span>
                         </div>
-                    )}
+                    ) : null}
+                    {isMiniSeasonSummaryDay && <MiniSeasonSummary />}
                     <div className={styles.simButtom}>
                         {todayMatch && !isSimulated[date] && (
                             <button onClick={() => {
