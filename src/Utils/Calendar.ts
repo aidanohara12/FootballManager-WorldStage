@@ -6,6 +6,7 @@ import { addTeamsToTournament } from './TournamentSchedule';
 import { getTrainingPoints } from './TeamPlayers';
 import { Top50Countries } from '../Models/Countries';
 import { saveGame } from './SaveLoad';
+import { showTeamAlert } from '../Components/AlertModal/AlertModal';
 
 export const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 export const daysOfTheMonth: Record<string, number> = {
@@ -179,7 +180,7 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
         });
         if (managerRecovered.length > 0) {
             const names = managerRecovered.map(p => `${p.name} (${p.overall} OVR)`).join(", ");
-            alert(`${names} recovered from injury and can be put back in the starting lineup!`);
+            showTeamAlert(`${names} recovered from injury and can be put back in the starting lineup!`);
         }
     }
 
@@ -364,7 +365,7 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
             });
 
             if (returned.length > 0) {
-                alert(`Back from suspension and available for selection: ${returned.join(', ')}`);
+                showTeamAlert(`Back from suspension and available for selection: ${returned.join(', ')}`);
             }
         }
     }

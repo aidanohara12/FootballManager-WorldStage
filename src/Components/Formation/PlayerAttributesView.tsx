@@ -30,8 +30,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export function PlayerAttributesView({ player, selectedPlayer, onClose }: PlayerAttributesViewProps) {
     const flag = Top50Countries.find(c => c.country === player.country)?.flag ?? "🌍";
     const posShort: Record<string, string> = { Forward: "FW", Midfielder: "MID", Defender: "DEF", Goalkeeper: "GK" };
-    const seasonGoals = player.leagueGoals + player.countryGoals;
-    const seasonAssists = player.leagueAssists + player.countryAssists;
+    const seasonGoals = player.leagueGoals + player.countryGoals + (player.tournamentGoals ?? 0);
+    const seasonAssists = player.leagueAssists + player.countryAssists + (player.tournamentAssists ?? 0);
     const staminaColor = player.stamina > 60 ? "#27ae60" : player.stamina > 30 ? "#e67e22" : "#e74c3c";
     const isGK = player.position === "Goalkeeper";
 

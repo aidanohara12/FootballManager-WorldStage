@@ -30,6 +30,7 @@ import LeagueWeekMatches from '../../Components/LeagueWeekMatches/LeagueWeekMatc
 import { useGameContext } from '../../Context/GameContext';
 import { flagName, Top50Countries } from '../../Models/Countries';
 import { MiniSeasonSummary } from '../../Components/MiniSeasonSummary/MiniSeasonSumamry';
+import { showTeamAlert } from '../../Components/AlertModal/AlertModal';
 interface ScheduleProps {
     isFirstSeason: Signal<boolean>;
     currentPage: Signal<string>;
@@ -514,11 +515,11 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                         {todayMatch && !isSimulated[date] && (
                             <button onClick={() => {
                                 if (hasInjuredStarters()) {
-                                    alert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
+                                    showTeamAlert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
                                     return;
                                 }
                                 if (hasSuspendedStarters()) {
-                                    alert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
+                                    showTeamAlert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
                                     return;
                                 }
                                 lastPreGameSuspended = simulateDay();
@@ -538,11 +539,11 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
                             onClick={() => {
                                 if (!isSimulated[date]) {
                                     if (hasInjuredStarters()) {
-                                        alert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
+                                        showTeamAlert("You cannot proceed with an illegal lineup! Please reset your lineup to remove injured players.");
                                         return;
                                     }
                                     if (hasSuspendedStarters()) {
-                                        alert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
+                                        showTeamAlert("You cannot proceed with a suspended player in the starting lineup! Please remove them.");
                                         return;
                                     }
                                     const suspended = simulateDay();

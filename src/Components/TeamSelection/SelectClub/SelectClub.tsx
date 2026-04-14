@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { showAlert } from "../../AlertModal/AlertModal";
 import { signal, type Signal } from "@preact/signals-react";
 import styles from "./SelectClub.module.css";
 import { Top50Countries } from "../../../Models/Countries.ts";
@@ -47,13 +48,13 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
             // const playerSalary = player?.contractAmount ?? 0;
             selectedPlayers.value = [...selectedPlayers.value, playerName];
         } else {
-            alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
+            showAlert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
         }
     }
 
     function handleNext() {
         if (selectedPlayers.value.length !== currentPosition.max) {
-            alert(`Please select exactly ${currentPosition.max} ${currentPosition.name}(s)`);
+            showAlert(`Please select exactly ${currentPosition.max} ${currentPosition.name}(s)`);
             return;
         }
 
@@ -83,6 +84,9 @@ export function SelectClub({ currentPage, isFirstSeason, onComplete, wasClicked 
                     curPlayer.leagueAssists = 0;
                     curPlayer.countryGoals = 0;
                     curPlayer.countryAssists = 0;
+                    curPlayer.tournamentGoals = 0;
+                    curPlayer.tournamentAssists = 0;
+                    curPlayer.cleanSheets = 0;
                 });
             });
             if (onComplete) {

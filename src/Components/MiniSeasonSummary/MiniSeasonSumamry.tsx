@@ -22,14 +22,29 @@ export function MiniSeasonSummary() {
         .sort((a, b) => (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst))
         .sort((a, b) => b.points - a.points);
     const usersPlace = managerTeam && sortedLeague ? sortedLeague.indexOf(managerTeam) + 1 : undefined;
-    const europeanTournaments = ["Champions League", "Europa League", "Conference League"];
-    const usersTournaments = tournaments.value
+    const europeanTournamentNames = ["Champions League", "Europa League", "Conference League"];
+    const isAfterFirstSeason = currentYear.value.yearsCompleted >= 1;
+
+    // National tournaments: only show ones the user is in
+    const nationalTournaments = tournaments.value
+        .filter((t) => !europeanTournamentNames.includes(t.name))
         .filter((t) => t.teams.some((team) => team.teamName === userManager.value.team))
-        .filter((t) => !(currentYear.value.yearsCompleted < 1 && europeanTournaments.includes(t.name)))
         .map((t) => ({
             tournament: t,
             winner: t.pastChampions[t.pastChampions.length - 1]?.teamName ?? null,
+            qualified: true,
         }));
+
+    // European tournaments: always show after season 1, mark if user didn't qualify
+    const europeanTournamentsList = !isAfterFirstSeason ? [] : tournaments.value
+        .filter((t) => europeanTournamentNames.includes(t.name))
+        .map((t) => ({
+            tournament: t,
+            winner: t.pastChampions[t.pastChampions.length - 1]?.teamName ?? null,
+            qualified: t.teams.some((team) => team.teamName === userManager.value.team),
+        }));
+
+    const usersTournaments = [...nationalTournaments, ...europeanTournamentsList];
     return (
         <div className={styles.miniSeasonSummary}>
             <div className={styles.winnersContainer}>
@@ -47,10 +62,12 @@ export function MiniSeasonSummary() {
                     </div>
                 </div>
                 <div className={styles.tournamentResults}>
-                    {usersTournaments.map(({ tournament, winner }, index) => (
+                    {usersTournaments.map(({ tournament, winner, qualified }, index) => (
                         <div key={index} className={styles.tournamentResult}>
                             <div className={styles.tournamentName}>{tournament.name} Winner:</div>
-                            <div className={styles.tournamentWinner}>{winner ?? "TBD"}</div>
+                            <div className={styles.tournamentWinner}>
+                                {qualified ? (winner ?? "TBD") : "Did not qualify"}
+                            </div>
                         </div>
                     ))}
                 </div>

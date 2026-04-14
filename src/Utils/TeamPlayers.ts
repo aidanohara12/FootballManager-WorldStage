@@ -180,6 +180,7 @@ function buildPlayer(position: string, team: string, overall: number, potential:
         newPlayer: false,
         leagueGoals: 0, leagueAssists: 0,
         countryGoals: 0, countryAssists: 0,
+        tournamentGoals: 0, tournamentAssists: 0,
         cleanSheets: 0, totalGoals: 0, totalAssists: 0,
         otherTrophiesThisSeason: 0, importantTrophiesThisSeason: 0,
         awards: 0, trophies: 0, stamina: 100, trainingIntency: "Medium", trainingPoints: 0, trainingUpgradePoints: trainingsPointMax, injured: false, weeksInjured: 0, seasonYellowCards: 0, consecutiveYellowCards: 0, seasonRedCards: 0, gamesSuspended: 0, careerYellowCards: 0, careerRedCards: 0

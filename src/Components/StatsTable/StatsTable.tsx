@@ -49,10 +49,10 @@ const tabs: TabConfig[] = [
         columns: [
             { header: "Pos", getValue: (p) => positionShort[p.position] ?? p.position, flex: 0.6 },
             { header: "Team", getValue: (p) => p.team, flex: 1.5 },
-            { header: "Goals", getValue: (p) => p.leagueGoals + p.countryGoals, flex: 0.7 },
-            { header: "Assists", getValue: (p) => p.leagueAssists + p.countryAssists, flex: 0.7 },
+            { header: "Goals", getValue: (p) => p.leagueGoals, flex: 0.7 },
+            { header: "Assists", getValue: (p) => p.leagueAssists, flex: 0.7 },
         ],
-        sortFn: (a, b) => (b.leagueGoals + b.countryGoals) - (a.leagueGoals + a.countryGoals),
+        sortFn: (a, b) => b.leagueGoals - a.leagueGoals,
     },
     {
         id: "assists",
@@ -60,10 +60,10 @@ const tabs: TabConfig[] = [
         columns: [
             { header: "Pos", getValue: (p) => positionShort[p.position] ?? p.position, flex: 0.6 },
             { header: "Team", getValue: (p) => p.team, flex: 1.5 },
-            { header: "Assists", getValue: (p) => p.leagueAssists + p.countryAssists, flex: 0.7 },
-            { header: "Goals", getValue: (p) => p.leagueGoals + p.countryGoals, flex: 0.7 },
+            { header: "Assists", getValue: (p) => p.leagueAssists, flex: 0.7 },
+            { header: "Goals", getValue: (p) => p.leagueGoals, flex: 0.7 },
         ],
-        sortFn: (a, b) => (b.leagueAssists + b.countryAssists) - (a.leagueAssists + a.countryAssists),
+        sortFn: (a, b) => b.leagueAssists - a.leagueAssists,
     },
     {
         id: "cleansheets",

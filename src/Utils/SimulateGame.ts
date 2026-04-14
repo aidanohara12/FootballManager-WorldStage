@@ -378,16 +378,15 @@ export function simulateGame(match: Signal<Match>, teamsMap: Map<string, Team>, 
         }
     }
 
-    // Update goalkeeper clean sheets (league only)
-    if (isLeague) {
-        if (awayTeamScore === 0) {
-            const homeGK = homePlayers.find((p: Player) => p.startingTeam && p.position === "Goalkeeper");
-            if (homeGK) homeGK.cleanSheets++;
-        }
-        if (homeTeamScore === 0) {
-            const awayGK = awayPlayers.find((p: Player) => p.startingTeam && p.position === "Goalkeeper");
-            if (awayGK) awayGK.cleanSheets++;
-        }
+    // Update goalkeeper clean sheets (league, tournament, and international)
+    const startingKey = isNational ? 'startingNational' : 'startingTeam';
+    if (awayTeamScore === 0) {
+        const homeGK = homePlayers.find((p: Player) => p[startingKey] && p.position === "Goalkeeper");
+        if (homeGK) homeGK.cleanSheets++;
+    }
+    if (homeTeamScore === 0) {
+        const awayGK = awayPlayers.find((p: Player) => p[startingKey] && p.position === "Goalkeeper");
+        if (awayGK) awayGK.cleanSheets++;
     }
 
     // Drain stamina for international match starters
@@ -509,12 +508,14 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         }
         scorer.totalGoals++;
         if (isLeague) scorer.leagueGoals++;
-        else scorer.countryGoals++;
+        else if (isNational) scorer.countryGoals++;
+        else scorer.tournamentGoals++;
 
         const assister = getAssister(scorer, homeTeamStartingForwards, homeTeamStartingMidfielders, homeTeamStartingDefenders, homePlayers);
         assister.totalAssists++;
         if (isLeague) assister.leagueAssists++;
-        else assister.countryAssists++;
+        else if (isNational) assister.countryAssists++;
+        else assister.tournamentAssists++;
 
         const minute = generateMinute(usedMinutes);
         homeScorers.push([scorer.name, minute]);
@@ -533,12 +534,14 @@ function calculateScorers(homePlayers: Player[], awayPlayers: Player[], homeTeam
         }
         scorer.totalGoals++;
         if (isLeague) scorer.leagueGoals++;
-        else scorer.countryGoals++;
+        else if (isNational) scorer.countryGoals++;
+        else scorer.tournamentGoals++;
 
         const assister = getAssister(scorer, awayTeamStartingForwards, awayTeamStartingMidfielders, awayTeamStartingDefenders, awayPlayers);
         assister.totalAssists++;
         if (isLeague) assister.leagueAssists++;
-        else assister.countryAssists++;
+        else if (isNational) assister.countryAssists++;
+        else assister.tournamentAssists++;
 
         const minute = generateMinute(usedMinutes);
         awayScorers.push([scorer.name, minute]);

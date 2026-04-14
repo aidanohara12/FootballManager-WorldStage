@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { showAlert } from "../../AlertModal/AlertModal";
 import { signal, type Signal } from "@preact/signals-react";
 import styles from "./SelectTraining.module.css";
 import { useSignals } from "@preact/signals-react/runtime";
@@ -140,7 +141,7 @@ export function SelectTraining({ currentPage, isFirstSeason, onComplete, compact
         }
         if (peopleInjured.length > 0) {
             const injuredList = peopleInjured.join(", ");
-            alert(`${injuredList}`);
+            showAlert(`${injuredList}`);
         }
     }
 

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { showAlert } from "../../Components/AlertModal/AlertModal";
 import { signal } from "@preact/signals-react";
 import { Top50Countries } from "../../Models/Countries.ts";
 import { AllTeams } from "../../Models/Teams.ts";
@@ -30,7 +31,7 @@ export function CreateManager() {
     }, []);
     function createManager() {
         if (!name || age.value < 20 || age.value > 70) {
-            alert("Please fill in all fields correctly");
+            showAlert("Please fill in all fields correctly");
             return;
         }
 

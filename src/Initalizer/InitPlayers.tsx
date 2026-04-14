@@ -187,6 +187,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
             goalsFor: 0,
             goalsAgainst: 0,
             newlyPromoted: false,
+            previousSeasonEuroTournament: "",
         };
 
         // Add to TeamsMap
@@ -248,6 +249,7 @@ export function InitPlayers(AllPlayers: Player[], TeamsMap: Signal<Map<string, T
                 goalsFor: 0,
                 goalsAgainst: 0,
                 newlyPromoted: false,
+                previousSeasonEuroTournament: "",
             },
             country: countryData.country
         };

@@ -1,4 +1,5 @@
 import { signal } from "@preact/signals-react";
+import { AlertModal } from "../../Components/AlertModal/AlertModal";
 import type { League, Match, PlayerAwards, Player, Tournament } from "../../Models/WorldStage.ts";
 import { createSchedule } from "../../Utils/CreateSchedule.ts";
 import { createTournamentSchedule } from "../../Utils/TournamentSchedule.ts";
@@ -62,6 +63,9 @@ export function MainPage() {
             player.leagueAssists = 0;
             player.countryGoals = 0;
             player.countryAssists = 0;
+            player.tournamentGoals = 0;
+            player.tournamentAssists = 0;
+            player.cleanSheets = 0;
             player.otherTrophiesThisSeason = 0;
             player.importantTrophiesThisSeason = 0;
             player.injured = false;
@@ -123,6 +127,7 @@ export function MainPage() {
 
     return (
         <div className={styles.mainPageContainer}>
+            <AlertModal activeTab={activeTab} />
             {currentPage.value === "SelectNational" && (
                 <SelectNational
                     currentPage={currentPage}

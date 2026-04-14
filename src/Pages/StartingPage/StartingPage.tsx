@@ -1,4 +1,5 @@
 import logo from '../../assets/Images/logo.png';
+import { showAlert } from '../../Components/AlertModal/AlertModal';
 import styles from "./StartingPage.module.css";
 import { useGameContext } from '../../Context/GameContext';
 import { hasSave, loadGame, deleteSave } from '../../Utils/SaveLoad';
@@ -10,7 +11,7 @@ export function StartingPage() {
     function handleContinue() {
         const loaded = loadGame();
         if (!loaded) {
-            alert("Save file could not be loaded.");
+            showAlert("Save file could not be loaded.");
         }
     }
 

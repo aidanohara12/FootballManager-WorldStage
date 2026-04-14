@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { showAlert } from "../../AlertModal/AlertModal";
 import { signal, type Signal } from "@preact/signals-react";
 import Top50Countries from "../../../Models/Countries.ts";
 import styles from "./SelectNational.module.css";
@@ -38,13 +39,13 @@ export function SelectNational({ currentPage, isFirstSeason, onComplete, wasClic
         } else if (selectedPlayers.value.length < currentPosition.max) {
             selectedPlayers.value = [...selectedPlayers.value, playerName];
         } else {
-            alert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
+            showAlert(`You can only select ${currentPosition.max} ${currentPosition.name}(s)`);
         }
     }
 
     function handleNext() {
         if (selectedPlayers.value.length !== currentPosition.max) {
-            alert(`Please select exactly ${currentPosition.max} ${currentPosition.name}(s)`);
+            showAlert(`Please select exactly ${currentPosition.max} ${currentPosition.name}(s)`);
             return;
         }
 

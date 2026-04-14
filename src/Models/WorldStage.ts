@@ -49,6 +49,8 @@ export interface Player {
     leagueAssists: number;
     countryGoals: number;
     countryAssists: number;
+    tournamentGoals: number;
+    tournamentAssists: number;
     seasonYellowCards: number;
     consecutiveYellowCards: number;
     seasonRedCards: number;
@@ -98,6 +100,7 @@ export interface Team {
     goalsFor: number;
     goalsAgainst: number;
     newlyPromoted: boolean;
+    previousSeasonEuroTournament: string;
 }
 
 export interface NationalTeam {
