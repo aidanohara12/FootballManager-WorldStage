@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { signal } from "@preact/signals-react";
+import { useSignals } from "@preact/signals-react/runtime";
 import type { InternationalTournament, Match, Tournament } from "../../Models/WorldStage";
 import ShowTournamentTable from "../../Components/Table/ShowTables/ShowTournamentTable";
 import { ShowInternationalTournamentTable } from "../../Components/Table/ShowTables/ShowIntTournamentTable";
@@ -30,6 +31,7 @@ const tournamentCountries: Record<string, string> = {
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 export function Tournaments() {
+    useSignals();
     const ctx = useGameContext();
     const playersMap = ctx.playersMap.value;
     const manager = ctx.userManager.value;
