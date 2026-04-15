@@ -35,13 +35,14 @@ export function MiniSeasonSummary() {
             qualified: true,
         }));
 
-    // European tournaments: always show after season 1, mark if user didn't qualify
+    // European tournaments: only show ones the user qualified for
     const europeanTournamentsList = !isAfterFirstSeason ? [] : tournaments.value
         .filter((t) => europeanTournamentNames.includes(t.name))
+        .filter((t) => t.teams.some((team) => team.teamName === userManager.value.team))
         .map((t) => ({
             tournament: t,
             winner: t.pastChampions[t.pastChampions.length - 1]?.teamName ?? null,
-            qualified: t.teams.some((team) => team.teamName === userManager.value.team),
+            qualified: true,
         }));
 
     const usersTournaments = [...nationalTournaments, ...europeanTournamentsList];
