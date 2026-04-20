@@ -12,20 +12,20 @@ import styles from "../Table/Table.module.css";
 const matchClicked = signal<Match | undefined>(undefined);
 
 const tournamentCountries: Record<string, string> = {
-    "FA Cup": "England",
-    "Carabao Cup": "England",
-    "Copa del Rey": "Spain",
-    "Supercopa de España": "Spain",
-    "Coppa Italia": "Italy",
-    "Supercoppa Italiana": "Italy",
-    "DFB-Pokal": "Germany",
-    "DFL-Supercup": "Germany",
-    "Coupe de France": "France",
-    "Coupe de la Ligue": "France",
-    "KNVB Cup": "Netherlands",
-    "Johan Cruyff Shield": "Netherlands",
-    "Taça de Portugal": "Portugal",
-    "Taça da Liga": "Portugal",
+    "England Cup": "England",
+    "League Cup": "England",
+    "King's Cup": "Spain",
+    "Spanish Super Cup": "Spain",
+    "Italian Cup": "Italy",
+    "Italian Super Cup": "Italy",
+    "German Cup": "Germany",
+    "German Super Cup": "Germany",
+    "French Cup": "France",
+    "French League Cup": "France",
+    "Dutch Cup": "Netherlands",
+    "Dutch Shield": "Netherlands",
+    "Portuguese Cup": "Portugal",
+    "Portuguese League Cup": "Portugal",
 }
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -39,7 +39,7 @@ export function Tournaments() {
     const internationalTournaments = ctx.internationalTournaments.value;
     const currentYear = ctx.currentYear.value;
     const currentInternationalTournament = ctx.currentInternationalTournament.value;
-    const europeanTournaments = ['Champions League', 'Europa League', 'Conference League'];
+    const europeanTournaments = ['Champions Cup', 'Europa Cup', 'Conference Cup'];
     const countries = ['England', 'Spain', 'Italy', 'Germany', 'France', 'Netherlands', 'Portugal'];
 
     const managerTournament = tournaments.find((tournament) => tournament.teams?.find((team) => team.teamName === manager.team));
@@ -65,12 +65,12 @@ export function Tournaments() {
     const defaultOption = isIntPeriod ? "International Tournaments" : "Tournaments";
 
     // Find the active international tournament based on currentInternationalTournament type
-    const continentalNames = ["Euros", "Copa America", "AFCON", "Asian Cup"];
-    const friendlyNames = ["Euros Friendly", "American Friendly", "Africa Friendly", "Asian Friendly"];
+    const continentalNames = ["Euro Nations", "Americas Cup", "Africa Nations", "Asian Nations"];
+    const friendlyNames = ["Euro Nations Friendly", "Americas Friendly", "Africa Nations Friendly", "Asian Nations Friendly"];
     const activeIntTournament = (() => {
         if (!currentInternationalTournament) return managerInternationalTournament ?? null;
-        if (currentInternationalTournament === "World Cup") {
-            return internationalTournaments.find(t => t.name === "World Cup") ?? null;
+        if (currentInternationalTournament === "World Stage") {
+            return internationalTournaments.find(t => t.name === "World Stage") ?? null;
         }
         if (currentInternationalTournament === "Continental") {
             return internationalTournaments.find(t =>
@@ -185,7 +185,7 @@ export function Tournaments() {
                                 setSelectedInternationalTournament(tournament ?? null);
                             }}>
                                 {sortedInternationalTournaments.map(tournament => {
-                                    const label = tournament.name === "World Cup" ? "World Cup" : tournament.name;
+                                    const label = tournament.name === "World Stage" ? "World Stage" : tournament.name;
                                     return (
                                         <option key={tournament.name} value={tournament.name}>{label}</option>
                                     );

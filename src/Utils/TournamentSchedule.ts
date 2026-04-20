@@ -24,20 +24,20 @@ function formatDate(d: Date): string {
 
 // Secondary (league cup) tournaments play on Tuesdays every 4 weeks
 const secondaryTournamentNames = new Set([
-    "Carabao Cup",
-    "Supercopa de España",
-    "Supercoppa Italiana",
-    "DFL-Supercup",
-    "Coupe de la Ligue",
-    "Johan Cruyff Shield",
-    "Taça da Liga",
+    "League Cup",
+    "Spanish Super Cup",
+    "Italian Super Cup",
+    "German Super Cup",
+    "French League Cup",
+    "Dutch Shield",
+    "Portuguese League Cup",
 ]);
 
 // European tournaments play on Thursdays with two-legged ties
 const europeanTournamentNames = new Set([
-    "Champions League",
-    "Europa League",
-    "Conference League",
+    "Champions Cup",
+    "Europa Cup",
+    "Conference Cup",
 ]);
 
 export function isEuropeanTournament(name: string): boolean {
@@ -293,7 +293,7 @@ export function advanceTournamentRound(
                     const player = playersMap.get(playerName);
                     if (player) {
                         player.trophies++;
-                        if (tournament.name === "Champions League") {
+                        if (tournament.name === "Champions Cup") {
                             player.importantTrophiesThisSeason++;
                         } else {
                             player.otherTrophiesThisSeason++;

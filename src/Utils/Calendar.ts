@@ -25,7 +25,7 @@ export const daysOfTheMonth: Record<string, number> = {
 };
 export const months: string[] = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const topLeagues = ["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1", "Eredivisie", "Primeira Liga"];
+const topLeagues = ["Premier Division", "La Primera", "Serie Alfa", "Deutsche Liga", "Division Première", "Dutch Premier League", "Liga Portuguesa"];
 
 export function isLeapYear(year: number): boolean {
     return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
@@ -191,21 +191,21 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
             if (isFirstSeason.value) {
                 isFirstSeason.value = false;
                 tournaments.value.push({
-                    name: "Champions League",
+                    name: "Champions Cup",
                     currentRound: "First Round",
                     teams: [],
                     matches: [],
                     pastChampions: [],
                 });
                 tournaments.value.push({
-                    name: "Europa League",
+                    name: "Europa Cup",
                     currentRound: "First Round",
                     teams: [],
                     matches: [],
                     pastChampions: [],
                 });
                 tournaments.value.push({
-                    name: "Conference League",
+                    name: "Conference Cup",
                     currentRound: "First Round",
                     teams: [],
                     matches: [],
@@ -213,9 +213,9 @@ export function moveToNextDay(ctx: GameContextType, isSimulated: Record<string, 
                 });
             }
             // Clear European tournament teams before re-populating from all leagues
-            const cl = tournaments.value.find(t => t.name === "Champions League")!;
-            const el = tournaments.value.find(t => t.name === "Europa League")!;
-            const conf = tournaments.value.find(t => t.name === "Conference League")!;
+            const cl = tournaments.value.find(t => t.name === "Champions Cup")!;
+            const el = tournaments.value.find(t => t.name === "Europa Cup")!;
+            const conf = tournaments.value.find(t => t.name === "Conference Cup")!;
 
             // Get last season's winners before clearing
             const clWinner = cl.pastChampions[cl.pastChampions.length - 1]?.teamName;

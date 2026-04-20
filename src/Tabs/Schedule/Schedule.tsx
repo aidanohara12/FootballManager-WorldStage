@@ -264,7 +264,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
             });
 
             if (todayMatches.length > 0) {
-                const isWorldCup = tournament.name === "World Cup";
+                const isWorldCup = tournament.name === "World Stage";
 
                 // World Cup qualifying phase
                 if (tournament.currentPhase === "qualifying") {
@@ -391,7 +391,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
         // After January, currentYear.value.year is already the correct tournament year (e.g., 2026 for World Cup)
         const intYear = currentYear.value.year;
         if (isWorldCupYear(intYear)) {
-            currentInternationalTournament.value = "World Cup";
+            currentInternationalTournament.value = "World Stage";
         } else if (isMajorTournamentYear(intYear)) {
             currentInternationalTournament.value = "Continental";
         } else {

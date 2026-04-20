@@ -20,7 +20,7 @@ const showBestKeeper = signal<boolean>(false);
 
 function getTournamentTypeName(year: number): string {
     const intYear = year;
-    if (isWorldCupYear(intYear)) return "World Cup";
+    if (isWorldCupYear(intYear)) return "World Stage";
     if (isMajorTournamentYear(intYear)) return "Continental";
     return "Friendly";
 }
@@ -65,10 +65,10 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
             <h1>Season Summary</h1>
             <div className={styles.leftSide}>
                 <div className={styles.tournamentType}>
-                    <h3>{tournamentTypeName} Winner{tournamentTypeName === "World Cup" ? "" : "s"}</h3>
-                    {tournamentTypeName === "World Cup" && (
+                    <h3>{tournamentTypeName} Winner{tournamentTypeName === "World Stage" ? "" : "s"}</h3>
+                    {tournamentTypeName === "World Stage" && (
                         <div>
-                            {internationalTournaments.value.filter(t => t.name === "World Cup").map(tournament => (
+                            {internationalTournaments.value.filter(t => t.name === "World Stage").map(tournament => (
                                 <div key={tournament.name}>
                                     <h4>{tournament.name}</h4>
                                     <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName} {Top50Countries.find((c) => c.country === tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName)?.flag}</p>
@@ -78,7 +78,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                     )}
                     {tournamentTypeName === "Continental" && (
                         <div>
-                            {internationalTournaments.value.filter(t => t.name === "Euros" || t.name === "Copa America" || t.name === "AFCON" || t.name === "Asian Cup").map(tournament => (
+                            {internationalTournaments.value.filter(t => t.name === "Euro Nations" || t.name === "Americas Cup" || t.name === "Africa Nations" || t.name === "Asian Nations").map(tournament => (
                                 <div key={tournament.name}>
                                     <h4>{tournament.name}</h4>
                                     <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName} {Top50Countries.find((c) => c.country === tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName)?.flag}</p>
@@ -88,7 +88,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                     )}
                     {tournamentTypeName === "Friendly" && (
                         <div>
-                            {internationalTournaments.value.filter(t => t.name === "Euros Friendly" || t.name === "American Friendly" || t.name === "Africa Friendly" || t.name === "Asian Friendly").map(tournament => (
+                            {internationalTournaments.value.filter(t => t.name === "Euro Nations Friendly" || t.name === "Americas Friendly" || t.name === "Africa Nations Friendly" || t.name === "Asian Nations Friendly").map(tournament => (
                                 <div key={tournament.name}>
                                     <h4>{tournament.name}</h4>
                                     <p>{tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName} {Top50Countries.find((c) => c.country === tournament.pastChampions[tournament.pastChampions.length - 1]?.teamName)?.flag}</p>
@@ -158,7 +158,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
 
                     <div className={styles.leagueAwards}>
                         <div className={styles.leagueAwardsList}>
-                            <h3>Premier League</h3>
+                            <h3>Premier Division</h3>
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{premBestPlayer?.name} - {premBestPlayer?.team}</div>
@@ -173,7 +173,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                         </div>
                         {/* La Liga */}
                         <div className={styles.leagueAwardsList}>
-                            <h3>La Liga</h3>
+                            <h3>La Primera</h3>
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{laLigaBestPlayer?.name} - {laLigaBestPlayer?.team}</div>
@@ -188,7 +188,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                         </div>
                         {/* Serie A */}
                         <div className={styles.leagueAwardsList}>
-                            <h3>Serie A</h3>
+                            <h3>Serie Alfa</h3>
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{serieABestPlayer?.name} - {serieABestPlayer?.team}</div>
@@ -203,7 +203,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                         </div>
 
                         <div className={styles.leagueAwardsList}>
-                            <h3>Bundesliga</h3>
+                            <h3>Deutsche Liga</h3>
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{bundesligaBestPlayer?.name} - {bundesligaBestPlayer?.team}</div>
@@ -218,7 +218,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                         </div>
 
                         <div className={styles.leagueAwardsList}>
-                            <h3>Ligue 1</h3>
+                            <h3>Division Première</h3>
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{ligue1BestPlayer?.name} - {ligue1BestPlayer?.team}</div>
@@ -233,7 +233,7 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                         </div>
 
                         <div className={styles.leagueAwardsList}>
-                            <h3>Eredivisie</h3>
+                            <h3>Dutch Premier League</h3>
                             <div className={styles.award}>
                                 <h4>Best Player</h4>
                                 <div className={styles.playerName}>{eredivisieBestPlayer?.name} - {eredivisieBestPlayer?.team}</div>

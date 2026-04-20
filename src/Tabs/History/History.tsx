@@ -96,7 +96,7 @@ export function History() {
                             <h4 className={achievements.winFirstTrophy ? styles.achieved : styles.notAchieved}>Win your first trophy</h4>
                         </div>
                         <div className={styles.achievement}>
-                            <h4 className={achievements.winTheWorldCup ? styles.achieved : styles.notAchieved}>Win the World Cup</h4>
+                            <h4 className={achievements.winTheWorldCup ? styles.achieved : styles.notAchieved}>Win the World Stage</h4>
                         </div>
                         <div className={styles.achievement}>
                             <h4 className={achievements.win10Trophies ? styles.achieved : styles.notAchieved}>Win 10 trophies</h4>

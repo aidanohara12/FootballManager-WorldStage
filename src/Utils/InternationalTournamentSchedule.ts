@@ -989,8 +989,8 @@ export function advanceWorldCupKnockout(
                 const winnerTeam = teamsMap.value.get(winner.teamName);
                 if (winnerTeam) {
                     winnerTeam.manager.trophiesWon.push({
-                        trophy: "World Cup",
-                        trophyType: "World Cup",
+                        trophy: "World Stage",
+                        trophyType: "World Stage",
                         trophyYear: currentYearSignal.value.year,
                     });
                     winnerTeam.manager.internationalTrophies++;
@@ -1057,11 +1057,11 @@ export function isFriendlyTournamentYear(year: number): boolean {
 
 
 export function isMajorTournament(name: string): boolean {
-    return ["Euros", "Copa America", "AFCON", "Asian Cup"].includes(name);
+    return ["Euro Nations", "Americas Cup", "Africa Nations", "Asian Nations"].includes(name);
 }
 
 export function isFriendlyTournament(name: string): boolean {
-    return ["Euros Friendly", "American Friendly", "Africa Friendly", "Asian Friendly"].includes(name);
+    return ["Euro Nations Friendly", "Americas Friendly", "Africa Nations Friendly", "Asian Nations Friendly"].includes(name);
 }
 
 export function scheduleAllInternationalTournaments(
@@ -1076,7 +1076,7 @@ export function scheduleAllInternationalTournaments(
     const worldCup = isWorldCupYear(year);
 
     internationalTournaments.value.forEach(tournament => {
-        if (tournament.name === "World Cup") {
+        if (tournament.name === "World Stage") {
             if (worldCup && playersMap && nationalTeams) {
                 scheduleWorldCup(tournament, year, teamsMap, playersMap, nationalTeams);
             } else {

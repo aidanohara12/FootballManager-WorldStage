@@ -299,7 +299,7 @@ export function ShowInternationalTournamentTable({
     }
 
     // World Cup — show qualifying, groups, and knockout all in one view
-    const isWorldCup = tournament.name === "World Cup";
+    const isWorldCup = tournament.name === "World Stage";
     const hasQualifyingMatches = matches.some(m => m.tournamentRound?.startsWith("WCQ-"));
     const hasKnockoutMatches = matches.some(m =>
         !m.tournamentRound?.startsWith("Group") &&
@@ -313,7 +313,7 @@ export function ShowInternationalTournamentTable({
             <div className={styles.intTournamentContainer}>
                 {hasQualifyingMatches && tournament.currentPhase === "qualifying" && (
                     <div className={styles.knockoutContainer}>
-                        <div className={styles.phaseLabel}>World Cup Qualifying</div>
+                        <div className={styles.phaseLabel}>World Stage Qualifying</div>
                         <QualifyingBrackets matches={matches} onMatchClick={onMatchClick} managerCountry={mc} />
                     </div>
                 )}

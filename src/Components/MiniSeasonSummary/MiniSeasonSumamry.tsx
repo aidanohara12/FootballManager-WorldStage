@@ -22,7 +22,7 @@ export function MiniSeasonSummary() {
         .sort((a, b) => (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst))
         .sort((a, b) => b.points - a.points);
     const usersPlace = managerTeam && sortedLeague ? sortedLeague.indexOf(managerTeam) + 1 : undefined;
-    const europeanTournamentNames = ["Champions League", "Europa League", "Conference League"];
+    const europeanTournamentNames = ["Champions Cup", "Europa Cup", "Conference Cup"];
     const isAfterFirstSeason = currentYear.value.yearsCompleted >= 1;
 
     // National tournaments: only show ones the user is in

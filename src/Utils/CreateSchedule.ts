@@ -5,24 +5,24 @@ import { updateClubTeams, getNationalAllTeamPlayers, updatePlayerContract } from
 import type { Signal } from '@preact/signals-react';
 
 const importantLeagues = new Set([
-    "Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1", "Eredivisie", "Primeira Liga"
+    "Premier Division", "La Primera", "Serie Alfa", "Deutsche Liga", "Division Première", "Dutch Premier League", "Liga Portuguesa"
 ]);
 
 const leagueMapping: Record<string, string> = {
-    "Premier League": "Championship",
-    "La Liga": "La Liga 2",
-    "Serie A": "Serie B",
-    "Bundesliga": "2. Bundesliga",
-    "Ligue 1": "Ligue 2",
-    "Eredivisie": "Eerste Divisie",
-    "Primeira Liga": "Segunda Liga",
-    "Championship": "League One",
-    "La Liga 2": "Primera Federación",
-    "Serie B": "Serie C",
-    "2. Bundesliga": "3. Liga",
-    "Ligue 2": "National",
-    "Eerste Divisie": "Tweede Divisie",
-    "Segunda Liga": "Liga 3"
+    "Premier Division": "Second Division",
+    "La Primera": "La Segunda",
+    "Serie Alfa": "Serie Beta",
+    "Deutsche Liga": "2. Deutsche Liga",
+    "Division Première": "Division Deux",
+    "Dutch Premier League": "Dutch Second Division",
+    "Liga Portuguesa": "Liga Segunda",
+    "Second Division": "Third Division",
+    "La Segunda": "La Tercera",
+    "Serie Beta": "Serie Gamma",
+    "2. Deutsche Liga": "3. Deutsche Liga",
+    "Division Deux": "Division Nationale",
+    "Dutch Second Division": "Dutch Third Division",
+    "Liga Segunda": "Liga Terceira"
 };
 
 export function createSchedule(league: League, currentYear: Signal<currentYear>): Match[] {
@@ -148,16 +148,16 @@ function ballonDorWeight(player: Player, isTop5: boolean): number {
 
 export function calculateAwards(leagues: Signal<League[]>, teamsMap: Signal<Map<string, Team>>, playerMap: Signal<Map<string, Player>>, playerAwards: Signal<PlayerAwards>): void {
     const leagueAwardKeys: Record<string, { bestPlayer: keyof PlayerAwards; goldenBoot: keyof PlayerAwards; }> = {
-        "Premier League": { bestPlayer: "premBestPlayer", goldenBoot: "premGoldenBoot" },
-        "La Liga": { bestPlayer: "laLigaBestPlayer", goldenBoot: "laLigaGoldenBoot" },
-        "Serie A": { bestPlayer: "serieABestPlayer", goldenBoot: "serieAGoldenBoot" },
-        "Bundesliga": { bestPlayer: "bundesligaBestPlayer", goldenBoot: "bundesligaGoldenBoot" },
-        "Ligue 1": { bestPlayer: "ligue1BestPlayer", goldenBoot: "ligue1GoldenBoot" },
-        "Eredivisie": { bestPlayer: "eredivisieBestPlayer", goldenBoot: "eredivisieGoldenBoot" },
-        "Primeira Liga": { bestPlayer: "primeraDivisionBestPlayer", goldenBoot: "primeraDivisionGoldenBoot" },
+        "Premier Division": { bestPlayer: "premBestPlayer", goldenBoot: "premGoldenBoot" },
+        "La Primera": { bestPlayer: "laLigaBestPlayer", goldenBoot: "laLigaGoldenBoot" },
+        "Serie Alfa": { bestPlayer: "serieABestPlayer", goldenBoot: "serieAGoldenBoot" },
+        "Deutsche Liga": { bestPlayer: "bundesligaBestPlayer", goldenBoot: "bundesligaGoldenBoot" },
+        "Division Première": { bestPlayer: "ligue1BestPlayer", goldenBoot: "ligue1GoldenBoot" },
+        "Dutch Premier League": { bestPlayer: "eredivisieBestPlayer", goldenBoot: "eredivisieGoldenBoot" },
+        "Liga Portuguesa": { bestPlayer: "primeraDivisionBestPlayer", goldenBoot: "primeraDivisionGoldenBoot" },
     };
 
-    const top5Leagues = new Set(["Premier League", "La Liga", "Serie A", "Bundesliga", "Ligue 1"]);
+    const top5Leagues = new Set(["Premier Division", "La Primera", "Serie Alfa", "Deutsche Liga", "Division Première"]);
 
     // Collect all players across all leagues
     const allPlayers: Player[] = [];
@@ -451,7 +451,7 @@ export function checkAchievements(manager: Signal<Manager>, currentYear: Signal<
     if (manager.value.trophiesWon.length >= 1) {
         updated.winFirstTrophy = true;
     }
-    const wonWorldCup = manager.value.trophiesWon.filter(trophy => trophy.trophyType === "World Cup").length;
+    const wonWorldCup = manager.value.trophiesWon.filter(trophy => trophy.trophyType === "World Stage").length;
     if (wonWorldCup >= 1) {
         updated.winTheWorldCup = true;
     }
