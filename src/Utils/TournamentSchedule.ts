@@ -1,5 +1,6 @@
 import type { Signal } from "@preact/signals-react";
 import type { currentYear, Match, Player, Team, Tournament, TournamentTeam } from "../Models/WorldStage";
+import { gameContext } from "../Context/GameContext";
 
 function nextPowerOf2(n: number): number {
     let p = 1;
@@ -283,12 +284,17 @@ export function advanceTournamentRound(
             tournament.pastChampions.push(advancingTeams[0]);
             const winnerTeam = teamsMap.value.get(advancingTeams[0].teamName);
             if (winnerTeam) {
-                winnerTeam.manager.trophiesWon.push({
+                const tournamentTrophy = {
                     trophy: tournament.name,
                     trophyType: "Tournament",
                     trophyYear: currentYear.value.year
-                });
+                };
+                winnerTeam.manager.trophiesWon.push(tournamentTrophy);
                 winnerTeam.manager.tournamentTrophies++;
+                if (winnerTeam.manager.isUserManager) {
+                    gameContext.userManager.value.trophiesWon.push(tournamentTrophy);
+                    gameContext.userManager.value.tournamentTrophies++;
+                }
                 winnerTeam.players.forEach(playerName => {
                     const player = playersMap.get(playerName);
                     if (player) {

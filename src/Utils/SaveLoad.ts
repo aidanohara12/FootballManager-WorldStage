@@ -10,7 +10,7 @@ import {
 
 const SAVE_KEY = 'footballManagerSave';
 
-export function saveGame(): void {
+export function saveGame(): boolean {
     try {
         const state = {
             teamsMap: Array.from(gameContext.teamsMap.value.entries()),
@@ -33,8 +33,9 @@ export function saveGame(): void {
             retiredPlayers: retiredPlayers.value,
         };
         localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        return true;
     } catch {
-        // localStorage may be full or unavailable — fail silently
+        return false;
     }
 }
 

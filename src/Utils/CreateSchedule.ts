@@ -231,12 +231,17 @@ export function finishSeason(leagues: Signal<League[]>, manager: Signal<Manager>
         });
         const winner = allLeagueTeams.sort((a, b) => (b.goalsFor - b.goalsAgainst) - (a.goalsFor) - (a.goalsAgainst)).sort((a, b) => b.points - a.points)[0];
         league.pastChampions.push(winner.name);
-        winner.manager.trophiesWon.push({
+        const leagueTrophy = {
             trophy: league.name,
             trophyType: "League",
             trophyYear: currentYear.value.year
-        });
+        };
+        winner.manager.trophiesWon.push(leagueTrophy);
         winner.manager.leagueTrophies++;
+        if (winner.manager.isUserManager) {
+            manager.value.trophiesWon.push(leagueTrophy);
+            manager.value.leagueTrophies++;
+        }
         winner.players.forEach(player => {
             const playerTeam = playerMap.value.get(player);
             if (playerTeam) {

@@ -10,12 +10,12 @@ export function History() {
     const achievements = ctx.achievements.value;
     const managerHistory = ctx.managerHistory.value;
     const currentYear = ctx.currentYear.value;
-    const [saveConfirm, setSaveConfirm] = useState(false);
+    const [saveConfirm, setSaveConfirm] = useState<'idle' | 'saved' | 'failed'>('idle');
 
     function handleSave() {
-        saveGame();
-        setSaveConfirm(true);
-        setTimeout(() => setSaveConfirm(false), 2000);
+        const success = saveGame();
+        setSaveConfirm(success ? 'saved' : 'failed');
+        setTimeout(() => setSaveConfirm('idle'), 3000);
     }
 
     function handleDelete() {
@@ -27,14 +27,6 @@ export function History() {
 
     return (
         <div className={styles.historyContainer}>
-            <div className={styles.gameButtons}>
-                <button className={styles.saveButton} onClick={handleSave}>
-                    {saveConfirm ? "Saved!" : "Save Game"}
-                </button>
-                <button className={styles.deleteButton} onClick={handleDelete}>
-                    Delete Save &amp; Restart
-                </button>
-            </div>
             <div className={styles.boxesContainer}>
                 <div className={styles.trophiesContainer}>
                     <div>

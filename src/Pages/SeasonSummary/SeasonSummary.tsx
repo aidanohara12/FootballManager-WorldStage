@@ -14,9 +14,6 @@ interface SeasonSummaryProps {
 }
 
 const selectedPlayer = signal<Player | null>(null);
-const showBallonDorWinner = signal<boolean>(false);
-const showGoldenBootWinner = signal<boolean>(false);
-const showBestKeeper = signal<boolean>(false);
 
 function getTournamentTypeName(year: number): string {
     const intYear = year;
@@ -44,16 +41,13 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
     const eredivisieGoldenBoot = playersMap.value.get(playerAwards.value.eredivisieGoldenBoot[playerAwards.value.eredivisieGoldenBoot.length - 1]);
     const primeraDivisionBestPlayer = playersMap.value.get(playerAwards.value.primeraDivisionBestPlayer[playerAwards.value.primeraDivisionBestPlayer.length - 1]);
     const primeraDivisionGoldenBoot = playersMap.value.get(playerAwards.value.primeraDivisionGoldenBoot[playerAwards.value.primeraDivisionGoldenBoot.length - 1]);
+    const [showBallonDorWinner, setShowBallonDorWinner] = useState(false);
+    const [showGoldenBootWinner, setShowGoldenBootWinner] = useState(false);
+    const [showBestKeeper, setShowBestKeeper] = useState(false);
     const [tournamentTypeName, setTournamentTypeName] = useState<string>("");
     useEffect(() => {
         setTournamentTypeName(getTournamentTypeName(currentYear.value.year));
     }, [currentYear.value.yearsCompleted]);
-
-    useEffect(() => {
-        showBallonDorWinner.value = false;
-        showGoldenBootWinner.value = false;
-        showBestKeeper.value = false;
-    }, []);
 
     function handlePageChange() {
         selectedPlayer.value = null;
@@ -116,10 +110,10 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                 <div className={styles.awardsList}>
                     <div className={styles.award}>
                         <h4>Ballon d'Or Winner</h4>
-                        {!showBallonDorWinner.value && (
-                            <button onClick={() => showBallonDorWinner.value = true}>Reveal Winner</button>
+                        {!showBallonDorWinner && (
+                            <button onClick={() => setShowBallonDorWinner(true)}>Reveal Winner</button>
                         )}
-                        {showBallonDorWinner.value && (
+                        {showBallonDorWinner && (
                             <div>
                                 <div className={styles.playerName}>{ballonDorWinner?.name} - {ballonDorWinner?.team}</div>
                                 <div className={styles.playerName}>Goals: {ballonDorWinner?.leagueGoals}</div>
@@ -131,10 +125,10 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                     {/* Golden Boot Winners */}
                     <div className={styles.award}>
                         <h4>Golden Boot Winner</h4>
-                        {!showGoldenBootWinner.value && (
-                            <button onClick={() => showGoldenBootWinner.value = true}>Reveal Winner</button>
+                        {!showGoldenBootWinner && (
+                            <button onClick={() => setShowGoldenBootWinner(true)}>Reveal Winner</button>
                         )}
-                        {showGoldenBootWinner.value && (
+                        {showGoldenBootWinner && (
                             <div>
                                 <div className={styles.playerName}>{goldenBootWinner?.name} - {goldenBootWinner?.team}</div>
                                 <div className={styles.playerName}>Goals: {goldenBootWinner?.leagueGoals}</div>
@@ -145,10 +139,10 @@ export function SeasonSummary({ currentPage, retiredPlayers, playerAwards }: Sea
                     {/* Best Keeper */}
                     <div className={styles.award}>
                         <h4>Best Keeper</h4>
-                        {!showBestKeeper.value && (
-                            <button onClick={() => showBestKeeper.value = true}>Reveal Winner</button>
+                        {!showBestKeeper && (
+                            <button onClick={() => setShowBestKeeper(true)}>Reveal Winner</button>
                         )}
-                        {showBestKeeper.value && (
+                        {showBestKeeper && (
                             <div>
                                 <div className={styles.playerName}>{bestKeeper?.name} - {bestKeeper?.team}</div>
                                 <div className={styles.playerName}>Clean Sheets: {bestKeeper?.cleanSheets}</div>

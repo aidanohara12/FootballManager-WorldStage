@@ -336,7 +336,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
     function hasInjuredStarters(): boolean {
         if (!todayMatch) return false;
         const match = todayMatch.value;
-        const isNational = Top50Countries.some((c: { country: string }) => c.country === match.homeTeamName);
+        const isNational = Top50Countries.some((c: { country: string }) => c.country === match.homeTeamName || c.country === match.awayTeamName);
         const team = isNational ? managerNationalTeam : managerTeam;
         if (!team) return false;
         for (const playerName of team.players) {
@@ -351,7 +351,7 @@ export function Schedule({ isFirstSeason, currentPage, retiredPlayers, playerAwa
     function hasSuspendedStarters(): boolean {
         if (!todayMatch) return false;
         const match = todayMatch.value;
-        const isNational = Top50Countries.some((c: { country: string }) => c.country === match.homeTeamName);
+        const isNational = Top50Countries.some((c: { country: string }) => c.country === match.homeTeamName || c.country === match.awayTeamName);
         const team = isNational ? managerNationalTeam : managerTeam;
         if (!team) return false;
         for (const playerName of team.players) {

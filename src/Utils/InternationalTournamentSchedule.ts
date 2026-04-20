@@ -9,6 +9,7 @@ import type {
     Team,
 } from "../Models/WorldStage";
 import { rankNationalTeams } from "./TeamPlayers";
+import { gameContext } from "../Context/GameContext";
 
 function formatDate(d: Date): string {
     const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -337,12 +338,17 @@ export function advanceInternationalKnockout(
             tournament.pastChampions.push(advancingTeams[0]);
             const winnerTeam = teamsMap.value.get(advancingTeams[0].teamName);
             if (winnerTeam) {
-                winnerTeam.manager.trophiesWon.push({
+                const intlTrophy = {
                     trophy: tournament.name,
                     trophyType: "International Tournament",
                     trophyYear: currentYearSignal.value.year,
-                });
+                };
+                winnerTeam.manager.trophiesWon.push(intlTrophy);
                 winnerTeam.manager.internationalTrophies++;
+                if (winnerTeam.manager.isUserManager) {
+                    gameContext.userManager.value.trophiesWon.push(intlTrophy);
+                    gameContext.userManager.value.internationalTrophies++;
+                }
             }
         }
         tournament.currentPhase = "complete";
@@ -569,12 +575,17 @@ export function advanceFriendlyKnockout(
                 tournament.pastChampions.push(winner);
                 const winnerTeam = teamsMap.value.get(winner.teamName);
                 if (winnerTeam) {
-                    winnerTeam.manager.trophiesWon.push({
+                    const intlTrophy2 = {
                         trophy: tournament.name,
                         trophyType: "International Tournament",
                         trophyYear: currentYearSignal.value.year,
-                    });
+                    };
+                    winnerTeam.manager.trophiesWon.push(intlTrophy2);
                     winnerTeam.manager.internationalTrophies++;
+                    if (winnerTeam.manager.isUserManager) {
+                        gameContext.userManager.value.trophiesWon.push(intlTrophy2);
+                        gameContext.userManager.value.internationalTrophies++;
+                    }
                 }
             }
         }
@@ -988,12 +999,17 @@ export function advanceWorldCupKnockout(
                 tournament.pastChampions.push(winner);
                 const winnerTeam = teamsMap.value.get(winner.teamName);
                 if (winnerTeam) {
-                    winnerTeam.manager.trophiesWon.push({
+                    const worldStageTrophy = {
                         trophy: "World Stage",
                         trophyType: "World Stage",
                         trophyYear: currentYearSignal.value.year,
-                    });
+                    };
+                    winnerTeam.manager.trophiesWon.push(worldStageTrophy);
                     winnerTeam.manager.internationalTrophies++;
+                    if (winnerTeam.manager.isUserManager) {
+                        gameContext.userManager.value.trophiesWon.push(worldStageTrophy);
+                        gameContext.userManager.value.internationalTrophies++;
+                    }
                 }
             }
         }
