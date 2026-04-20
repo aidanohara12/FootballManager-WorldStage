@@ -1,8 +1,8 @@
-import { useState } from "react";
+// import { useState } from "react";
 import styles from "./History.module.css";
 import ManagerStats from "../../Components/ManagerStats/ManagerStats";
 import { useGameContext } from "../../Context/GameContext";
-import { saveGame, deleteSave } from "../../Utils/SaveLoad";
+// import { saveGame, deleteSave } from "../../Utils/SaveLoad";
 
 export function History() {
     const ctx = useGameContext();
@@ -10,20 +10,20 @@ export function History() {
     const achievements = ctx.achievements.value;
     const managerHistory = ctx.managerHistory.value;
     const currentYear = ctx.currentYear.value;
-    const [saveConfirm, setSaveConfirm] = useState<'idle' | 'saved' | 'failed'>('idle');
+    // const [saveConfirm, setSaveConfirm] = useState<'idle' | 'saved' | 'failed'>('idle');
 
-    function handleSave() {
-        const success = saveGame();
-        setSaveConfirm(success ? 'saved' : 'failed');
-        setTimeout(() => setSaveConfirm('idle'), 3000);
-    }
+    // function handleSave() {
+    //     const success = saveGame();
+    //     setSaveConfirm(success ? 'saved' : 'failed');
+    //     setTimeout(() => setSaveConfirm('idle'), 3000);
+    // }
 
-    function handleDelete() {
-        if (window.confirm("Delete your save and restart from the beginning? This cannot be undone.")) {
-            deleteSave();
-            window.location.reload();
-        }
-    }
+    // function handleDelete() {
+    //     if (window.confirm("Delete your save and restart from the beginning? This cannot be undone.")) {
+    //         deleteSave();
+    //         window.location.reload();
+    //     }
+    // }
 
     return (
         <div className={styles.historyContainer}>
