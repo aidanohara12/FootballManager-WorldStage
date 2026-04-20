@@ -9,7 +9,7 @@ import { useGameContext } from "../../Context/GameContext.tsx";
 
 const name = signal<string>("");
 const country = signal<string>("Spain");
-const league = signal<string>("Premier League");
+const league = signal<string>("Premier Division");
 const team = signal<string>("");
 const age = signal<number>(25);
 const type = signal<string>("scout");
@@ -144,7 +144,7 @@ export function CreateManager() {
                             value={division.value}
                             onChange={(e) => {
                                 division.value = e.target.value;
-                                league.value = division.value === "First" ? "Premier League" : division.value === "Second" ? "Championship" : "League One";
+                                league.value = division.value === "First" ? "Premier Division" : division.value === "Second" ? "Second Division" : "Third Division";
                             }}
                         >
                             <option value="First">First Division</option>
@@ -159,27 +159,27 @@ export function CreateManager() {
                                 team.value = AllTeams.find((t: any) => t.league === e.target.value)?.name || "";
                             }}
                         >
-                            {division.value === "First" && <option value="Premier League">Premier League</option>}
-                            {division.value === "First" && <option value="La Liga">La Liga</option>}
-                            {division.value === "First" && <option value="Serie A">Serie A</option>}
-                            {division.value === "First" && <option value="Bundesliga">Bundesliga</option>}
-                            {division.value === "First" && <option value="Ligue 1">Ligue 1</option>}
-                            {division.value === "First" && <option value="Eredivisie">Eredivisie</option>}
-                            {division.value === "First" && <option value="Primeira Liga">Primeira Liga</option>}
-                            {division.value === "Second" && <option value="Championship">Championship</option>}
-                            {division.value === "Second" && <option value="La Liga 2">La Liga 2</option>}
-                            {division.value === "Second" && <option value="Serie B">Serie B</option>}
-                            {division.value === "Second" && <option value="2. Bundesliga">2. Bundesliga</option>}
-                            {division.value === "Second" && <option value="Ligue 2">Ligue 2</option>}
-                            {division.value === "Second" && <option value="Eerste Divisie">Eerste Divisie</option>}
-                            {division.value === "Second" && <option value="Segunda Liga">Segunda Liga</option>}
-                            {division.value === "Third" && <option value="League One">League One</option>}
-                            {division.value === "Third" && <option value="Primera Federación">Primera Federación</option>}
-                            {division.value === "Third" && <option value="Serie C">Serie C</option>}
-                            {division.value === "Third" && <option value="3. Liga">3. Liga</option>}
-                            {division.value === "Third" && <option value="National">National</option>}
-                            {division.value === "Third" && <option value="Tweede Divisie">Tweede Divisie</option>}
-                            {division.value === "Third" && <option value="Liga 3">Liga 3</option>}
+                            {division.value === "First" && <option value="Premier Division">Premier Division (England)</option>}
+                            {division.value === "First" && <option value="La Primera">La Primera (Spain)</option>}
+                            {division.value === "First" && <option value="Serie Alfa">Serie Alfa (Italy)</option>}
+                            {division.value === "First" && <option value="Deutsche Liga">Deutsche Liga (Germany)</option>}
+                            {division.value === "First" && <option value="Division Première">Division Première (France)</option>}
+                            {division.value === "First" && <option value="Dutch Premier League">Dutch Premier League (Netherlands)</option>}
+                            {division.value === "First" && <option value="Liga Portuguesa">Liga Portuguesa (Portugal)</option>}
+                            {division.value === "Second" && <option value="Second Division">Second Division (England)</option>}
+                            {division.value === "Second" && <option value="La Segunda">La Segunda (Spain)</option>}
+                            {division.value === "Second" && <option value="Serie Beta">Serie Beta (Italy)</option>}
+                            {division.value === "Second" && <option value="2. Deutsche Liga">2. Deutsche Liga (Germany)</option>}
+                            {division.value === "Second" && <option value="Division Deux">Division Deux (France)</option>}
+                            {division.value === "Second" && <option value="Dutch Second Division">Dutch Second Division (Netherlands)</option>}
+                            {division.value === "Second" && <option value="Liga Segunda">Liga Segunda (Portugal)</option>}
+                            {division.value === "Third" && <option value="Third Division">Third Division (England)</option>}
+                            {division.value === "Third" && <option value="La Tercera">La Tercera (Spain)</option>}
+                            {division.value === "Third" && <option value="Serie Gamma">Serie Gamma (Italy)</option>}
+                            {division.value === "Third" && <option value="3. Deutsche Liga">3. Deutsche Liga (Germany)</option>}
+                            {division.value === "Third" && <option value="Division Nationale">Division Nationale (France)</option>}
+                            {division.value === "Third" && <option value="Dutch Third Division">Dutch Third Division (Netherlands)</option>}
+                            {division.value === "Third" && <option value="Liga Terceira">Liga Terceira (Portugal)</option>}
                         </select>
                     </div>
                 </div>
